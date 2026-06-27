@@ -1,0 +1,25 @@
+# Build output
+build/
+*.o
+*.elf
+*.map
+
+# ROM files
+*.z64
+*.v64
+*.n64
+*.iso
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# Node artifacts
+node_modules/
+
+# Splat generated outputs
+asm/
+assets/
+src/

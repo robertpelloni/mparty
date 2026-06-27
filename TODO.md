@@ -1,0 +1,11 @@
+# TODO
+
+## Short-term Tasks & Immediate Actions
+
+- [x] Initialize Core Documentation (`VISION.md`, `ROADMAP.md`, `TODO.md`, `MEMORY.md`, `DEPLOY.md`, `IDEAS.md`, `CHANGELOG.md`, `VERSION.md`).
+- [ ] Create Python script (`tools/generate_splat.py`) for automated ROM splitting and generating `splat.yaml`.
+- [ ] Create Node/Python script (`tools/disassemble.py`) to orchestrate `spimdisasm` on split files.
+- [ ] Create Node script (`tools/c_stubber.js`) to generate matching `.c` stubs from `.s` assemblies.
+- [ ] Write a base `Makefile` for recompiling byte-matching ROMs.
+- [ ] Verify functionality of newly created tools via basic syntax checking and dry-runs.
+- [ ] Finalize initial repository structure with `HANDOFF.md` before concluding session.
