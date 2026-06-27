@@ -11,3 +11,4 @@
 [x] Finalize initial repository structure with `HANDOFF.md` before concluding session.
 - [x] Initialize Next.js/TypeScript frontend boilerplate.
 - [x] Integrate Emscripten toolchain wrapper for WebAssembly emulation cores.
+- [x] Implement AI decompilation matching harness (`tools/ai_matcher.py`).

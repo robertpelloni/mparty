@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.3.0] - 2026-06-27
+### Added
+- Implemented `tools/ai_matcher.py` harness to automate byte-matching C objects to MIPS assembly using `mips-linux-gnu-gcc`.
+
 ## [0.2.0] - 2026-06-27
 ### Added
 - Created `web/src/lib/EmulationCore.ts` as a hypervisor to wrap underlying WebAssembly/Emscripten N64 emulation cores.
