@@ -18,12 +18,13 @@ def generate_yaml(rom_path, output_path="splat.yaml"):
         basename = "target_rom"
 
     yaml_content = f"""name: {basename}
-sha1: "" # Add your target SHA1 here
+# sha1: "" # Add your target SHA1 here (disabled for dummy test)
 options:
   basename: {basename}
   target_path: {rom_path}
   base_path: .
   compiler: GCC
+  platform: n64
   find_file_boundaries: True
   header_encoding: ASCII
 segments:

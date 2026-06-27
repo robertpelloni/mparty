@@ -1,0 +1,111 @@
+SECTIONS
+{
+    __romPos = 0;
+    header_ROM_START = __romPos;
+    header_VRAM = ADDR(.header);
+    .header : AT(header_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        header_DATA_START = .;
+        build/asm/header.s.o(.data);
+        header_DATA_END = .;
+        header_DATA_SIZE = ABSOLUTE(header_DATA_END - header_DATA_START);
+    }
+    __romPos += SIZEOF(.header);
+    header_ROM_END = __romPos;
+    header_VRAM_END = .;
+
+    boot_ROM_START = __romPos;
+    boot_VRAM = ADDR(.boot);
+    .boot : AT(boot_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        boot_DATA_START = .;
+        build/assets/boot.bin.o(.data);
+        boot_DATA_END = .;
+        boot_DATA_SIZE = ABSOLUTE(boot_DATA_END - boot_DATA_START);
+    }
+    __romPos += SIZEOF(.boot);
+    boot_ROM_END = __romPos;
+    boot_VRAM_END = .;
+
+    main_ROM_START = __romPos;
+    main_VRAM = ADDR(.main);
+    .main 0x80000400 : AT(main_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        main_TEXT_START = .;
+        build/src/1000.c.o(.text);
+        . = ALIGN(., 16);
+        main_TEXT_END = .;
+        main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
+        main_DATA_START = .;
+        build/src/1000.c.o(.data);
+        build/asm/data/100000.data.s.o(.data);
+        . = ALIGN(., 16);
+        main_DATA_END = .;
+        main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
+        main_RODATA_START = .;
+        build/src/1000.c.o(.rodata);
+        . = ALIGN(., 16);
+        main_RODATA_END = .;
+        main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
+    }
+    main_bss_VRAM = ADDR(.main_bss);
+    .main_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        main_BSS_START = .;
+        build/src/1000.c.o(.bss);
+        . = ALIGN(., 16);
+        main_BSS_END = .;
+        main_BSS_SIZE = ABSOLUTE(main_BSS_END - main_BSS_START);
+    }
+    __romPos += SIZEOF(.main);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    main_ROM_END = __romPos;
+    main_VRAM_END = .;
+
+    overlays_ROM_START = __romPos;
+    overlays_VRAM = ADDR(.overlays);
+    .overlays 0x80100000 : AT(overlays_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlays_TEXT_START = .;
+        build/src/100000.c.o(.text);
+        . = ALIGN(., 16);
+        overlays_TEXT_END = .;
+        overlays_TEXT_SIZE = ABSOLUTE(overlays_TEXT_END - overlays_TEXT_START);
+        overlays_DATA_START = .;
+        build/src/100000.c.o(.data);
+        . = ALIGN(., 16);
+        overlays_DATA_END = .;
+        overlays_DATA_SIZE = ABSOLUTE(overlays_DATA_END - overlays_DATA_START);
+        overlays_RODATA_START = .;
+        build/src/100000.c.o(.rodata);
+        . = ALIGN(., 16);
+        overlays_RODATA_END = .;
+        overlays_RODATA_SIZE = ABSOLUTE(overlays_RODATA_END - overlays_RODATA_START);
+    }
+    overlays_bss_VRAM = ADDR(.overlays_bss);
+    .overlays_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlays_BSS_START = .;
+        build/src/100000.c.o(.bss);
+        . = ALIGN(., 16);
+        overlays_BSS_END = .;
+        overlays_BSS_SIZE = ABSOLUTE(overlays_BSS_END - overlays_BSS_START);
+    }
+    __romPos += SIZEOF(.overlays);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlays_ROM_END = __romPos;
+    overlays_VRAM_END = .;
+
+    /DISCARD/ :
+    {
+        *(*);
+    }
+}
