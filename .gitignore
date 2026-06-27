@@ -18,6 +18,7 @@ venv/
 
 # Node artifacts
 node_modules/
+*.log
 
 # Splat generated outputs
 asm/

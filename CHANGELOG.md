@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.5.0] - 2026-06-27
+### Added
+- Created `tools/texture_converter.py` to automate the extraction and conversion of binary N64 textures (RGBA16) to web-friendly PNG format.
+
 ## [0.4.0] - 2026-06-27
 ### Added
 - Created `web/src/lib/Fast3DTranslator.ts` middleware to parse N64 microcode `gSP` macros and translate them into native WebGL operations.

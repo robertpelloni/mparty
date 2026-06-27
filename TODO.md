@@ -13,3 +13,4 @@
 - [x] Integrate Emscripten toolchain wrapper for WebAssembly emulation cores.
 - [x] Implement AI decompilation matching harness (`tools/ai_matcher.py`).
 - [x] Implement Fast3D microcode translation abstraction for WebGL.
+- [x] Implement texture converter script (`tools/texture_converter.py`) for the Graphics & Asset Pipeline.
