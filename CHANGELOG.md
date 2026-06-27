@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.4.0] - 2026-06-27
+### Added
+- Created `web/src/lib/Fast3DTranslator.ts` middleware to parse N64 microcode `gSP` macros and translate them into native WebGL operations.
+
 ## [0.3.0] - 2026-06-27
 ### Added
 - Implemented `tools/ai_matcher.py` harness to automate byte-matching C objects to MIPS assembly using `mips-linux-gnu-gcc`.
