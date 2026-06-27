@@ -18,7 +18,8 @@
    cd tools
    python3 -m venv venv
    source venv/bin/activate
-   pip install -r requirements.txt # (Once added)
+   pip install splat64 # Required for ROM splitting via disassemble.py
+   # pip install -r requirements.txt # (Once added)
    ```
 3. Setup Node.js tools:
    ```bash

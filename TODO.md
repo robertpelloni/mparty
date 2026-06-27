@@ -9,3 +9,4 @@
 [x] Write a base `Makefile` for recompiling byte-matching ROMs.
 [x] Verify functionality of newly created tools via basic syntax checking and dry-runs.
 [x] Finalize initial repository structure with `HANDOFF.md` before concluding session.
+- [x] Initialize Next.js/TypeScript frontend boilerplate.

@@ -22,4 +22,4 @@ node_modules/
 # Splat generated outputs
 asm/
 assets/
-src/
+/src/
