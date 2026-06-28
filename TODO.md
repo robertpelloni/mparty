@@ -21,3 +21,4 @@
 - [x] Achieve Phase 1 completion by running the first automated C-to-ASM byte match.
 - [x] Implement InputManager wrapper to translate browser APIs to N64 controller bitmasks.
 - [x] Implement Web Audio API abstractions (`AudioManager.ts`) for continuous PCM playback.
+- [x] Create a centralized master CLI orchestrator (`mparty_cli.py`) for simplified developer execution.

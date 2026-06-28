@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.3.0] - 2026-06-28
+### Added
+- Created `tools/mparty_cli.py` as a centralized command-line interface to unify testing, continuous AI looping, and launching the WebEngine server.
+
 ## [1.2.0] - 2026-06-28
 ### Added
 - Created `web/src/lib/AudioManager.ts` to manage Web Audio API `AudioContext` buffers natively, catching and scheduling raw PCM float streams emitted from the WASM cores to prevent underruns.
