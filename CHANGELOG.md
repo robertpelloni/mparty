@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.8.0] - 2026-06-28
+### Added
+- Added `tools/test_pipeline.py` to automate end-to-end testing of the entire mock ROM generation, splat decompilation, texture conversion, ISO FST extraction, and AI compilation loops.
+
 ## [0.7.0] - 2026-06-28
 ### Added
 - Implemented `/api/roms` in Next.js to provide a universal JSON endpoint for dynamically discovering and loading cross-platform titles (N64, GameCube, Wii) into the emulation hub.
