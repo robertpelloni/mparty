@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.9.0] - 2026-06-28
+### Added
+- Integrated actual `urllib` HTTP request scaffolding into `tools/ai_loop.py` to seamlessly pass mismatching C code and target assembly blocks to an external LLM API when `LLM_API_KEY` is provided.
+
 ## [1.8.0] - 2026-06-28
 ### Added
 - Created `tools/generate_advanced_mock_rom.py` to securely simulate raw MIPS binary data injection (`.text`/`.data` block structuring) for the `ai_loop.py` decompilation matching tests, substituting the need for copyrighted ROMs.
