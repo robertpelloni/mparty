@@ -23,3 +23,4 @@
 - [x] Implement Web Audio API abstractions (`AudioManager.ts`) for continuous PCM playback.
 - [x] Create a centralized master CLI orchestrator (`mparty_cli.py`) for simplified developer execution.
 - [x] Establish IndexedDB persistence pipeline for emulation save states.
+- [x] Create WebRTC peer-to-peer NetplayManager for multiplayer input synchronization.

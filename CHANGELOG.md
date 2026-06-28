@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.5.0] - 2026-06-28
+### Added
+- Created `web/src/lib/NetplayManager.ts` establishing WebRTC data channels for low-latency peer-to-peer multiplayer input polling.
+
 ## [1.4.0] - 2026-06-28
 ### Added
 - Created `web/src/lib/SaveStateManager.ts` to implement persistent IndexedDB storage for binary WASM emulation snapshots.
