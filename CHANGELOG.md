@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.6.0] - 2026-06-28
+### Added
+- Added `tools/iso_extractor.py` scaffolding to handle extraction of GameCube/Wii `.iso` files (Dolphin FST parsing, `.rel` modules, and `.szs` archives).
+
 ## [0.5.0] - 2026-06-27
 ### Added
 - Created `tools/texture_converter.py` to automate the extraction and conversion of binary N64 textures (RGBA16) to web-friendly PNG format.
