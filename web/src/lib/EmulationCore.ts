@@ -6,6 +6,8 @@
  * underlying C++ compiled WASM modules (e.g., Mupen64Plus).
  */
 
+import { InputManager } from './InputManager';
+
 export type EmulatorType = 'N64' | 'GameCube' | 'Wii';
 
 export interface RomMetadata {
@@ -18,8 +20,12 @@ export interface RomMetadata {
 export class EmulationCore {
   private isLoaded: boolean = false;
   private canvasContext: WebGLRenderingContext | null = null;
+  private inputManager: InputManager;
+  private animationFrameId: number = 0;
 
-  constructor(private canvasElementId: string) {}
+  constructor(private canvasElementId: string) {
+    this.inputManager = new InputManager();
+  }
 
   /**
    * Initializes the WebGL/Canvas context required for the WASM module to bind to.
@@ -70,8 +76,23 @@ export class EmulationCore {
       throw new Error('EmulationCore: Cannot start, no ROM is loaded.');
     }
     console.log('EmulationCore: Starting WASM execution loop...');
-    // TODO: Module._main() or specific Emscripten execution hook.
+
+    this.inputManager.attachListeners();
+    this.executionLoop();
   }
+
+  private executionLoop = (): void => {
+    if (!this.isLoaded) return;
+
+    // 1. Poll input states and feed them to the WASM emulator memory
+    const packedInput = this.inputManager.getPackedN64State();
+    // e.g., Module.ccall('updateInput', 'void', ['number'], [packedInput]);
+
+    // 2. Trigger emulator to step 1 frame
+    // e.g., Module.ccall('stepFrame', 'void', [], []);
+
+    this.animationFrameId = requestAnimationFrame(this.executionLoop);
+  };
 
   /**
    * Halts emulation and cleans up the virtual filesystem.
@@ -80,6 +101,8 @@ export class EmulationCore {
     if (this.isLoaded) {
       console.log('EmulationCore: Halting execution and clearing memory.');
       this.isLoaded = false;
+      this.inputManager.detachListeners();
+      cancelAnimationFrame(this.animationFrameId);
     }
   }
 }

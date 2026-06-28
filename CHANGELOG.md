@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.1.0] - 2026-06-28
+### Added
+- Created `web/src/lib/InputManager.ts` to capture HTML5 Gamepad API and Keyboard events and translate them into packed 32-bit legacy console structures for the WASM engine.
+- Integrated `InputManager` polling into the `EmulationCore.ts` runtime loop.
+
 ## [1.0.0] - 2026-06-28
 ### Added
 - Completed Phase 1 milestone. The autonomous system successfully achieved its first byte-matching validation.

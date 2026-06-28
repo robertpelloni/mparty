@@ -19,3 +19,4 @@
 - [x] Create automated integration test script (`tools/test_pipeline.py`) to validate full CI/CD loop.
 - [x] Create continuous AI orchestration loop stub (`tools/ai_loop.py`).
 - [x] Achieve Phase 1 completion by running the first automated C-to-ASM byte match.
+- [x] Implement InputManager wrapper to translate browser APIs to N64 controller bitmasks.
