@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.7.0] - 2026-06-28
+### Added
+- Created `tools/audio_decoder.py` as a scaffolding script to mock the extraction and decoding of proprietary MUSYX audio banks (.ctl/.tbl) into raw PCM streams for the Next.js `AudioManager`.
+
 ## [1.6.0] - 2026-06-28
 ### Added
 - Created `tools/verify_architecture.py` to strictly assert the existence and integrity of all required Mario Party WebEngine scaffolding components.

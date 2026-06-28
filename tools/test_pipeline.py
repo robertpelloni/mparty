@@ -54,10 +54,13 @@ def main():
         # 6. Test ISO extraction stub
         ["python3", "tools/iso_extractor.py", "dummy.iso", "--out", "assets/gc_extracted"],
 
-        # 7. Test AI Matcher (expected to mismatch, but execute cleanly)
+        # 7. Test Audio Decoder stub
+        ["python3", "tools/audio_decoder.py", "dummy_bank.ctl", "--out", "assets/audio"],
+
+        # 8. Test AI Matcher
         ["python3", "tools/ai_matcher.py", "src/nonmatchings/1000/func_80000400.c", "asm/nonmatchings/1000/func_80000400.s"],
 
-        # 8. Test AI Automation Loop
+        # 9. Test AI Automation Loop
         ["python3", "tools/ai_loop.py"]
     ]
 
