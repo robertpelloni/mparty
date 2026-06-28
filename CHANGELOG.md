@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.9.0] - 2026-06-28
+### Added
+- Created `tools/ai_loop.py` to automate the continuous discovery and matching process for decompiled C files, satisfying the final "Next Step" of the project handover framework.
+
 ## [0.8.0] - 2026-06-28
 ### Added
 - Added `tools/test_pipeline.py` to automate end-to-end testing of the entire mock ROM generation, splat decompilation, texture conversion, ISO FST extraction, and AI compilation loops.

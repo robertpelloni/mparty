@@ -55,7 +55,10 @@ def main():
         ["python3", "tools/iso_extractor.py", "dummy.iso", "--out", "assets/gc_extracted"],
 
         # 7. Test AI Matcher (expected to mismatch, but execute cleanly)
-        ["python3", "tools/ai_matcher.py", "src/nonmatchings/1000/func_80000400.c", "asm/nonmatchings/1000/func_80000400.s"]
+        ["python3", "tools/ai_matcher.py", "src/nonmatchings/1000/func_80000400.c", "asm/nonmatchings/1000/func_80000400.s"],
+
+        # 8. Test AI Automation Loop
+        ["python3", "tools/ai_loop.py"]
     ]
 
     for step in steps:
