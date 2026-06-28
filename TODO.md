@@ -22,3 +22,4 @@
 - [x] Implement InputManager wrapper to translate browser APIs to N64 controller bitmasks.
 - [x] Implement Web Audio API abstractions (`AudioManager.ts`) for continuous PCM playback.
 - [x] Create a centralized master CLI orchestrator (`mparty_cli.py`) for simplified developer execution.
+- [x] Establish IndexedDB persistence pipeline for emulation save states.

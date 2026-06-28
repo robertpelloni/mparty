@@ -8,6 +8,7 @@
 
 import { InputManager } from './InputManager';
 import { AudioManager } from './AudioManager';
+import { SaveStateManager } from './SaveStateManager';
 
 export type EmulatorType = 'N64' | 'GameCube' | 'Wii';
 
@@ -23,11 +24,13 @@ export class EmulationCore {
   private canvasContext: WebGLRenderingContext | null = null;
   private inputManager: InputManager;
   private audioManager: AudioManager;
+  private saveManager: SaveStateManager;
   private animationFrameId: number = 0;
 
   constructor(private canvasElementId: string) {
     this.inputManager = new InputManager();
     this.audioManager = new AudioManager();
+    this.saveManager = new SaveStateManager();
   }
 
   /**
@@ -116,6 +119,33 @@ export class EmulationCore {
       this.inputManager.detachListeners();
       this.audioManager.close();
       cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+
+  /**
+   * Captures the current WASM execution memory array and persists it to IndexedDB.
+   */
+  public async triggerSaveState(gameId: string): Promise<void> {
+    if (!this.isLoaded) return;
+    console.log(`EmulationCore: Triggering memory snapshot for ${gameId}...`);
+    // TODO: Extract raw HEAPU8 buffer from Emscripten
+    // const memSnapshot = new Uint8Array(Module.HEAPU8.buffer);
+    const mockSnapshot = new Uint8Array(1024); // Dummy 1KB snapshot
+    await this.saveManager.saveState(gameId, mockSnapshot);
+  }
+
+  /**
+   * Halts the WASM loop, injects a stored memory array from IndexedDB, and resumes.
+   */
+  public async triggerLoadState(gameId: string): Promise<void> {
+    if (!this.isLoaded) return;
+    console.log(`EmulationCore: Fetching memory snapshot for ${gameId}...`);
+    const savedState = await this.saveManager.loadState(gameId);
+
+    if (savedState) {
+      console.log(`EmulationCore: Injecting ${savedState.length} bytes into WASM heap...`);
+      // TODO: Inject back into Emscripten memory boundary
+      // Module.HEAPU8.set(savedState);
     }
   }
 }

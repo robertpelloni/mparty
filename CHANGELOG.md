@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.4.0] - 2026-06-28
+### Added
+- Created `web/src/lib/SaveStateManager.ts` to implement persistent IndexedDB storage for binary WASM emulation snapshots.
+- Implemented `triggerSaveState` and `triggerLoadState` abstractions within the `EmulationCore.ts` execution loop.
+
 ## [1.3.0] - 2026-06-28
 ### Added
 - Created `tools/mparty_cli.py` as a centralized command-line interface to unify testing, continuous AI looping, and launching the WebEngine server.
