@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.11.0] - 2026-06-28
+### Added
+- Created `tools/model_extractor.py` scaffolding to simulate extracting N64 F3DEX2 display lists and 3D vertex buffers into standard Wavefront `.obj` format for native rendering in the web browser.
+
 ## [1.10.0] - 2026-06-28
 ### Added
 - Created a secondary mocked mismatch target (`func_80100000.c`) to validate that the automated `ai_loop.py` correctly iterates over the entire `src/` tree continuously without halting.

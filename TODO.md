@@ -29,3 +29,4 @@
 - [x] Replace initial simple mock ROM generator with an advanced version injecting functional MIPS logic.
 - [x] Integrate generic LLM API request execution into the `ai_loop` orchestration script.
 - [x] Demonstrate continuous multi-file autonomous matching loop handling (Phase 2 startup).
+- [x] Implement 3D model geometry extraction scaffolding (`tools/model_extractor.py`) for the frontend asset pipeline.
