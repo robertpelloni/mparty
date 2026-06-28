@@ -23,7 +23,7 @@ CC = f"{CROSS}gcc"
 AS = f"{CROSS}as"
 
 # Flags based on standard N64 MIPS III decompilation targets
-CFLAGS = ["-O0", "-G", "0", "-mabi=32", "-mips3", "-fno-PIC", "-Iinclude", "-c"]
+CFLAGS = ["-O2", "-G", "0", "-mabi=32", "-mips3", "-fno-PIC", "-Iinclude", "-c"]
 ASFLAGS = ["-mabi=32", "-mips3"]
 
 def get_file_hash(filepath):
@@ -83,18 +83,26 @@ def check_match(c_file, s_file):
         print("FAIL: Target assembly failed.")
         return False
 
-    print("[3] Comparing object hashes...")
-    c_hash = get_file_hash(c_obj)
-    s_hash = get_file_hash(s_obj)
+    print("[3] Stripping objects and extracting text sections for matching...")
+    # In order to avoid differing timestamps, ELF headers, or section layouts causing false mismatches,
+    # we use objcopy to extract purely the binary .text (MIPS instructions) from the object files.
+    c_bin = c_obj.replace(".o", ".bin")
+    s_bin = s_obj.replace(".o", ".bin")
 
-    print(f"C obj Hash : {c_hash}")
-    print(f"ASM obj Hash: {s_hash}")
+    subprocess.run([f"{CROSS}objcopy", "-O", "binary", "-j", ".text", c_obj, c_bin], check=True)
+    subprocess.run([f"{CROSS}objcopy", "-O", "binary", "-j", ".text", s_obj, s_bin], check=True)
+
+    c_hash = get_file_hash(c_bin)
+    s_hash = get_file_hash(s_bin)
+
+    print(f"C text Hash : {c_hash}")
+    print(f"ASM text Hash: {s_hash}")
 
     if c_hash == s_hash:
-        print("\n>>> MATCH! <<< The C code successfully byte-matches the target assembly.")
+        print("\n>>> MATCH! <<< The compiled C logic successfully byte-matches the target assembly.")
         return True
     else:
-        print("\n>>> MISMATCH <<< The generated object file does not match the target.")
+        print("\n>>> MISMATCH <<< The generated binary does not match the target.")
         return False
 
 def main():

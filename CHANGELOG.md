@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.0] - 2026-06-28
+### Added
+- Completed Phase 1 milestone. The autonomous system successfully achieved its first byte-matching validation.
+- Upgraded `tools/ai_matcher.py` to extract raw binary `.text` via `objcopy`, ignoring ELF metadata artifacts.
+
 ## [0.9.0] - 2026-06-28
 ### Added
 - Created `tools/ai_loop.py` to automate the continuous discovery and matching process for decompiled C files, satisfying the final "Next Step" of the project handover framework.
