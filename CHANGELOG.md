@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.10.0] - 2026-06-28
+### Added
+- Created a secondary mocked mismatch target (`func_80100000.c`) to validate that the automated `ai_loop.py` correctly iterates over the entire `src/` tree continuously without halting.
+
 ## [1.9.0] - 2026-06-28
 ### Added
 - Integrated actual `urllib` HTTP request scaffolding into `tools/ai_loop.py` to seamlessly pass mismatching C code and target assembly blocks to an external LLM API when `LLM_API_KEY` is provided.
