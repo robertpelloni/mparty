@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.7.0] - 2026-06-28
+### Added
+- Implemented `/api/roms` in Next.js to provide a universal JSON endpoint for dynamically discovering and loading cross-platform titles (N64, GameCube, Wii) into the emulation hub.
+- Refactored `GameSelector.tsx` to consume this remote API instead of hardcoded component state.
+
 ## [0.6.0] - 2026-06-28
 ### Added
 - Added `tools/iso_extractor.py` scaffolding to handle extraction of GameCube/Wii `.iso` files (Dolphin FST parsing, `.rel` modules, and `.szs` archives).

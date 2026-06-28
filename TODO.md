@@ -15,3 +15,4 @@
 - [x] Implement Fast3D microcode translation abstraction for WebGL.
 - [x] Implement texture converter script (`tools/texture_converter.py`) for the Graphics & Asset Pipeline.
 - [x] Create ISO filesystem extractor stub for GameCube/Wii integration.
+- [x] Establish universal ROM metadata API route in frontend hub.
