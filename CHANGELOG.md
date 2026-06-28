@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.2.0] - 2026-06-28
+### Added
+- Created `web/src/lib/AudioManager.ts` to manage Web Audio API `AudioContext` buffers natively, catching and scheduling raw PCM float streams emitted from the WASM cores to prevent underruns.
+- Hooked the `AudioManager` into the `EmulationCore.ts` `requestAnimationFrame` lifecycle.
+
 ## [1.1.0] - 2026-06-28
 ### Added
 - Created `web/src/lib/InputManager.ts` to capture HTML5 Gamepad API and Keyboard events and translate them into packed 32-bit legacy console structures for the WASM engine.

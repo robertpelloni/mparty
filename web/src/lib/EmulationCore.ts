@@ -7,6 +7,7 @@
  */
 
 import { InputManager } from './InputManager';
+import { AudioManager } from './AudioManager';
 
 export type EmulatorType = 'N64' | 'GameCube' | 'Wii';
 
@@ -21,10 +22,12 @@ export class EmulationCore {
   private isLoaded: boolean = false;
   private canvasContext: WebGLRenderingContext | null = null;
   private inputManager: InputManager;
+  private audioManager: AudioManager;
   private animationFrameId: number = 0;
 
   constructor(private canvasElementId: string) {
     this.inputManager = new InputManager();
+    this.audioManager = new AudioManager();
   }
 
   /**
@@ -78,6 +81,7 @@ export class EmulationCore {
     console.log('EmulationCore: Starting WASM execution loop...');
 
     this.inputManager.attachListeners();
+    this.audioManager.initialize();
     this.executionLoop();
   }
 
@@ -91,6 +95,14 @@ export class EmulationCore {
     // 2. Trigger emulator to step 1 frame
     // e.g., Module.ccall('stepFrame', 'void', [], []);
 
+    // 3. Flush the native audio buffers to the Web Audio API
+    // const leftAudioPtr = Module.ccall('getAudioLeftBuffer', 'number', [], []);
+    // const rightAudioPtr = Module.ccall('getAudioRightBuffer', 'number', [], []);
+    // const audioLength = Module.ccall('getAudioLength', 'number', [], []);
+    // const leftBuffer = new Float32Array(Module.HEAPF32.buffer, leftAudioPtr, audioLength);
+    // const rightBuffer = new Float32Array(Module.HEAPF32.buffer, rightAudioPtr, audioLength);
+    // this.audioManager.pushAudioBuffer(leftBuffer, rightBuffer);
+
     this.animationFrameId = requestAnimationFrame(this.executionLoop);
   };
 
@@ -102,6 +114,7 @@ export class EmulationCore {
       console.log('EmulationCore: Halting execution and clearing memory.');
       this.isLoaded = false;
       this.inputManager.detachListeners();
+      this.audioManager.close();
       cancelAnimationFrame(this.animationFrameId);
     }
   }
