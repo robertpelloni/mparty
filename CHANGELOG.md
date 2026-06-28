@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.8.0] - 2026-06-28
+### Added
+- Created `tools/generate_advanced_mock_rom.py` to securely simulate raw MIPS binary data injection (`.text`/`.data` block structuring) for the `ai_loop.py` decompilation matching tests, substituting the need for copyrighted ROMs.
+
 ## [1.7.0] - 2026-06-28
 ### Added
 - Created `tools/audio_decoder.py` as a scaffolding script to mock the extraction and decoding of proprietary MUSYX audio banks (.ctl/.tbl) into raw PCM streams for the Next.js `AudioManager`.

@@ -1,46 +1,71 @@
 #!/usr/bin/env python3
 """
-mock_rom.py
+generate_advanced_mock_rom.py
 
-Generates a dummy 4MB N64 ROM file (.z64) with basic header bytes and padding.
-This allows the decompilation pipeline (splat) to be tested autonomously without
-requiring a legally problematic copyrighted ROM file.
+Generates a structural 4MB N64 ROM file (.z64) populated with valid MIPS III
+opcodes representing mocked Mario Party engine functions (e.g., board logic, minigame ticks).
+This bypasses copyright restrictions while providing the continuous AI decompilation
+loop (ai_loop.py) with actual logical blocks to ingest, parse, and match.
 """
 
 import sys
 import os
 import argparse
+import struct
 
-# Standard N64 ROM size for simple tests (4 Megabytes)
 ROM_SIZE = 4 * 1024 * 1024
 
+def write_mips_instruction(buffer, offset, opcode):
+    """Packs a 32-bit integer opcode into the buffer as big-endian."""
+    struct.pack_into(">I", buffer, offset, opcode)
+
 def generate_mock_rom(output_path):
-    print(f"Generating mock ROM at: {output_path}")
+    print(f"Generating advanced mock ROM at: {output_path}")
 
-    # N64 ROMs start with a header containing a specific magic word
-    # 0x80371240 is the standard big-endian N64 magic word (PI BSB DOM1 LAT REG)
-    header_magic = b'\x80\x37\x12\x40'
-
-    # Create the buffer and fill with nop instructions (0x00000000 in MIPS)
-    # Actually, let's use 0xFF padding after the 4KB header space.
     buffer = bytearray(ROM_SIZE)
 
-    # Write magic to start
-    buffer[0:4] = header_magic
+    # Standard big-endian N64 magic word (PI BSB DOM1 LAT REG)
+    buffer[0:4] = b'\x80\x37\x12\x40'
 
-    # Mock bootcode area
-    # Put a mock MIPS instruction around 0x1000 so spimdisasm has something to hit.
-    # jr ra (return) is 0x03E00008
-    mips_jr_ra = b'\x03\xE0\x00\x08'
-    buffer[0x1000:0x1004] = mips_jr_ra
+    # ---------------------------------------------------------
+    # MOCK BLOCK 1: Boot Sequence (0x40 - 0x1000)
+    # ---------------------------------------------------------
+    write_mips_instruction(buffer, 0x40, 0x3C088000) # lui t0, 0x8000
+    write_mips_instruction(buffer, 0x44, 0x35080400) # ori t0, t0, 0x0400
+    write_mips_instruction(buffer, 0x48, 0x01000008) # jr t0
+    write_mips_instruction(buffer, 0x4C, 0x00000000) # nop
+
+    # ---------------------------------------------------------
+    # MOCK BLOCK 2: Board State Tick (0x1000)
+    # Target for ai_matcher.py tests
+    # ---------------------------------------------------------
+    # func_80000400 (Simple Return)
+    write_mips_instruction(buffer, 0x1000, 0x03E00008) # jr ra
+    write_mips_instruction(buffer, 0x1004, 0x00000000) # nop
+
+    # func_80000408 (Add two arguments)
+    write_mips_instruction(buffer, 0x1008, 0x00851020) # add v0, a0, a1
+    write_mips_instruction(buffer, 0x100C, 0x03E00008) # jr ra
+    write_mips_instruction(buffer, 0x1010, 0x00000000) # nop
+
+    # ---------------------------------------------------------
+    # MOCK BLOCK 3: Overlays / Minigame Logic (0x100000)
+    # ---------------------------------------------------------
+    # func_80100000
+    write_mips_instruction(buffer, 0x100000, 0x27BDFFF8) # addiu sp, sp, -8
+    write_mips_instruction(buffer, 0x100004, 0xAFBF0004) # sw ra, 4(sp)
+    write_mips_instruction(buffer, 0x100008, 0x8FBF0004) # lw ra, 4(sp)
+    write_mips_instruction(buffer, 0x10000C, 0x27BD0008) # addiu sp, sp, 8
+    write_mips_instruction(buffer, 0x100010, 0x03E00008) # jr ra
+    write_mips_instruction(buffer, 0x100014, 0x00000000) # nop
 
     with open(output_path, 'wb') as f:
         f.write(buffer)
 
-    print(f"Successfully wrote {ROM_SIZE} bytes to {output_path}.")
+    print(f"Successfully wrote {ROM_SIZE} bytes of structured MIPS data to {output_path}.")
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate a mock N64 .z64 ROM file.")
+    parser = argparse.ArgumentParser(description="Generate a structurally sound mock N64 .z64 ROM file.")
     parser.add_argument("--out", "-o", default="tests/roms/mock_mario_party.z64", help="Output path for the dummy ROM.")
 
     args = parser.parse_args()

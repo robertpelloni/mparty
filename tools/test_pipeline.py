@@ -36,6 +36,10 @@ def main():
     print("Starting Automated Decompilation Pipeline Integration Test...\n")
 
     steps = [
+        # Setup mock directories
+        ["mkdir", "-p", "tests/assets"],
+        ["bash", "-c", "head -c 2048 /dev/urandom > tests/assets/mock_texture.bin"],
+
         # 1. Generate Mock N64 ROM
         ["python3", "tools/mock_rom.py", "--out", "tests/roms/mock_mario_party.z64"],
 

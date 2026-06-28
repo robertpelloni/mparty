@@ -26,3 +26,4 @@
 - [x] Create WebRTC peer-to-peer NetplayManager for multiplayer input synchronization.
 - [x] Conclude Phase 1 scaffolding with a master structural verification script (`verify_architecture.py`).
 - [x] Implement Audio Decoder script (`tools/audio_decoder.py`) to parse MUSYX audio banks for the Audio Pipeline.
+- [x] Replace initial simple mock ROM generator with an advanced version injecting functional MIPS logic.
