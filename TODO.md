@@ -24,3 +24,4 @@
 - [x] Create a centralized master CLI orchestrator (`mparty_cli.py`) for simplified developer execution.
 - [x] Establish IndexedDB persistence pipeline for emulation save states.
 - [x] Create WebRTC peer-to-peer NetplayManager for multiplayer input synchronization.
+- [x] Conclude Phase 1 scaffolding with a master structural verification script (`verify_architecture.py`).

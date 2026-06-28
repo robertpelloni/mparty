@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.6.0] - 2026-06-28
+### Added
+- Created `tools/verify_architecture.py` to strictly assert the existence and integrity of all required Mario Party WebEngine scaffolding components.
+- Concluded Phase 1 initialization.
+
 ## [1.5.0] - 2026-06-28
 ### Added
 - Created `web/src/lib/NetplayManager.ts` establishing WebRTC data channels for low-latency peer-to-peer multiplayer input polling.
