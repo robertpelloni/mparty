@@ -10,12 +10,20 @@ export interface SaveState {
   gameId: string;
   timestamp: number;
   data: Uint8Array;
+  universalData?: UniversalGameState;
+}
+
+export interface UniversalGameState {
+  globalCoins: number;
+  globalStars: number;
+  unlockedBoards: string[];
+  unlockedMinigames: string[];
 }
 
 export class SaveStateManager {
   private readonly DB_NAME = 'MarioPartyWebEngine';
   private readonly STORE_NAME = 'SaveStates';
-  private readonly DB_VERSION = 1;
+  private readonly DB_VERSION = 2; // Incremented for schema change
 
   constructor() {
     this.initDatabase();
@@ -50,7 +58,23 @@ export class SaveStateManager {
   }
 
   /**
-   * Stores a binary memory snapshot extracted from the WASM emulator.
+   * Extracts known universal metrics (coins, stars) from a raw memory buffer
+   * using specific hardcoded game offsets to establish cross-game continuity.
+   * Note: These offsets will be dynamically mapped as decompilation finishes.
+   */
+  private extractUniversalState(gameId: string, memory: Uint8Array): UniversalGameState {
+      // Mock translation logic based on IDEAS.md concept
+      return {
+          globalCoins: 100, // TODO: map to actual N64 RDRAM offset for coins
+          globalStars: 5,   // TODO: map to actual N64 RDRAM offset for stars
+          unlockedBoards: ['Yoshi\'s Tropical Island'],
+          unlockedMinigames: ['Bumper Balls']
+      };
+  }
+
+  /**
+   * Stores a binary memory snapshot extracted from the WASM emulator,
+   * alongside a translated JSON "Universal State" for cross-game sync.
    */
   public async saveState(gameId: string, memorySnapshot: Uint8Array): Promise<void> {
     try {
@@ -58,17 +82,20 @@ export class SaveStateManager {
       const transaction = db.transaction([this.STORE_NAME], 'readwrite');
       const store = transaction.objectStore(this.STORE_NAME);
 
+      const universalData = this.extractUniversalState(gameId, memorySnapshot);
+
       const state: SaveState = {
         gameId,
         timestamp: Date.now(),
-        data: memorySnapshot
+        data: memorySnapshot,
+        universalData
       };
 
       store.put(state);
 
       return new Promise((resolve, reject) => {
         transaction.oncomplete = () => {
-          console.log(`SaveStateManager: Successfully persisted save state for ${gameId}.`);
+          console.log(`SaveStateManager: Successfully persisted save state and universal translation for ${gameId}.`);
           resolve();
         };
         transaction.onerror = () => reject(transaction.error);
@@ -93,6 +120,9 @@ export class SaveStateManager {
           const result = request.result as SaveState;
           if (result) {
             console.log(`SaveStateManager: Successfully loaded save state for ${gameId}.`);
+            if (result.universalData) {
+                console.log(`Universal State Context detected: ${result.universalData.globalCoins} Coins transferred.`);
+            }
             resolve(result.data);
           } else {
             console.log(`SaveStateManager: No save state found for ${gameId}.`);

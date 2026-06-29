@@ -1,4 +1,5 @@
 import GameSelector from "../components/GameSelector";
+import AssetViewer from "../components/AssetViewer";
 
 export default function Home() {
   return (
@@ -14,6 +15,12 @@ export default function Home() {
         </div>
 
         <GameSelector />
+
+        <div className="mt-16 w-full max-w-4xl">
+           <h2 className="text-2xl font-bold mb-4 text-center">Extracted Asset Viewer Preview</h2>
+           <p className="text-center text-zinc-500 mb-6">Demonstrating live web rendering of 3D models extracted via the pipeline.</p>
+           <AssetViewer />
+        </div>
       </main>
     </div>
   );
