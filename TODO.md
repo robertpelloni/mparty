@@ -3,9 +3,18 @@
 ## Short-term Tasks & Immediate Actions
 
 - [x] Initialize Core Documentation (`VISION.md`, `ROADMAP.md`, `TODO.md`, `MEMORY.md`, `DEPLOY.md`, `IDEAS.md`, `CHANGELOG.md`, `VERSION.md`).
-- [ ] Create Python script (`tools/generate_splat.py`) for automated ROM splitting and generating `splat.yaml`.
-- [ ] Create Node/Python script (`tools/disassemble.py`) to orchestrate `spimdisasm` on split files.
-- [ ] Create Node script (`tools/c_stubber.js`) to generate matching `.c` stubs from `.s` assemblies.
-- [ ] Write a base `Makefile` for recompiling byte-matching ROMs.
-- [ ] Verify functionality of newly created tools via basic syntax checking and dry-runs.
-- [ ] Finalize initial repository structure with `HANDOFF.md` before concluding session.
+- [x] Create Python script (`tools/generate_splat.py`) for automated ROM splitting and generating `splat.yaml`.
+- [x] Create Node/Python script (`tools/disassemble.py`) to orchestrate `spimdisasm` on split files.
+- [x] Create Node script (`tools/c_stubber.js`) to generate matching `.c` stubs from `.s` assemblies.
+- [x] Write a base `Makefile` for recompiling byte-matching ROMs.
+- [x] Verify functionality of newly created tools via basic syntax checking and dry-runs.
+- [x] Finalize initial repository structure with `HANDOFF.md` before concluding session.
+
+## Current Session Tasks
+
+- [x] Create `tools/verify_architecture.py`.
+- [x] Create `tools/generate_advanced_mock_rom.py`.
+- [x] Create `tools/test_pipeline.py`.
+- [x] Create `tools/ai_matcher.py`.
+- [x] Create `tools/ai_loop.py`.
+- [x] Create `tools/mparty_cli.py`.

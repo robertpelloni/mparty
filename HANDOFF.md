@@ -17,8 +17,9 @@ This session initiated the structural scaffolding required to execute the contin
 - **Node.js Integration**: Introduced Node.js into the build pipeline explicitly for regex string parsing and AST manipulation tasks (`c_stubber.js`), as its ecosystem is better tailored for web-port integration logic down the line compared to standard Python scripts.
 
 ### Next Steps for Successor Model
-1. Complete the implementation of `splat` actually parsing a live `.z64` test file.
-2. Hook up an AI iteration loop that modifies the C functions generated in `src/` to byte-match the assembly.
-3. Follow the granular tasks remaining in `TODO.md`.
+1. Setup and initialize the `web/` frontend directory with a modern Next.js project.
+2. Implement `web/src/lib/Fast3DTranslator.ts` for intercepting and interpreting N64 graphical microcode.
+3. Integrate testing to ensure the Next.js frontend builds locally via `npm run dev` wrapped under `tools/mparty_cli.py dev`.
+4. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
