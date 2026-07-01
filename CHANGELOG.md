@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.12.0]
+### Added
+- Wired WebRTC Netplay logic (`hostGame`, `joinGame`) to the `NetworkControl` dashboard component.
+
 ## [0.11.0]
 ### Added
 - Implemented `exportSave()` and `importSave()` in `web/src/lib/SaveStateManager.ts` and wired to dashboard UI for universal cross-game state persistence.

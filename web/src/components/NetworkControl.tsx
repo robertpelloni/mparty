@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tooltip } from './Tooltip';
 import { Network, Wifi, Globe, Copy, Check } from 'lucide-react';
+import { NetplayManager } from '../lib/NetplayManager';
 
 export default function NetworkControl() {
   const [isHosting, setIsHosting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState<string>("Offline");
+  const [netplay, setNetplay] = useState<NetplayManager | null>(null);
+
+  useEffect(() => {
+    setNetplay(new NetplayManager());
+    return () => netplay?.disconnect();
+  }, []);
 
   const mockInviteCode = "MPARTY-8F2A-99B1";
 
@@ -14,6 +22,33 @@ export default function NetworkControl() {
     navigator.clipboard.writeText(mockInviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const startHosting = async () => {
+    if (!netplay) return;
+    try {
+      setStatus("Initializing Host...");
+      // In a real app we would exchange SDP via signaling server.
+      await netplay.hostGame();
+      setIsHosting(true);
+      setStatus("Hosting WebRTC Lobby");
+    } catch (e) {
+      console.error(e);
+      setStatus("Failed to Host");
+    }
+  };
+
+  const joinSession = async () => {
+     if (!netplay) return;
+     try {
+       setStatus("Attempting Peer Connection...");
+       // Mock an empty object just to test frontend UI logic
+       await netplay.joinGame({ type: 'offer', sdp: '' } as any);
+       setStatus("Connected via DataChannel");
+     } catch(e) {
+       console.log("Mock join error handled:", e);
+       setStatus("Joined Mock Lobby");
+     }
   };
 
   return (
@@ -34,7 +69,7 @@ export default function NetworkControl() {
         {!isHosting ? (
           <>
             <button
-              onClick={() => setIsHosting(true)}
+              onClick={startHosting}
               className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <Wifi className="w-4 h-4" /> Host Public Lobby
@@ -55,9 +90,13 @@ export default function NetworkControl() {
                 placeholder="Enter Invite Code"
                 className="flex-1 bg-black border border-zinc-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
               />
-              <button className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors">
+              <button onClick={joinSession} className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors">
                 Join
               </button>
+            </div>
+
+            <div className="text-center text-xs text-zinc-500 mt-2">
+              Status: {status}
             </div>
           </>
         ) : (

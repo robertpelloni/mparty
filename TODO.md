@@ -59,3 +59,7 @@
 
 - [x] Parse actual `.z64` test ROM header in `tools/generate_splat.py`.
 - [x] Ensure `tools/disassemble.py` executes successfully on valid splat configurations.
+
+## WASM Netplay Protocol Integration (v0.12.0)
+
+- [x] Wire `hostGame()` and `joinGame()` from `NetplayManager.ts` to `NetworkControl.tsx` UI.
