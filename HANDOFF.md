@@ -22,6 +22,7 @@ This session initiated the structural scaffolding required to execute the contin
 3. Completed Next.js dashboard UI integrating Emulation, Netplay, Audio, and AssetViewer components with Playwright tests.
 4. Integrate extracted `.obj` models into the Next.js AssetViewer.
 5. Integrate Dolphin WASM hypervisor wrapper into the frontend.
-6. Follow the granular tasks remaining in `TODO.md`.
+6. Expand the `mparty_cli.py` run loop to parse incoming network connection streams.
+7. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

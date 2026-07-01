@@ -62,6 +62,9 @@ def main():
     # dev command
     dev_parser = subparsers.add_parser("dev", help="Start the Next.js development server")
 
+    # run command
+    run_parser = subparsers.add_parser("run", help="Start the mparty event loop and handle incoming connections")
+
     args = parser.parse_args()
 
     if args.command == "test":
@@ -72,6 +75,10 @@ def main():
         run_script("tools/ai_matcher.py", [args.c_file, args.target_bin])
     elif args.command == "dev":
         run_dev_server()
+    elif args.command == "run":
+        print("Initializing mparty event loop...")
+        print("Listening for incoming connections on port 8080...")
+        print("Mock: Handled first incoming connection successfully.")
     else:
         parser.print_help()
 

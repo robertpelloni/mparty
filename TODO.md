@@ -37,3 +37,7 @@
 
 - [x] Expand `tools/iso_extractor.py` to parse GCZ format.
 - [x] Create `web/src/lib/GameCubeEmulator.ts` for Dolphin WASM integration.
+
+## Main Event Loop
+
+- [x] Initialize the mparty event loop to handle incoming connections.

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.6.0]
+### Added
+- Added `run` command to `tools/mparty_cli.py` to initialize the mparty event loop and mock socket handling.
+
 ## [0.5.0]
 ### Added
 - Added `web/src/lib/GameCubeEmulator.ts` for Dolphin WASM integration.
