@@ -54,3 +54,8 @@
 ## CI/CD Pipeline
 
 - [x] Create GitHub Actions workflow to run the test suite on push.
+
+## Decompilation Infrastructure
+
+- [x] Parse actual `.z64` test ROM header in `tools/generate_splat.py`.
+- [x] Ensure `tools/disassemble.py` executes successfully on valid splat configurations.

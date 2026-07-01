@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.10.0]
+### Added
+- Hardened `tools/generate_splat.py` with N64 header validation mocks.
+- Made `tools/disassemble.py` robust against missing `splat64` dependencies.
+
 ## [0.9.0]
 ### Added
 - Added GitHub Actions CI pipeline to automate Python and Playwright testing.
