@@ -25,3 +25,10 @@
 - [x] Implement UI components
 - [x] Implement Dashboard API
 - [x] Configure Playwright tests
+
+## Graphics & Asset Pipeline
+
+- [x] Create `tools/texture_converter.py`.
+- [x] Create `tools/model_extractor.py`.
+- [x] Create `tools/audio_decoder.py`.
+- [x] Create `tools/iso_extractor.py`.

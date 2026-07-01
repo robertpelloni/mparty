@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.4.0]
+### Added
+- Added `tools/texture_converter.py`, `tools/model_extractor.py`, `tools/audio_decoder.py`, and `tools/iso_extractor.py` as scaffolding scripts for the asset extraction pipeline.
+
 ## [0.3.0]
 ### Added
 - Integrated Next.js frontend dashboard with Playwright testing.
