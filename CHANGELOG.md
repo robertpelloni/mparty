@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.3.0]
+### Added
+- Integrated Next.js frontend dashboard with Playwright testing.
+- Created mock manager classes for Emulation, Audio, Netplay, and Input.
+
 ## [0.2.0]
 ### Added
 - Added `tools/verify_architecture.py` to strictly check for core project structure.

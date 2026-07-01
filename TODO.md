@@ -18,3 +18,10 @@
 - [x] Create `tools/ai_matcher.py`.
 - [x] Create `tools/ai_loop.py`.
 - [x] Create `tools/mparty_cli.py`.
+
+## Web Frontend Tasks
+
+- [x] Setup Next.js frontend
+- [x] Implement UI components
+- [x] Implement Dashboard API
+- [x] Configure Playwright tests
