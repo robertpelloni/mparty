@@ -79,6 +79,8 @@ def main():
         print("Initializing mparty event loop...")
         print("Listening for incoming connections on port 8080...")
         print("Mock: Handled first incoming connection successfully.")
+        print("Parsing incoming network connection stream...")
+        print("Mock: Decoded controller payload 0x8000 (A Button).")
     else:
         parser.print_help()
 

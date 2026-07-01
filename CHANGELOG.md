@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.7.0]
+### Added
+- Expanded `run` command in `tools/mparty_cli.py` to parse mock incoming network connection streams.
+
 ## [0.6.0]
 ### Added
 - Added `run` command to `tools/mparty_cli.py` to initialize the mparty event loop and mock socket handling.

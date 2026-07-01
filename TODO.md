@@ -41,3 +41,7 @@
 ## Main Event Loop
 
 - [x] Initialize the mparty event loop to handle incoming connections.
+
+## Network Parsing
+
+- [x] Expand the `mparty_cli.py` run loop to parse incoming network connection streams.
