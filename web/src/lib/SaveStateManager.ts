@@ -106,6 +106,37 @@ export class SaveStateManager {
   }
 
   /**
+   * Exports a save state to a JSON string for user download.
+   */
+  public async exportSave(gameId: string): Promise<string | null> {
+    const data = await this.loadState(gameId);
+    if (!data) return null;
+    const universalData = this.extractUniversalState(gameId, data);
+    return JSON.stringify({
+      gameId,
+      timestamp: Date.now(),
+      data: Array.from(data),
+      universalData
+    });
+  }
+
+  /**
+   * Imports a save state from a JSON string.
+   */
+  public async importSave(gameId: string, jsonString: string): Promise<boolean> {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (parsed.gameId !== gameId || !parsed.data) return false;
+      const dataArray = new Uint8Array(parsed.data);
+      await this.saveState(gameId, dataArray);
+      return true;
+    } catch (e) {
+      console.error(`SaveStateManager: Error importing save.`, e);
+      return false;
+    }
+  }
+
+  /**
    * Retrieves a previously stored binary memory snapshot.
    */
   public async loadState(gameId: string): Promise<Uint8Array | null> {

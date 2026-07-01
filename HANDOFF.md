@@ -25,6 +25,7 @@ This session initiated the structural scaffolding required to execute the contin
 6. Expanded the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets and connected `NetplayManager.ts`.
 7. Configured continuous integration via GitHub Actions for automated testing.
 8. Hardened decompilation infrastructure scripts to parse N64 ROM headers and safely stub missing dependencies.
-9. Follow the granular tasks remaining in `TODO.md`.
+9. Added `exportSave` and `importSave` features to `SaveStateManager.ts` and wired them up to the dashboard UI for Universal cross-game logic testing.
+10. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
