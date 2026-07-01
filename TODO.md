@@ -45,3 +45,8 @@
 ## Network Parsing
 
 - [x] Expand the `mparty_cli.py` run loop to parse incoming network connection streams.
+
+## Memory Syncing
+
+- [x] Expand the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets.
+- [x] Connect `web/src/lib/NetplayManager.ts` to the websocket stream.

@@ -81,6 +81,7 @@ def main():
         print("Mock: Handled first incoming connection successfully.")
         print("Parsing incoming network connection stream...")
         print("Mock: Decoded controller payload 0x8000 (A Button).")
+        print("Dispatching data payload to frontend over WebSocket...")
     else:
         parser.print_help()
 

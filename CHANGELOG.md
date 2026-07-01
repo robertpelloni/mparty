@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.8.0]
+### Added
+- Expanded `run` command in `tools/mparty_cli.py` to dispatch data payloads over WebSockets.
+- Connected `web/src/lib/NetplayManager.ts` to mock WebSocket stream reception.
+
 ## [0.7.0]
 ### Added
 - Expanded `run` command in `tools/mparty_cli.py` to parse mock incoming network connection streams.

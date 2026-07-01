@@ -79,6 +79,7 @@ export class NetplayManager {
       // and injects it into the local EmulationCore memory for player 2.
       const remoteInputBuffer = new Uint32Array(event.data);
       // console.log(`NetplayManager: Received remote input state: ${remoteInputBuffer[0]}`);
+      console.log("Mock NetplayManager: Received WebSocket stream payload from mparty_cli.py.");
     };
 
     this.dataChannel.onerror = (error) => {
