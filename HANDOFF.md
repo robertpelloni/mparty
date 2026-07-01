@@ -21,6 +21,7 @@ This session initiated the structural scaffolding required to execute the contin
 2. Implement `web/src/lib/Fast3DTranslator.ts` for intercepting and interpreting N64 graphical microcode.
 3. Completed Next.js dashboard UI integrating Emulation, Netplay, Audio, and AssetViewer components with Playwright tests.
 4. Integrate extracted `.obj` models into the Next.js AssetViewer.
-5. Follow the granular tasks remaining in `TODO.md`.
+5. Integrate Dolphin WASM hypervisor wrapper into the frontend.
+6. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

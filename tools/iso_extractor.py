@@ -7,8 +7,12 @@ simulating Dolphin FST parsing to extract .rel modules and .szs archives.
 """
 import sys
 
+def parse_gcz(file_path):
+    print(f"Mock parsing GCZ file at {file_path}")
+
 def main():
     print("Mock Gamecube/Wii ISO extractor initialized.")
+    parse_gcz("mock.gcz")
     sys.exit(0)
 
 if __name__ == "__main__":

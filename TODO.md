@@ -32,3 +32,8 @@
 - [x] Create `tools/model_extractor.py`.
 - [x] Create `tools/audio_decoder.py`.
 - [x] Create `tools/iso_extractor.py`.
+
+## Engine Expansion
+
+- [x] Expand `tools/iso_extractor.py` to parse GCZ format.
+- [x] Create `web/src/lib/GameCubeEmulator.ts` for Dolphin WASM integration.

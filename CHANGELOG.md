@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.5.0]
+### Added
+- Added `web/src/lib/GameCubeEmulator.ts` for Dolphin WASM integration.
+- Expanded `tools/iso_extractor.py` to support GCZ parsing mocks.
+
 ## [0.4.0]
 ### Added
 - Added `tools/texture_converter.py`, `tools/model_extractor.py`, `tools/audio_decoder.py`, and `tools/iso_extractor.py` as scaffolding scripts for the asset extraction pipeline.
