@@ -50,3 +50,7 @@
 
 - [x] Expand the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets.
 - [x] Connect `web/src/lib/NetplayManager.ts` to the websocket stream.
+
+## CI/CD Pipeline
+
+- [x] Create GitHub Actions workflow to run the test suite on push.

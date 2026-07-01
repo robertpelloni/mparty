@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.9.0]
+### Added
+- Added GitHub Actions CI pipeline to automate Python and Playwright testing.
+
 ## [0.8.0]
 ### Added
 - Expanded `run` command in `tools/mparty_cli.py` to dispatch data payloads over WebSockets.

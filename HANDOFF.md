@@ -23,6 +23,7 @@ This session initiated the structural scaffolding required to execute the contin
 4. Integrate extracted `.obj` models into the Next.js AssetViewer.
 5. Integrate Dolphin WASM hypervisor wrapper into the frontend.
 6. Expanded the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets and connected `NetplayManager.ts`.
-7. Follow the granular tasks remaining in `TODO.md`.
+7. Configured continuous integration via GitHub Actions for automated testing.
+8. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
