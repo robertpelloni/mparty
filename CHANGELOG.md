@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.13.0]
+### Changed
+- Redesigned and reorganized the Next.js dashboard UI to intuitively group and prioritize high-value features.
+
 ## [0.12.0]
 ### Added
 - Wired WebRTC Netplay logic (`hostGame`, `joinGame`) to the `NetworkControl` dashboard component.

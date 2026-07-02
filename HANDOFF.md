@@ -27,6 +27,7 @@ This session initiated the structural scaffolding required to execute the contin
 8. Hardened decompilation infrastructure scripts to parse N64 ROM headers and safely stub missing dependencies.
 9. Added `exportSave` and `importSave` features to `SaveStateManager.ts` and wired them up to the dashboard UI for Universal cross-game logic testing.
 10. Wired WebRTC Netplay logic to `NetworkControl` to complete `v0.12.0`.
-11. Follow the granular tasks remaining in `TODO.md`.
+11. Redesigned dashboard layout to prioritize high-value features (Emulation & Netplay) and group dev tools.
+12. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

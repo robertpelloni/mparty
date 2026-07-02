@@ -63,3 +63,7 @@
 ## WASM Netplay Protocol Integration (v0.12.0)
 
 - [x] Wire `hostGame()` and `joinGame()` from `NetplayManager.ts` to `NetworkControl.tsx` UI.
+
+## UI Redesign and Reorganization (v0.13.0)
+
+- [x] Consolidate layout in `page.tsx` and prioritize high-value features.
