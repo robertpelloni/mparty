@@ -1,5 +1,5 @@
 import GameSelector from "../components/GameSelector";
-import AssetViewer from "../components/AssetViewer";
+import AssetGallery from "../components/AssetGallery";
 import DecompilationStatus from "../components/DecompilationStatus";
 import NetworkControl from "../components/NetworkControl";
 import SaveStateControl from "../components/SaveStateControl";
@@ -67,13 +67,13 @@ export default function Home() {
               <DecompilationStatus />
             </div>
             <div className="lg:col-span-6">
-              <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden shadow-2xl h-full">
+              <div className="bg-black border border-zinc-800 rounded-xl overflow-hidden shadow-2xl h-full flex flex-col">
                  <div className="p-6 border-b border-zinc-800 bg-zinc-900/50">
-                    <h3 className="text-lg font-semibold mb-2">Extracted Asset Viewer</h3>
-                    <p className="text-sm text-zinc-400">Live WebGL rendering of 3D models.</p>
+                    <h3 className="text-lg font-semibold mb-2">Extracted Asset Gallery</h3>
+                    <p className="text-sm text-zinc-400">View extracted 3D models and N64 textures natively.</p>
                  </div>
-                 <div className="p-6 flex justify-center items-center h-[calc(100%-80px)]">
-                    <AssetViewer />
+                 <div className="p-6 flex-1 flex flex-col justify-center items-center h-[calc(100%-100px)]">
+                    <AssetGallery />
                  </div>
               </div>
             </div>
