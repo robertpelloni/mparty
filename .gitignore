@@ -22,4 +22,11 @@ node_modules/
 # Splat generated outputs
 asm/
 assets/
-src/
+/src/
+
+# Web frontend
+web/.next/
+!web/src/
+web/playwright-report/
+web/test-results/
+web/dev_server.log

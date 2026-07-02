@@ -1,0 +1,23 @@
+name: CI Pipeline
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Frontend Dependencies
+        run: cd web && npm ci
+      - name: Install Playwright Browsers
+        run: cd web && npx playwright install --with-deps
+      - name: Run Python Tests
+        run: python3 tools/mparty_cli.py test
+      - name: Run Playwright Tests
+        run: cd web && npm run build && npx playwright test

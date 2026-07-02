@@ -17,8 +17,18 @@ This session initiated the structural scaffolding required to execute the contin
 - **Node.js Integration**: Introduced Node.js into the build pipeline explicitly for regex string parsing and AST manipulation tasks (`c_stubber.js`), as its ecosystem is better tailored for web-port integration logic down the line compared to standard Python scripts.
 
 ### Next Steps for Successor Model
-1. Complete the implementation of `splat` actually parsing a live `.z64` test file.
-2. Hook up an AI iteration loop that modifies the C functions generated in `src/` to byte-match the assembly.
-3. Follow the granular tasks remaining in `TODO.md`.
+1. Setup and initialize the `web/` frontend directory with a modern Next.js project.
+2. Implement `web/src/lib/Fast3DTranslator.ts` for intercepting and interpreting N64 graphical microcode.
+3. Completed Next.js dashboard UI integrating Emulation, Netplay, Audio, and AssetViewer components with Playwright tests.
+4. Integrate extracted `.obj` models into the Next.js AssetViewer.
+5. Integrate Dolphin WASM hypervisor wrapper into the frontend.
+6. Expanded the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets and connected `NetplayManager.ts`.
+7. Configured continuous integration via GitHub Actions for automated testing.
+8. Hardened decompilation infrastructure scripts to parse N64 ROM headers and safely stub missing dependencies.
+9. Added `exportSave` and `importSave` features to `SaveStateManager.ts` and wired them up to the dashboard UI for Universal cross-game logic testing.
+10. Wired WebRTC Netplay logic to `NetworkControl` to complete `v0.12.0`.
+11. Redesigned dashboard layout to prioritize high-value features (Emulation & Netplay) and group dev tools.
+12. Expanded `Fast3DTranslator.ts` with internal cache tracking and mock WebGL translation loops for `gSPVertex` and `gSP1Triangle`.
+13. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
