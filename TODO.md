@@ -67,3 +67,7 @@
 ## UI Redesign and Reorganization (v0.13.0)
 
 - [x] Consolidate layout in `page.tsx` and prioritize high-value features.
+
+## Graphics Translation Pipeline (v0.14.0)
+
+- [x] Implement memory processing and vertex caching mocks in `Fast3DTranslator.ts`.

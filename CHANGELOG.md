@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.14.0]
+### Added
+- Implemented WebGL translation mocks (`gSPProcessDisplayList`, `gSPVertex`, `gSP1Triangle`) and vertex caching inside `Fast3DTranslator.ts`.
+
 ## [0.13.0]
 ### Changed
 - Redesigned and reorganized the Next.js dashboard UI to intuitively group and prioritize high-value features.
