@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.17.0]
+### Added
+- Integrated `GameCubeEmulator` instantiation inside `EmulationCore.ts` `loadRom` and `start` functions, depending on platform metadata.
+
+
 ## [0.14.0]
 ### Added
 - Implemented WebGL translation mocks (`gSPProcessDisplayList`, `gSPVertex`, `gSP1Triangle`) and vertex caching inside `Fast3DTranslator.ts`.

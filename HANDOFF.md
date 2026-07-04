@@ -29,6 +29,7 @@ This session initiated the structural scaffolding required to execute the contin
 10. Wired WebRTC Netplay logic to `NetworkControl` to complete `v0.12.0`.
 11. Redesigned dashboard layout to prioritize high-value features (Emulation & Netplay) and group dev tools.
 12. Expanded `Fast3DTranslator.ts` with internal cache tracking and mock WebGL translation loops for `gSPVertex` and `gSP1Triangle`.
-13. Follow the granular tasks remaining in `TODO.md`.
+13. Integrated Dolphin WASM hypervisor wrapper (`GameCubeEmulator.ts`) into `EmulationCore.ts`.
+14. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
