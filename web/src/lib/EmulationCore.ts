@@ -9,6 +9,7 @@
 import { InputManager } from './InputManager';
 import { AudioManager } from './AudioManager';
 import { SaveStateManager } from './SaveStateManager';
+import { GameCubeEmulator } from './GameCubeEmulator';
 
 export type EmulatorType = 'N64' | 'GameCube' | 'Wii';
 
@@ -25,7 +26,9 @@ export class EmulationCore {
   private inputManager: InputManager;
   private audioManager: AudioManager;
   private saveManager: SaveStateManager;
+  private gamecubeCore: GameCubeEmulator | null = null;
   private animationFrameId: number = 0;
+  private currentPlatform: EmulatorType = 'N64';
 
   constructor(private canvasElementId: string) {
     this.inputManager = new InputManager();
@@ -63,12 +66,21 @@ export class EmulationCore {
     console.log(`EmulationCore: Attempting to load ${meta.title} (${meta.platform})...`);
     console.log(`EmulationCore: Buffer size is ${romBuffer.byteLength} bytes.`);
 
-    // TODO: In a real implementation, this would involve calling the Emscripten Module
-    // e.g., Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
-    //       Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
+    this.currentPlatform = meta.platform;
 
     // Simulate async load time
     await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (this.currentPlatform === 'GameCube' || this.currentPlatform === 'Wii') {
+        this.gamecubeCore = new GameCubeEmulator();
+        this.gamecubeCore.loadISO(meta.id);
+        console.log(`EmulationCore: Branched to Dolphin WASM for ${meta.platform} target.`);
+    } else {
+        // N64 Logic
+        // TODO: In a real implementation, this would involve calling the Emscripten Module
+        // e.g., Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
+        //       Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
+    }
 
     this.isLoaded = true;
     console.log(`EmulationCore: ${meta.title} successfully loaded into WASM memory space.`);
@@ -81,11 +93,17 @@ export class EmulationCore {
     if (!this.isLoaded) {
       throw new Error('EmulationCore: Cannot start, no ROM is loaded.');
     }
-    console.log('EmulationCore: Starting WASM execution loop...');
+    console.log(`EmulationCore: Starting WASM execution loop for ${this.currentPlatform}...`);
 
     this.inputManager.attachListeners();
     this.audioManager.initialize();
-    this.executionLoop();
+
+    if (this.currentPlatform === 'GameCube' || this.currentPlatform === 'Wii') {
+        console.log(`EmulationCore: Handing off event loop to Dolphin hypervisor.`);
+        // Note: Dolphin WASM would have its own runloop here
+    } else {
+        this.executionLoop();
+    }
   }
 
   private executionLoop = (): void => {
