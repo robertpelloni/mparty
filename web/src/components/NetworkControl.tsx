@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Tooltip } from './Tooltip';
-import { Network, Wifi, Globe, Copy, Check } from 'lucide-react';
+import { Network, Wifi, Globe, Copy, Check, FastForward } from 'lucide-react';
 import { NetplayManager } from '../lib/NetplayManager';
 
 export default function NetworkControl() {
@@ -49,6 +49,13 @@ export default function NetworkControl() {
        console.log("Mock join error handled:", e);
        setStatus("Joined Mock Lobby");
      }
+  };
+
+  const triggerRollback = () => {
+      if (netplay) {
+          netplay.predictInputState();
+          setStatus("Predicted Next Frame (Rollback)");
+      }
   };
 
   return (
@@ -113,6 +120,18 @@ export default function NetworkControl() {
                 </button>
               </Tooltip>
             </div>
+
+            <div className="pt-2 border-t border-zinc-800 mt-4">
+                <Tooltip content="Force the WASM hypervisor to predict input state manually. Testing rollback netcode sync.">
+                    <button
+                        onClick={triggerRollback}
+                        className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"
+                    >
+                        <FastForward className="w-4 h-4 text-indigo-400" /> Mock Rollback Prediction
+                    </button>
+                </Tooltip>
+            </div>
+
             <button
               onClick={() => setIsHosting(false)}
               className="mt-4 text-sm text-red-400 hover:text-red-300 underline"

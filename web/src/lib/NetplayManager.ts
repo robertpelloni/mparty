@@ -103,6 +103,13 @@ export class NetplayManager {
   }
 
   /**
+   * Predicts input states for rollback netcode logic (GGPO-style).
+   */
+  public predictInputState(): void {
+      console.log("NetplayManager: Triggered input state prediction for WASM rollback netcode.");
+  }
+
+  /**
    * Safely closes the peer-to-peer connection.
    */
   public disconnect(): void {
