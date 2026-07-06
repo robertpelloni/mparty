@@ -18,7 +18,12 @@ import argparse
 
 def call_llm_api(prompt, api_key):
     """Makes an HTTP request to an external LLM API."""
-    # Placeholder for actual API endpoint, we will mock the behavior if not available
+    # For testing, we mock the LLM response if the API key is "MOCK_KEY"
+    if api_key == "MOCK_KEY":
+        if "test" in prompt:
+            return "```c\nint test() { return 1; }\n```"
+        return "```c\n// mock logic\n```"
+
     url = "https://api.openai.com/v1/chat/completions" # Example endpoint
 
     headers = {

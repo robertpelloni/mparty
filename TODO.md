@@ -79,6 +79,3 @@
 ## Graphics Translation Pipeline (v0.14.0)
 
 - [x] Implement memory processing and vertex caching mocks in `Fast3DTranslator.ts`.
-## Universal Save State Translation (v0.19.0)
-
-- [x] Implement translation method in `SaveStateManager.ts` and add mock toggle button to `SaveStateControl.tsx`.

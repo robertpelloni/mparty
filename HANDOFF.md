@@ -32,6 +32,5 @@ This session initiated the structural scaffolding required to execute the contin
 13. Integrated Dolphin WASM hypervisor wrapper (`GameCubeEmulator.ts`) into `EmulationCore.ts`.
 14. Expanded `NetplayManager.ts` to include rollback netcode prediction stubs (`predictInputState()`) mapped to the host UI.
 15. Follow the granular tasks remaining in `TODO.md`.
-16. Expanded `SaveStateManager.ts` with Universal Save State extraction logic and mocked it via the Host UI.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

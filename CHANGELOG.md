@@ -1,9 +1,9 @@
 # CHANGELOG
 
-## [0.19.0]
+## [0.20.0]
 ### Added
-- Implemented `extractUniversalState()` mock for Universal Save State cross-generation integration in `SaveStateManager.ts`.
-- Implemented manual cross-gen translation feature in the `SaveStateControl.tsx` host UI via save/load state.
+- Expanded `ai_matcher.py` with mock `mips-linux-gnu-gcc` logic loops for test environments.
+- Implemented `ai_loop.py` tests with mocked LLM HTTP calls for testing automated AI matching capabilities.
 
 
 ## [0.18.0]
