@@ -68,6 +68,10 @@
 
 - [x] Wire `hostGame()` and `joinGame()` from `NetplayManager.ts` to `NetworkControl.tsx` UI.
 
+## Rollback Netcode Integration (v0.18.0)
+
+- [x] Implement prediction method in `NetplayManager.ts` and add mock toggle button to `NetworkControl.tsx`.
+
 ## UI Redesign and Reorganization (v0.13.0)
 
 - [x] Consolidate layout in `page.tsx` and prioritize high-value features.

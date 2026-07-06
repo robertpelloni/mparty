@@ -30,6 +30,7 @@ This session initiated the structural scaffolding required to execute the contin
 11. Redesigned dashboard layout to prioritize high-value features (Emulation & Netplay) and group dev tools.
 12. Expanded `Fast3DTranslator.ts` with internal cache tracking and mock WebGL translation loops for `gSPVertex` and `gSP1Triangle`.
 13. Integrated Dolphin WASM hypervisor wrapper (`GameCubeEmulator.ts`) into `EmulationCore.ts`.
-14. Follow the granular tasks remaining in `TODO.md`.
+14. Expanded `NetplayManager.ts` to include rollback netcode prediction stubs (`predictInputState()`) mapped to the host UI.
+15. Follow the granular tasks remaining in `TODO.md`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

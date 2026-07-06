@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.18.0]
+### Added
+- Implemented `predictInputState()` mock for GGPO-style rollback netcode in `NetplayManager.ts`.
+- Exposed manual rollback trigger button in the `NetworkControl.tsx` host UI.
+
+
 ## [0.17.0]
 ### Added
 - Integrated `GameCubeEmulator` instantiation inside `EmulationCore.ts` `loadRom` and `start` functions, depending on platform metadata.
