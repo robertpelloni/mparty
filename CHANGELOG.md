@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.19.0]
+### Added
+- Implemented `extractUniversalState()` mock for Universal Save State cross-generation integration in `SaveStateManager.ts`.
+- Implemented manual cross-gen translation feature in the `SaveStateControl.tsx` host UI via save/load state.
+
+
 ## [0.18.0]
 ### Added
 - Implemented `predictInputState()` mock for GGPO-style rollback netcode in `NetplayManager.ts`.
