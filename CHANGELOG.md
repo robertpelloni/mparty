@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.21.0]
+### Added
+- Exposed an API route `/api/ai` in Next.js to trigger the `ai_loop.py` script securely from the web client.
+- Added a "Run AI Loop" manual trigger button in `DecompilationStatus.tsx` to visualize the pipeline logs on the dashboard.
+
+
 ## [0.20.0]
 ### Added
 - Expanded `ai_matcher.py` with mock `mips-linux-gnu-gcc` logic loops for test environments.

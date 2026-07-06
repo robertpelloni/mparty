@@ -79,3 +79,7 @@
 ## Graphics Translation Pipeline (v0.14.0)
 
 - [x] Implement memory processing and vertex caching mocks in `Fast3DTranslator.ts`.
+## Automated AI Matching Web Hook (v0.21.0)
+
+- [x] Expose an API route in Next.js to trigger the `ai_loop.py` script and report back logs.
+- [x] Add a button in `DecompilationStatus.tsx` to manually trigger the AI matching pipeline for testing.
