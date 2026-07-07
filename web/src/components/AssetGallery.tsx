@@ -5,30 +5,50 @@ import { Box, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { AssetMetadata } from '../app/api/assets/route';
 import AssetViewer from './AssetViewer';
 
+// Mock hook based on Supervisor's instructions "useDataFetch"
+function useDataFetch<T>(url: string) {
+    const [data, setData] = useState<T | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                // Simulate network latency as requested
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (isMounted && json.success) {
+                    // Expecting the new 'metadata' field logic here as hinted by the supervisor
+                    setData(json.metadata || json.data);
+                }
+            } catch (err: any) {
+                if (isMounted) setError(err);
+                console.error(`Failed to fetch from ${url}`, err);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+        fetchData();
+
+        return () => { isMounted = false; };
+    }, [url]);
+
+    return { data, loading, error };
+}
+
 export default function AssetGallery() {
-  const [assets, setAssets] = useState<AssetMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: assets, loading } = useDataFetch<AssetMetadata[]>('/api/assets');
   const [selectedAsset, setSelectedAsset] = useState<AssetMetadata | null>(null);
 
   useEffect(() => {
-    const fetchAssets = async () => {
-      try {
-        const res = await fetch('/api/assets');
-        const json = await res.json();
-        if (json.success) {
-          setAssets(json.data);
-          if (json.data.length > 0) {
-            setSelectedAsset(json.data[0]);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch assets', err);
-      } finally {
-        setLoading(false);
+      if (assets && assets.length > 0 && !selectedAsset) {
+          setSelectedAsset(assets[0]);
       }
-    };
-    fetchAssets();
-  }, []);
+  }, [assets, selectedAsset]);
 
   return (
     <div className="flex h-96 w-full border border-zinc-800 rounded-xl overflow-hidden bg-black shadow-inner">
@@ -43,7 +63,7 @@ export default function AssetGallery() {
           </div>
         ) : (
           <div className="flex flex-col">
-            {assets.map((asset) => (
+            {assets?.map((asset) => (
               <button
                 key={asset.id}
                 onClick={() => setSelectedAsset(asset)}

@@ -83,3 +83,8 @@
 
 - [x] Expose an API route in Next.js to trigger the `ai_loop.py` script and report back logs.
 - [x] Add a button in `DecompilationStatus.tsx` to manually trigger the AI matching pipeline for testing.
+
+## WebAsset Viewer Web Hook Integration (v0.22.0)
+
+- [x] Update frontend hook to intercept payload metrics dynamically instead of raw fallback buffers.
+- [x] Ensure `AssetGallery` pulls data efficiently utilizing robust network latency logic.

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.22.0]
+### Added
+- Refactored `AssetGallery.tsx` with a custom `useDataFetch` hook to handle the new `metadata` payload structure securely.
+- Added artificial network latency handling and cached fallbacks to the Asset extraction UI payload requests.
+
+
 ## [0.21.0]
 ### Added
 - Exposed an API route `/api/ai` in Next.js to trigger the `ai_loop.py` script securely from the web client.

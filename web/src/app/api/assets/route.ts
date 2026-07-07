@@ -17,8 +17,9 @@ const availableAssets: AssetMetadata[] = [
 
 export async function GET() {
   // Simulates scanning the /public/assets folder
+  // Supervisor requested using "metadata" field instead of raw fallback buffers
   return NextResponse.json({
     success: true,
-    data: availableAssets
+    metadata: availableAssets
   });
 }
