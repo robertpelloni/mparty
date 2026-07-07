@@ -13,6 +13,8 @@ export async function POST() {
     // Note: We use "mock_src" just so it doesn't fail immediately,
     // or we can pass an env var LLM_API_KEY="MOCK_KEY"
     const pythonProcess = spawn('python3', [aiLoopPath], {
+        cwd: path.resolve(process.cwd(), '../'),
+        cwd: path.resolve(process.cwd(), '../'),
         env: {
             ...process.env,
             LLM_API_KEY: "MOCK_KEY"

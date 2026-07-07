@@ -6,14 +6,26 @@ import { AssetMetadata } from '../app/api/assets/route';
 import AssetViewer from './AssetViewer';
 
 // Mock hook based on Supervisor's instructions "useDataFetch"
+
+// Simple memory cache
+const cache = new Map<string, any>();
+
 function useDataFetch<T>(url: string) {
+
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
         let isMounted = true;
+
         const fetchData = async () => {
+            if (cache.has(url)) {
+                setData(cache.get(url));
+                setLoading(false);
+                return;
+            }
+
             try {
                 // Simulate network latency as requested
                 await new Promise(resolve => setTimeout(resolve, 300));
@@ -22,9 +34,11 @@ function useDataFetch<T>(url: string) {
                 const json = await res.json();
 
                 if (isMounted && json.success) {
-                    // Expecting the new 'metadata' field logic here as hinted by the supervisor
-                    setData(json.metadata || json.data);
+                    const result = json.metadata || json.data;
+                    cache.set(url, result);
+                    setData(result);
                 }
+
             } catch (err: any) {
                 if (isMounted) setError(err);
                 console.error(`Failed to fetch from ${url}`, err);

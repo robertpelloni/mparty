@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.22.1]
+### Fixed
+- Added robust local dictionary caching to `useDataFetch` hook to persist memory across unmounts without relying on component state.
+- Fixed `ai_loop.py` execution directory context within Next.js `/api/ai` route by forcing `cwd` to the project root.
+
+
 ## [0.22.0]
 ### Added
 - Refactored `AssetGallery.tsx` with a custom `useDataFetch` hook to handle the new `metadata` payload structure securely.
