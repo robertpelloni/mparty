@@ -102,11 +102,20 @@ export class NetplayManager {
     }
   }
 
+  // Buffer to store historical states for rollback prediction
+  private rollbackBuffer: Map<number, Uint32Array> = new Map();
+  private maxRollbackFrames: number = 7;
+
   /**
    * Predicts input states for rollback netcode logic (GGPO-style).
    */
-  public predictInputState(): void {
-      console.log("NetplayManager: Triggered input state prediction for WASM rollback netcode.");
+  public predictInputState(currentFrame: number, latencyMs: number): void {
+      console.log(`NetplayManager: Triggering prediction for frame ${currentFrame} accounting for ${latencyMs}ms latency.`);
+      // Mock tracking state for rollback resolution
+      if (this.rollbackBuffer.size > this.maxRollbackFrames) {
+          this.rollbackBuffer.clear();
+      }
+      this.rollbackBuffer.set(currentFrame, new Uint32Array([0x0]));
   }
 
   /**

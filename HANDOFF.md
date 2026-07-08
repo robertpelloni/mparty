@@ -39,5 +39,6 @@ This session initiated the structural scaffolding required to execute the contin
 20. Successfully concluded session with all TODO.md and IDEAS.md features mocked, integrated, and verified up to version 0.22.0.
 21. Adjusted `Makefile` default optimization flags to `-O2` to sync with the AI decompilation harness logic loops.
 22. Implemented `dashboard` command to `mparty_cli.py` for a centralized interactive terminal menu.
+23. Implemented a Latency Config slider into the `NetworkControl.tsx` host UI, wiring it to a mocked `rollbackBuffer` map inside `NetplayManager.ts`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

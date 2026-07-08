@@ -8,6 +8,7 @@ import { NetplayManager } from '../lib/NetplayManager';
 export default function NetworkControl() {
   const [isHosting, setIsHosting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [latency, setLatency] = useState(50);
   const [status, setStatus] = useState<string>("Offline");
   const [netplay, setNetplay] = useState<NetplayManager | null>(null);
 
@@ -53,7 +54,7 @@ export default function NetworkControl() {
 
   const triggerRollback = () => {
       if (netplay) {
-          netplay.predictInputState();
+          netplay.predictInputState(1, latency);
           setStatus("Predicted Next Frame (Rollback)");
       }
   };
@@ -121,8 +122,20 @@ export default function NetworkControl() {
               </Tooltip>
             </div>
 
-            <div className="pt-2 border-t border-zinc-800 mt-4">
-                <Tooltip content="Force the WASM hypervisor to predict input state manually. Testing rollback netcode sync.">
+            <div className="pt-2 border-t border-zinc-800 mt-4 space-y-3">
+                <div className="flex justify-between items-center text-xs">
+                    <span className="text-zinc-400">Target Latency Comp</span>
+                    <span className="font-mono text-indigo-400">{latency} ms</span>
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="150"
+                    value={latency}
+                    onChange={(e) => setLatency(parseInt(e.target.value))}
+                    className="w-full accent-indigo-500"
+                />
+                <Tooltip content="Force the WASM hypervisor to predict input state manually based on latency config. Testing rollback netcode sync.">
                     <button
                         onClick={triggerRollback}
                         className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"

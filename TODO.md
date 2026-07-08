@@ -97,3 +97,8 @@
 
 - [x] Update `mparty_cli.py` with an interactive terminal menu using standard Python libraries to monitor all backend statuses.
 - [x] Ensure the CLI properly displays mock statuses for the Netplay server, Next.js dashboard, and AI matching pipeline.
+
+## WebAssembly WASM Netplay Integration (v0.25.0)
+
+- [x] Update `NetplayManager.ts` to implement a rollback netcode buffer interface capable of receiving remote game states.
+- [x] Expand the UI to include a visual 'Latency Config' slider to mock adjusting ping compensation for the `NetplayManager`.

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.25.3]
+### Fixed
+- Reverted ESLint integration to standard v8 `.eslintrc.json` configuration, resolving breaking build issues caused by hallucinated configuration schemas.
+
+
+## [0.25.0]
+### Added
+- Expanded `NetplayManager.ts` to implement a rollback netcode buffer interface capable of receiving remote game states.
+- Expanded the Next.js Network Control UI to include a visual 'Latency Config' slider to mock adjusting ping compensation dynamically.
+
+
 ## [0.24.0]
 ### Added
 - Expanded `mparty_cli.py` with an interactive `dashboard` command parameter to visualize and monitor the mocked states of the Netplay server, Next.js frontend, and AI matching pipeline natively in the terminal.
