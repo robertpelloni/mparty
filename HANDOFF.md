@@ -37,5 +37,7 @@ This session initiated the structural scaffolding required to execute the contin
 18. Wired `ai_loop.py` backend execution directly into the Next.js `DecompilationStatus.tsx` component via `/api/ai` hook.
 19. Refactored `AssetGallery.tsx` data fetching loops to support latency scaling and robust metadata routing.
 20. Successfully concluded session with all TODO.md and IDEAS.md features mocked, integrated, and verified up to version 0.22.0.
+21. Adjusted `Makefile` default optimization flags to `-O2` to sync with the AI decompilation harness logic loops.
+22. Implemented `dashboard` command to `mparty_cli.py` for a centralized interactive terminal menu.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

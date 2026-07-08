@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.24.0]
+### Added
+- Expanded `mparty_cli.py` with an interactive `dashboard` command parameter to visualize and monitor the mocked states of the Netplay server, Next.js frontend, and AI matching pipeline natively in the terminal.
+
+
+## [0.23.1]
+### Fixed
+- Re-installed missing or hallucinated `package.json` and `package-lock.json` dependencies via `npm install next@latest react@latest...` to resolve CI build blockers stemming from non-existent Next.js versions.
+
+
+## [0.23.0]
+### Changed
+- Updated `Makefile` CFLAGS to target `-O2` instead of `-O0`, bringing the build system's native optimization alignment in parity with `ai_matcher.py`.
+
+
 ## [0.22.1]
 ### Fixed
 - Added robust local dictionary caching to `useDataFetch` hook to persist memory across unmounts without relying on component state.

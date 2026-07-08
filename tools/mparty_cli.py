@@ -11,6 +11,7 @@ import argparse
 import subprocess
 import sys
 import os
+import time
 
 def run_script(script_path, args=None):
     if not os.path.exists(script_path):
@@ -43,6 +44,23 @@ def run_dev_server():
         print("npm not found. Please ensure Node.js and npm are installed.")
         sys.exit(1)
 
+def run_interactive_dashboard():
+    """Renders a simple interactive terminal dashboard mock."""
+    print("\033[2J\033[H", end="") # Clear screen
+    print("=" * 60)
+    print("   Mario Party Engine - Interactive CLI Dashboard")
+    print("=" * 60)
+    print("[1] AI Decompilation Pipeline : IDLE")
+    print("[2] Next.js Web Frontend      : OFFLINE")
+    print("[3] Netplay Sync Server       : LISTENING (Port 8080)")
+    print("-" * 60)
+    print("Press Ctrl+C to exit dashboard mode.")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nExiting dashboard.")
+
 def main():
     parser = argparse.ArgumentParser(description="Mario Party Decompilation Orchestrator")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -65,6 +83,9 @@ def main():
     # run command
     run_parser = subparsers.add_parser("run", help="Start the mparty event loop and handle incoming connections")
 
+    # dashboard command
+    dashboard_parser = subparsers.add_parser("dashboard", help="Launch the interactive terminal dashboard")
+
     args = parser.parse_args()
 
     if args.command == "test":
@@ -82,6 +103,8 @@ def main():
         print("Parsing incoming network connection stream...")
         print("Mock: Decoded controller payload 0x8000 (A Button).")
         print("Dispatching data payload to frontend over WebSocket...")
+    elif args.command == "dashboard":
+        run_interactive_dashboard()
     else:
         parser.print_help()
 

@@ -21,7 +21,7 @@ TARGET    := target_rom.z64
 ELF       := $(BUILD_DIR)/target_rom.elf
 
 # Flags
-CFLAGS  := -O0 -G 0 -I$(INCLUDE) -mabi=32 -mips3 -fno-PIC -c
+CFLAGS  := -O2 -G 0 -I$(INCLUDE) -mabi=32 -mips3 -fno-PIC -c
 ASFLAGS := -I$(INCLUDE) -mabi=32 -mips3
 LDFLAGS := -T splat.ld -Map $(BUILD_DIR)/target_rom.map
 

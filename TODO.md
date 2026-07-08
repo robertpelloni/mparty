@@ -88,3 +88,12 @@
 
 - [x] Update frontend hook to intercept payload metrics dynamically instead of raw fallback buffers.
 - [x] Ensure `AssetGallery` pulls data efficiently utilizing robust network latency logic.
+
+## Compiler Optimization Alignment (v0.23.0)
+
+- [x] Ensure `Makefile` uses the `-O2` compiler flag for N64 GCC builds, aligning with `ai_matcher.py` optimizations.
+
+## Centralized Mparty CLI Dashboard (v0.24.0)
+
+- [x] Update `mparty_cli.py` with an interactive terminal menu using standard Python libraries to monitor all backend statuses.
+- [x] Ensure the CLI properly displays mock statuses for the Netplay server, Next.js dashboard, and AI matching pipeline.
