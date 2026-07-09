@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.31.0]
+### Added
+- Implemented SHA-256 hash checking logic into `texture_converter.py` and `model_extractor.py` to cache file signatures and avoid redundant extractions during continuous AI decompilation loops.
+
+
 ## [0.29.0]
 ### Added
 - Expanded `NetplayManager.ts` to implement `syncRemoteInputs()`, verifying predicted frames against arrived inputs to finalize the WebAssembly Netplay Sync Logic loop.
