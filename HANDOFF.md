@@ -42,5 +42,6 @@ This session initiated the structural scaffolding required to execute the contin
 23. Implemented a Latency Config slider into the `NetworkControl.tsx` host UI, wiring it to a mocked `rollbackBuffer` map inside `NetplayManager.ts`.
 24. Implemented `Parse MIPS` button mapping inside `DecompilationStatus.tsx` to visualize the manual `c_stubber` execution log parsing.
 25. Added `decodePCMStream()` logic to `AudioManager.ts` for intercepting arbitrary native audio banks.
+26. Intercepted WASM PCM decoding directly inside the `EmulationCore.ts` pipeline execution loop and pre-allocated `Fast3DTranslator.ts` geometric buffer capacities.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

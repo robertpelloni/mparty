@@ -20,15 +20,15 @@ export interface Vertex {
 
 export class Fast3DTranslator {
   private gl: WebGLRenderingContext;
-
-  // Simulated internal vertex cache typical of N64 microcode (usually 32 vertices max)
-  private vertexCache: Vertex[] = new Array(32);
+// Simulated internal vertex cache typical of N64 microcode (usually 32 vertices max)
+  private vertexCache: Vertex[];
 
   constructor(context: WebGLRenderingContext) {
     this.gl = context;
+    // Pre-allocate geometric buffer capacity
+    this.vertexCache = new Array(32).fill(null);
     this.initGLState();
   }
-
   private initGLState() {
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.clearColor(0.0, 0.0, 0.0, 1.0);

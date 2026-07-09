@@ -124,6 +124,10 @@ export class EmulationCore {
     // const rightBuffer = new Float32Array(Module.HEAPF32.buffer, rightAudioPtr, audioLength);
     // this.audioManager.pushAudioBuffer(leftBuffer, rightBuffer);
 
+    // 4. Hook raw PCM stream decode mock
+    const mockPcmBuffer = new ArrayBuffer(1024); // Dummy 1KB PCM payload
+    this.audioManager.decodePCMStream(mockPcmBuffer);
+
     this.animationFrameId = requestAnimationFrame(this.executionLoop);
   };
 

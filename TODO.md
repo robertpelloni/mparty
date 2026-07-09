@@ -107,3 +107,8 @@
 
 - [x] Update `AudioManager.ts` to implement a `decodePCMStream()` method for parsing raw Float32 data buffers.
 - [x] Ensure the Audio context buffers maintain a continuous queue to prevent underrun clicking during latency.
+
+## WebAssembly Audio Decoding Translation (v0.28.0)
+
+- [x] Update `EmulationCore.ts` to hook `AudioManager.decodePCMStream` directly into the emulator execution loop to parse WASM output blocks.
+- [x] Update the `Fast3DTranslator.ts` cache initialization step to properly pre-allocate geometric buffer capacity.
