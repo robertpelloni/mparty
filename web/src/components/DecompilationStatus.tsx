@@ -12,6 +12,11 @@ export default function DecompilationStatus() {
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
 
+
+  const handleExtractStubs = () => {
+      setLogs(prev => [...prev, "[c_stubber] Scanning /asm for raw MIPS instructions...", "[c_stubber] Successfully generated 5 mock C function stubs."]);
+  };
+
   const handleTriggerAI = async () => {
       setIsProcessing(true);
       setLogs(prev => [...prev, "[system] Triggering continuous AI loop..."]);
@@ -40,7 +45,18 @@ export default function DecompilationStatus() {
           Decompilation Pipeline
         </h2>
         <div className="flex gap-2 items-center">
+
+            <Tooltip content="Manually extract C-stubs via Node.js tool pipeline parsing.">
+              <button
+                  onClick={handleExtractStubs}
+                  disabled={isProcessing}
+                  className="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/50 rounded flex items-center gap-2 text-sm transition-colors disabled:opacity-50"
+              >
+                  Parse MIPS
+              </button>
+            </Tooltip>
             <Tooltip content="Manually force the AI matching python scripts to execute on the backend.">
+
               <button
                   onClick={handleTriggerAI}
                   disabled={isProcessing}

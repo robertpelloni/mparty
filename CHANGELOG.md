@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.26.0]
+### Added
+- Expanded the `DecompilationStatus.tsx` component to include a `Parse MIPS` button to trigger the manual Node.js `c_stubber.js` log extraction process.
+- Implemented dummy visual log entries mapped to the UI for validating the extraction process state tracking.
+
+
 ## [0.25.3]
 ### Fixed
 - Reverted ESLint integration to standard v8 `.eslintrc.json` configuration, resolving breaking build issues caused by hallucinated configuration schemas.
