@@ -119,6 +119,29 @@ export class NetplayManager {
   }
 
   /**
+   * Syncs and resolves historical input states against newly arrived remote inputs.
+   * If a prediction was incorrect, it triggers a state load to rollback the emulator.
+   */
+  public syncRemoteInputs(arrivedFrame: number, actualInput: Uint32Array): boolean {
+      console.log(`NetplayManager: Syncing arrived remote inputs for frame ${arrivedFrame}.`);
+
+      const predictedInput = this.rollbackBuffer.get(arrivedFrame);
+      if (!predictedInput) {
+          console.warn(`NetplayManager: Frame ${arrivedFrame} dropped from prediction buffer. Forcing hard sync.`);
+          return false;
+      }
+
+      if (predictedInput[0] !== actualInput[0]) {
+          console.log(`NetplayManager: [DESYNC] Prediction failed for frame ${arrivedFrame}. Requesting emulator rollback.`);
+          return false;
+      }
+
+      // Clean up validated frame
+      this.rollbackBuffer.delete(arrivedFrame);
+      return true;
+  }
+
+  /**
    * Safely closes the peer-to-peer connection.
    */
   public disconnect(): void {

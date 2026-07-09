@@ -15,6 +15,7 @@ export default function NetworkControl() {
   useEffect(() => {
     setNetplay(new NetplayManager());
     return () => netplay?.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const mockInviteCode = "MPARTY-8F2A-99B1";
@@ -51,14 +52,19 @@ export default function NetworkControl() {
        setStatus("Joined Mock Lobby");
      }
   };
-
-  const triggerRollback = () => {
+const triggerRollback = () => {
       if (netplay) {
           netplay.predictInputState(1, latency);
           setStatus("Predicted Next Frame (Rollback)");
       }
   };
 
+  const triggerDesync = () => {
+      if (netplay) {
+          const success = netplay.syncRemoteInputs(1, new Uint32Array([0x1])); // Force mismatch
+          setStatus(success ? "Inputs Synced" : "Desync Detected! Rolling Back...");
+      }
+  };
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm w-full">
       <div className="flex items-center justify-between mb-6">
@@ -134,8 +140,7 @@ export default function NetworkControl() {
                     value={latency}
                     onChange={(e) => setLatency(parseInt(e.target.value))}
                     className="w-full accent-indigo-500"
-                />
-                <Tooltip content="Force the WASM hypervisor to predict input state manually based on latency config. Testing rollback netcode sync.">
+                /><Tooltip content="Force the WASM hypervisor to predict input state manually based on latency config. Testing rollback netcode sync.">
                     <button
                         onClick={triggerRollback}
                         className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"
@@ -143,7 +148,14 @@ export default function NetworkControl() {
                         <FastForward className="w-4 h-4 text-indigo-400" /> Mock Rollback Prediction
                     </button>
                 </Tooltip>
-            </div>
+                <Tooltip content="Simulate a remote input arriving that contradicts the local prediction, forcing a state rollback.">
+                    <button
+                        onClick={triggerDesync}
+                        className="w-full py-2 bg-red-950/30 hover:bg-red-900/40 border border-red-900 text-red-400 text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"
+                    >
+                        Mock Client Desync
+                    </button>
+                </Tooltip>            </div>
 
             <button
               onClick={() => setIsHosting(false)}

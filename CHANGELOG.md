@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.29.0]
+### Added
+- Expanded `NetplayManager.ts` to implement `syncRemoteInputs()`, verifying predicted frames against arrived inputs to finalize the WebAssembly Netplay Sync Logic loop.
+- Wired the `"Mock Client Desync"` button into `NetworkControl.tsx` to visualize state rollbacks.
+
+
 ## [0.28.0]
 ### Added
 - Wired `AudioManager.decodePCMStream` into `EmulationCore.ts` to seamlessly intercept and extract simulated raw WebAssembly audio engine blocks via dummy PCM memory pointers.
