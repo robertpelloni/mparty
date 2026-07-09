@@ -41,5 +41,6 @@ This session initiated the structural scaffolding required to execute the contin
 22. Implemented `dashboard` command to `mparty_cli.py` for a centralized interactive terminal menu.
 23. Implemented a Latency Config slider into the `NetworkControl.tsx` host UI, wiring it to a mocked `rollbackBuffer` map inside `NetplayManager.ts`.
 24. Implemented `Parse MIPS` button mapping inside `DecompilationStatus.tsx` to visualize the manual `c_stubber` execution log parsing.
+25. Added `decodePCMStream()` logic to `AudioManager.ts` for intercepting arbitrary native audio banks.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

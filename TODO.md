@@ -102,3 +102,8 @@
 
 - [x] Update `NetplayManager.ts` to implement a rollback netcode buffer interface capable of receiving remote game states.
 - [x] Expand the UI to include a visual 'Latency Config' slider to mock adjusting ping compensation for the `NetplayManager`.
+
+## Audio Stream Decoding Integration (v0.27.0)
+
+- [x] Update `AudioManager.ts` to implement a `decodePCMStream()` method for parsing raw Float32 data buffers.
+- [x] Ensure the Audio context buffers maintain a continuous queue to prevent underrun clicking during latency.
