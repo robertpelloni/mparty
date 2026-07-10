@@ -59,7 +59,7 @@ export class AudioManager {
           right[i] = floatView[i * 2 + 1];
       }
 
-      this.pushAudioBuffer(left as Float32Array<ArrayBuffer>, right as Float32Array<ArrayBuffer>);
+      this.pushAudioBuffer(left, right);
   }
 
   /**
@@ -80,7 +80,7 @@ export class AudioManager {
    * @param leftChannel Float32 array representing Left DAC PCM
    * @param rightChannel Float32 array representing Right DAC PCM
    */
-  public pushAudioBuffer(leftChannel: Float32Array<ArrayBuffer>, rightChannel: Float32Array<ArrayBuffer>): void {
+  public pushAudioBuffer(leftChannel: Float32Array, rightChannel: Float32Array): void {
     if (!this.audioContext) return;
 
     // Create a new AudioBuffer to hold this frame's audio
