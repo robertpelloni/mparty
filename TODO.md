@@ -117,3 +117,8 @@
 
 - [x] Update `NetplayManager.ts` to implement a `syncRemoteInputs()` method for resolving WebRTC payload mismatches.
 - [x] Add a `Mock Client Desync` button to `NetworkControl.tsx` to visualize the sync loop handling unexpected latency drops.
+
+## WebAssembly Universal Save State Integration (v0.34.0)
+
+- [x] Update `SaveStateManager.ts` to fully integrate the `extractUniversalState` loop into local IndexedDB payload syncing.
+- [x] Add explicit logs tracking when translation thresholds (e.g. cross-generation state conversions) trigger within `SaveStateControl.tsx`.
