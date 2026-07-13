@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.35.0]
+### Added
+- Created `tools/test_validation_layer.py` test suite to specifically target `tools/verify_architecture.py` failure modes.
+- Refactored `tools/verify_architecture.py` to handle edge-case failure modes gracefully (e.g., missing files, empty files, unreadable files, directories as files).
 ## [0.31.0]
 ### Added
 - Implemented SHA-256 hash checking logic into `texture_converter.py` and `model_extractor.py` to cache file signatures and avoid redundant extractions during continuous AI decompilation loops.
