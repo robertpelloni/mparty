@@ -129,3 +129,10 @@
 - [x] Refactor `tools/verify_architecture.py` to handle edge-case failure modes gracefully.
 
 - [x] Complete pre-commit and submit workflow for validation layer update.
+
+## API Hardening
+
+- [x] Create a new route `/api/stream/route.ts` to implement basic streaming payload stubs.
+- [x] Integrate rate limiting into `/api/stream/route.ts` to reject payloads exceeding frequency thresholds.
+- [x] Implement robust object validation mapping to ensure strictly structured action payloads (e.g., rejecting missing actions or non-array data).
+- [x] Create automated integration tests `tests/stream.spec.ts` for the newly created stream edge cases.
