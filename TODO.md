@@ -136,3 +136,8 @@
 - [x] Integrate rate limiting into `/api/stream/route.ts` to reject payloads exceeding frequency thresholds.
 - [x] Implement robust object validation mapping to ensure strictly structured action payloads (e.g., rejecting missing actions or non-array data).
 - [x] Create automated integration tests `tests/stream.spec.ts` for the newly created stream edge cases.
+
+## Input Validation Hardening
+
+- [x] Create a test suite for `InputManager` edge cases (e.g., NaN joystick inputs or out-of-bound values).
+- [x] Refactor `InputManager.ts` to cleanly cap input parameters and filter out NaNs.

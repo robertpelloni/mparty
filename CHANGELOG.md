@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.36.0]
+### Added
+- Added `tests/InputManager.spec.ts` test suite to specifically target analog joystick edge-cases (like out-of-bounds inputs or NaN crashes).
+- Refactored `InputManager.ts` to implement resilient boundary clamping, keeping output inputs strictly signed 8-bit (-128 to +127).
 ## [0.35.0]
 ### Added
 - Created `tools/test_validation_layer.py` test suite to specifically target `tools/verify_architecture.py` failure modes.
