@@ -141,3 +141,8 @@
 
 - [x] Create a test suite for `InputManager` edge cases (e.g., NaN joystick inputs or out-of-bound values).
 - [x] Refactor `InputManager.ts` to cleanly cap input parameters and filter out NaNs.
+
+## Netplay Manager Refinements
+
+- [x] Prioritize writing targeted unit tests `tests/NetplayManager.spec.ts` for newly added async rollback handlers.
+- [x] Ensure rollback buffer sizes are maintained effectively without leaking historical states.

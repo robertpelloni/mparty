@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.37.0]
+### Added
+- Added `tests/NetplayManager.spec.ts` test suite to assert the rollback buffer limits and desync flag conditions under simulated latency.
+- Validated `NetplayManager.ts` async handlers to ensure edge-case prediction frames are dropped properly to avoid memory leaks.
 ## [0.36.0]
 ### Added
 - Added `tests/InputManager.spec.ts` test suite to specifically target analog joystick edge-cases (like out-of-bounds inputs or NaN crashes).
