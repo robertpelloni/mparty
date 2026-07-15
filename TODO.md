@@ -155,3 +155,7 @@
 ## API Hardening
 
 - [x] Create automated integration tests `tests/api_roms.spec.ts` for the existing `/api/roms` endpoint to ensure metadata stability.
+
+## Resilience Post-Mortem
+
+- A resilience review determined the standard Next.js API endpoints are not equipped to handle large bursts of parallel concurrent data payloads locally via standard request mapping. Future proposals must prioritize migrating the data stream mapping to a pure WebRTC UDP socket layer or dedicated persistent Node.js WebSockets to bypass typical HTTP bottlenecks.

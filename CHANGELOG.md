@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.40.0]
+### Added
+- Completed system load testing resilience evaluation. Added resilience proposal to `TODO.md` recommending migrating high-frequency stream requests away from HTTP routes to raw WebRTC data channels to prevent request timeouts under extreme simulation loads.
 ## [0.39.0]
 ### Added
 - Added `tests/api_roms.spec.ts` test suite to assert the stability of the `/api/roms` endpoint mapping N64 and GameCube title metadata payloads correctly.
