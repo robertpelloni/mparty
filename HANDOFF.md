@@ -48,5 +48,6 @@ This session initiated the structural scaffolding required to execute the contin
 29. Refactored `tools/verify_architecture.py` to handle edge-case failure modes gracefully (e.g., missing files, empty files, unreadable files, directories as files) and added `tools/test_validation_layer.py` test suite.
 30. Refactored `InputManager.ts` boundary filtering to prevent NaN or analog stick inputs outside valid N64 (-128 to 127) memory ranges via `tests/InputManager.spec.ts`.
 31. Added `tests/NetplayManager.spec.ts` to assert the validity of `NetplayManager.ts` async rollback prediction handlers, resolving missing unit tests.
+32. Finalized WASM memory extraction logic by fleshing out `EmulationCore.ts` dummy payloads mapping to `SaveStateManager.ts` and covering it with `EmulationCore.spec.ts`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

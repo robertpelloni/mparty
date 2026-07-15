@@ -30,10 +30,14 @@ export class EmulationCore {
   private animationFrameId: number = 0;
   private currentPlatform: EmulatorType = 'N64';
 
+  // Mock WASM memory layer for integration testing
+  private mockWasmMemory: Uint8Array;
+
   constructor(private canvasElementId: string) {
     this.inputManager = new InputManager();
     this.audioManager = new AudioManager();
     this.saveManager = new SaveStateManager();
+    this.mockWasmMemory = new Uint8Array(1024 * 1024 * 8); // 8MB mock N64 RDRAM
   }
 
   /**
@@ -77,9 +81,9 @@ export class EmulationCore {
         console.log(`EmulationCore: Branched to Dolphin WASM for ${meta.platform} target.`);
     } else {
         // N64 Logic
-        // TODO: In a real implementation, this would involve calling the Emscripten Module
-        // e.g., Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
-        //       Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
+        console.log(`EmulationCore: Injecting ROM into mock WASM filesystem...`);
+        // Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
+        // Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
     }
 
     this.isLoaded = true;
@@ -150,10 +154,10 @@ export class EmulationCore {
   public async triggerSaveState(gameId: string): Promise<void> {
     if (!this.isLoaded) return;
     console.log(`EmulationCore: Triggering memory snapshot for ${gameId}...`);
-    // TODO: Extract raw HEAPU8 buffer from Emscripten
-    // const memSnapshot = new Uint8Array(Module.HEAPU8.buffer);
-    const mockSnapshot = new Uint8Array(1024); // Dummy 1KB snapshot
-    await this.saveManager.saveState(gameId, mockSnapshot);
+
+    // Extract raw buffer from Emscripten memory (Mocked)
+    const memSnapshot = new Uint8Array(this.mockWasmMemory);
+    await this.saveManager.saveState(gameId, memSnapshot);
   }
 
   /**
@@ -166,8 +170,10 @@ export class EmulationCore {
 
     if (savedState) {
       console.log(`EmulationCore: Injecting ${savedState.length} bytes into WASM heap...`);
-      // TODO: Inject back into Emscripten memory boundary
-      // Module.HEAPU8.set(savedState);
+      // Inject back into Emscripten memory boundary (Mocked)
+      this.mockWasmMemory.set(savedState);
+    } else {
+      console.warn(`EmulationCore: No saved state found to load for ${gameId}.`);
     }
   }
 }

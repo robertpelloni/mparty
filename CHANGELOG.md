@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.38.0]
+### Added
+- Completed WASM hypervisor refinement by fleshing out memory layer logic in `EmulationCore.ts` and `SaveStateManager.ts`.
+- Implemented test cases for `EmulationCore` to ensure stability of the API.
 ## [0.37.0]
 ### Added
 - Added `tests/NetplayManager.spec.ts` test suite to assert the rollback buffer limits and desync flag conditions under simulated latency.

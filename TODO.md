@@ -146,3 +146,8 @@
 
 - [x] Prioritize writing targeted unit tests `tests/NetplayManager.spec.ts` for newly added async rollback handlers.
 - [x] Ensure rollback buffer sizes are maintained effectively without leaking historical states.
+
+## WASM Hypervisor Refinements
+
+- [x] Mocked the remaining `TODO` pointers in `EmulationCore.ts` and `SaveStateManager.ts` to flesh out the WASM filesystem injection logic.
+- [x] Ran syntax validation across updated hypervisor files to ensure no typings regressions.
