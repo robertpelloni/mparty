@@ -151,3 +151,7 @@
 
 - [x] Mocked the remaining `TODO` pointers in `EmulationCore.ts` and `SaveStateManager.ts` to flesh out the WASM filesystem injection logic.
 - [x] Ran syntax validation across updated hypervisor files to ensure no typings regressions.
+
+## API Hardening
+
+- [x] Create automated integration tests `tests/api_roms.spec.ts` for the existing `/api/roms` endpoint to ensure metadata stability.

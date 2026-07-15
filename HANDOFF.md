@@ -49,5 +49,6 @@ This session initiated the structural scaffolding required to execute the contin
 30. Refactored `InputManager.ts` boundary filtering to prevent NaN or analog stick inputs outside valid N64 (-128 to 127) memory ranges via `tests/InputManager.spec.ts`.
 31. Added `tests/NetplayManager.spec.ts` to assert the validity of `NetplayManager.ts` async rollback prediction handlers, resolving missing unit tests.
 32. Finalized WASM memory extraction logic by fleshing out `EmulationCore.ts` dummy payloads mapping to `SaveStateManager.ts` and covering it with `EmulationCore.spec.ts`.
+33. Implemented `tests/api_roms.spec.ts` test suite to assert the stability of the `/api/roms` endpoint.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

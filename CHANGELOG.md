@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.39.0]
+### Added
+- Added `tests/api_roms.spec.ts` test suite to assert the stability of the `/api/roms` endpoint mapping N64 and GameCube title metadata payloads correctly.
 ## [0.38.0]
 ### Added
 - Completed WASM hypervisor refinement by fleshing out memory layer logic in `EmulationCore.ts` and `SaveStateManager.ts`.
