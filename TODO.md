@@ -164,3 +164,5 @@
 
 - [x] Harden `/api/stream/route.ts` against extremely large payloads and unmapped events (e.g. DoS vector protection).
 - [x] Create integration tests `tests/stream_async.spec.ts` for boundary checks.
+
+- [x] Integrate `tools/test_ai_loop.py` into the continuous integration testing pipeline.

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.42.0]
+### Added
+- Integrated `tools/test_ai_loop.py` into the continuous integration testing pipeline via `tools/test_pipeline.py`.
+- Added execution of `tools/test_validation_layer.py` into the continuous integration testing pipeline.
 ## [0.41.0]
 ### Added
 - Hardened the `/api/stream` endpoint with boundary checks for `MAX_PAYLOAD_DATA_LENGTH` (1000 items) to prevent potential DoS through excessively large array payloads.

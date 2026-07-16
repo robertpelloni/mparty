@@ -52,5 +52,6 @@ This session initiated the structural scaffolding required to execute the contin
 33. Implemented `tests/api_roms.spec.ts` test suite to assert the stability of the `/api/roms` endpoint.
 34. Conducted stress testing on `/api/stream` endpoint, revealing HTTP bottlenecking under high concurrent loads; appended resilience migration strategy to `TODO.md`.
 35. Validated edge cases in `/api/stream` by introducing explicit action allow-lists and array length bounds (DoS prevention), asserting with `tests/stream_async.spec.ts`.
+36. Hardened testing environment by appending `tools/test_validation_layer.py` and `tools/test_ai_loop.py` to `tools/test_pipeline.py`.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

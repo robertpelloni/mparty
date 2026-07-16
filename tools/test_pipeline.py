@@ -25,10 +25,16 @@ def main():
     # 1. Architecture Verification
     run_step("Verify Architecture", "python3 tools/verify_architecture.py")
 
-    # 2. Generate Mock ROM
+    # 2. Validation Layer Tests
+    run_step("Test Validation Layer", "python3 tools/test_validation_layer.py")
+
+    # 3. AI Loop Matcher Tests
+    run_step("Test AI Loop", "python3 tools/test_ai_loop.py")
+
+    # 4. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
-    # 3. Generate Splat Yaml
+    # 5. Generate Splat Yaml
     run_step("Generate Splat config", "python3 tools/generate_splat.py test_baserom.z64 --out test_splat.yaml")
 
     # Check if yaml was created
