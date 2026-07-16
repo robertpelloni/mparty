@@ -159,3 +159,8 @@
 ## Resilience Post-Mortem
 
 - A resilience review determined the standard Next.js API endpoints are not equipped to handle large bursts of parallel concurrent data payloads locally via standard request mapping. Future proposals must prioritize migrating the data stream mapping to a pure WebRTC UDP socket layer or dedicated persistent Node.js WebSockets to bypass typical HTTP bottlenecks.
+
+## Data Validation Layer Updates
+
+- [x] Harden `/api/stream/route.ts` against extremely large payloads and unmapped events (e.g. DoS vector protection).
+- [x] Create integration tests `tests/stream_async.spec.ts` for boundary checks.

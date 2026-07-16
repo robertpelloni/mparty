@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.41.0]
+### Added
+- Hardened the `/api/stream` endpoint with boundary checks for `MAX_PAYLOAD_DATA_LENGTH` (1000 items) to prevent potential DoS through excessively large array payloads.
+- Added strict `action` string allow-listing (`sync_input`, `ping`, `save_state`, `load_state`) to reject unmapped stream actions.
+- Introduced `tests/stream_async.spec.ts` for rigorous validation edge cases.
 ## [0.40.0]
 ### Added
 - Completed system load testing resilience evaluation. Added resilience proposal to `TODO.md` recommending migrating high-frequency stream requests away from HTTP routes to raw WebRTC data channels to prevent request timeouts under extreme simulation loads.

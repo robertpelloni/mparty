@@ -6,6 +6,7 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 100; // max requests per window
+const MAX_PAYLOAD_DATA_LENGTH = 1000; // Maximum allowed array length
 
 export async function POST(request: Request) {
     const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -38,8 +39,17 @@ export async function POST(request: Request) {
              return NextResponse.json({ error: 'Bad Request', message: 'Missing or invalid "action" field.' }, { status: 400 });
         }
 
+        const validActions = ['sync_input', 'ping', 'save_state', 'load_state'];
+        if (!validActions.includes(payload.action)) {
+             return NextResponse.json({ error: 'Bad Request', message: 'Unsupported action.' }, { status: 400 });
+        }
+
         if (!payload.data || !Array.isArray(payload.data)) {
             return NextResponse.json({ error: 'Bad Request', message: 'Missing or invalid "data" array.' }, { status: 400 });
+        }
+
+        if (payload.data.length > MAX_PAYLOAD_DATA_LENGTH) {
+            return NextResponse.json({ error: 'Payload Too Large', message: 'Data array exceeds maximum allowed length.' }, { status: 413 });
         }
 
         // Process stream
