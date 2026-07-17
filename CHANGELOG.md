@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.44.0]
+### Added
+- Added `tests/validatePayload.spec.ts` test suite to assert boundary conditions and failure modes (nulls, object validation, type mismatches) within the `/api/stream` JSON parsing layer.
 ## [0.43.0]
 ### Added
 - Hardened `tools/test_ai_loop.py` to validate edge-cases in the AI compilation loop, including missing API keys and persistent matcher failures.

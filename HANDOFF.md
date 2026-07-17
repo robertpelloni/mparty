@@ -54,5 +54,6 @@ This session initiated the structural scaffolding required to execute the contin
 35. Validated edge cases in `/api/stream` by introducing explicit action allow-lists and array length bounds (DoS prevention), asserting with `tests/stream_async.spec.ts`.
 36. Hardened testing environment by appending `tools/test_validation_layer.py` and `tools/test_ai_loop.py` to `tools/test_pipeline.py`.
 37. Expanded AI Loop validation by adding missing API key bounds and matcher failure modes to `tools/test_ai_loop.py`.
+38. Evaluated API payload parsing boundaries by creating a targeted unit test matrix (`tests/validatePayload.spec.ts`) asserting against null, numeric overrides, and malformed object injections.
 
 *CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*

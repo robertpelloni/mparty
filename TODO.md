@@ -172,3 +172,7 @@
 - [ ] Investigate modifying `tools/ai_loop.py` to directly hook into an LLM via the mock API layer to self-correct `.c` files during compilation.
 
 - [x] Harden `tools/test_ai_loop.py` to test LLM mock iteration failures and missing API key conditions.
+
+## Data Validation Layer Updates
+
+- [x] Implemented targeted unit tests for `validatePayload()` via `tests/validatePayload.spec.ts` capturing boundary checks on the new async data flow (e.g., nulls, numeric overrides, and nested references).
