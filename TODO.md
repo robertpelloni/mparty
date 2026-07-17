@@ -166,3 +166,9 @@
 - [x] Create integration tests `tests/stream_async.spec.ts` for boundary checks.
 
 - [x] Integrate `tools/test_ai_loop.py` into the continuous integration testing pipeline.
+
+## Automated AI Matching Expansion
+
+- [ ] Investigate modifying `tools/ai_loop.py` to directly hook into an LLM via the mock API layer to self-correct `.c` files during compilation.
+
+- [x] Harden `tools/test_ai_loop.py` to test LLM mock iteration failures and missing API key conditions.

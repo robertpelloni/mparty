@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.43.0]
+### Added
+- Hardened `tools/test_ai_loop.py` to validate edge-cases in the AI compilation loop, including missing API keys and persistent matcher failures.
 ## [0.42.0]
 ### Added
 - Integrated `tools/test_ai_loop.py` into the continuous integration testing pipeline via `tools/test_pipeline.py`.
