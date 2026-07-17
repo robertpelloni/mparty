@@ -12,7 +12,12 @@ import sys
 import os
 import argparse
 
+def check_rom_header(rom_path):
+    print(f"Mock checking N64 header 0x80371240 for {rom_path}...")
+    return True
+
 def generate_yaml(rom_path, output_path="splat.yaml"):
+    check_rom_header(rom_path)
     basename = os.path.basename(rom_path).replace('.z64', '').replace('.v64', '').replace('.n64', '')
     if not basename:
         basename = "target_rom"
