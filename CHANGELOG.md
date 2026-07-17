@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.45.0]
+### Added
+- Added `tests/Fast3DTranslator.spec.ts` test suite to assert boundary conditions and failure modes (vertex cache array bounds, null index pointers) within the Fast3D to WebGL middleware.
 ## [0.44.0]
 ### Added
 - Added `tests/validatePayload.spec.ts` test suite to assert boundary conditions and failure modes (nulls, object validation, type mismatches) within the `/api/stream` JSON parsing layer.
