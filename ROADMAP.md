@@ -17,3 +17,7 @@
 4. **Engine Expansion (Future Consoles):**
    - Expand tools to handle GameCube/Wii ISO formats (e.g., Dolphin WASM).
    - Provide standard web APIs for interacting with different console emulators within a unified "Mario Party" web hub.
+
+5. **Unified Dashboard & Subsystem Orchestration (v0.46.0 Completed):**
+   - Consolidated single-page dashboard organizing Emulation, Netplay, Save States, Input, Audio, Graphics Translation, Dolphin ISO Mounting, and Decompilation pipelines.
+   - Comprehensive system tray server process control with quit and restart capabilities.
