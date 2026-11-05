@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.48.0]
+### Added
+- Expanded `NetplayManager.ts` with direct WebRTC DataChannel packet transmission (`sendDataPacket`) and subscription handlers (`onDataPacket`) to implement low-latency UDP message transport, addressing HTTP bottlenecking under high concurrent payload loads.
+- Added unit tests in `web/tests/NetplayManager.spec.ts` to assert packet transmission states and event callback dispatches.
+
 ## [0.47.0]
 ### Added
 - Expanded `tools/ai_loop.py` with multi-step iterative LLM self-correction: feeds compiler diagnostics and binary-diff output directly back into the LLM prompt over configurable retries (`--max-retries`).

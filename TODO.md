@@ -158,7 +158,7 @@
 
 ## Resilience Post-Mortem
 
-- A resilience review determined the standard Next.js API endpoints are not equipped to handle large bursts of parallel concurrent data payloads locally via standard request mapping. Future proposals must prioritize migrating the data stream mapping to a pure WebRTC UDP socket layer or dedicated persistent Node.js WebSockets to bypass typical HTTP bottlenecks.
+- [x] Migrated high-frequency stream requests away from HTTP routes to raw WebRTC data channels in `NetplayManager.ts` (`sendDataPacket`, `onDataPacket`) to prevent request timeouts under extreme simulation loads.
 
 ## Data Validation Layer Updates
 
@@ -197,3 +197,8 @@
 - [x] Implemented multi-step iterative LLM self-correction loop in `tools/ai_loop.py` feeding compiler/matcher diagnostics into the prompt.
 - [x] Added unit test coverage for multi-step self-correction in `tools/test_ai_loop.py`.
 - [x] Integrated configurable API URLs and `--max-retries` parameter.
+
+## WebRTC DataChannel Streaming Resilience (v0.48.0)
+
+- [x] Implemented direct WebRTC DataChannel packet transmission and reception in `NetplayManager.ts` (`sendDataPacket`, `onDataPacket`).
+- [x] Added unit tests in `NetplayManager.spec.ts` covering packet streaming and message dispatcher handlers.

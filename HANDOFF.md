@@ -6,7 +6,7 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.47.0 (tracked in `VERSION.md`)
+- **Version:** v0.48.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
 1. **Consolidated 4-Tier Dashboard UI (`web/src/app/page.tsx`):**
@@ -28,11 +28,14 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 5. **AI Loop Multi-Step Iterative Self-Correction (`tools/ai_loop.py` & `tools/test_ai_loop.py`):**
    - Iterative feedback loop feeding compilation and binary-diff diagnostics directly back into subsequent LLM prompts up to configurable `--max-retries`.
    - Added test coverage in `tools/test_ai_loop.py` asserting multi-step self-correction convergence.
-6. **CI Environment Hardening (`.github/workflows/ci.yml`):**
+6. **WebRTC DataChannel Streaming Resilience (`web/src/lib/NetplayManager.ts`):**
+   - Implemented direct WebRTC DataChannel packet transmission and reception (`sendDataPacket`, `onDataPacket`) to bypass HTTP streaming bottlenecks under high loads.
+   - Added unit test coverage in `web/tests/NetplayManager.spec.ts`.
+7. **CI Environment Hardening (`.github/workflows/ci.yml`):**
    - Configured Node 22 (LTS), resolved npm dependencies, removed duplicate PostCSS configuration (`web/postcss.config.mjs`), and gitignored screenshots.
 
 ### Verification Status
 - `python3 tools/verify_architecture.py`: **PASS**
 - `python3 tools/test_pipeline.py`: **PASS** (all integration steps, validation layers, and AI loop tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 4 tests pass)
-- `cd web && npx playwright test`: **PASS** (all 29 E2E tests pass)
+- `cd web && npx playwright test`: **PASS** (all 31 E2E and unit tests pass)
