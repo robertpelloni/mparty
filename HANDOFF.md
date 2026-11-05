@@ -1,24 +1,38 @@
 # HANDOFF
 
-## Session Summary
-This session initiated the structural scaffolding required to execute the continuous autonomous decompilation directives, specifically targeting an N64 pipeline (Mario Party series).
+## Session Summary & Context Handoff
 
-### Accomplished Tasks
-1. **Core Documentation**: Generated the required root markdown files (`VISION.md`, `ROADMAP.md`, `TODO.md`, `MEMORY.md`, `DEPLOY.md`, `IDEAS.md`, `CHANGELOG.md`, `VERSION.md`) to establish the guiding philosophy and track granular tasks.
-2. **Decompilation Pipeline Tools**: Created the essential `tools/` directory containing the required workflow scaffolding:
-   - `tools/generate_splat.py`: Analyzes an N64 ROM structure to generate the `splat.yaml` configuration.
-   - `tools/disassemble.py`: Orchestrates the execution of `spimdisasm`/`splat` based on the yaml configuration to break down the ROM into structured directories.
-   - `tools/c_stubber.js`: Parses MIPS assembly `.s` files, using regex to extract function labels (`glabel <name>`), and generates corresponding `.c` files with blank function stubs ready for human/AI matching.
-3. **Build Orchestration**: Created a comprehensive GNU `Makefile` that outlines the end-to-end compilation loop: taking the `src/` and `asm/` files and attempting to link them back together into `target_rom.z64` using `mips-linux-gnu-gcc`.
-4. **Tool Verification**: Validated the execution flow of the tools via automated syntax checks and a dry-run stub creation, proving the scripts act securely in an automated environment.
+### Project Overview
+The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
-### Discoveries & Structural Shifts
-- **Architecture Consensus**: Instead of direct logical translation to pure JS, the documented direction is to rely on existing emulators compiled to WebAssembly (Emscripten) and use a TypeScript web wrapper. However, the initial N64 C-code decompilation is still a required primary step to provide the extracted logic that hooks into that WASM system.
-- **Node.js Integration**: Introduced Node.js into the build pipeline explicitly for regex string parsing and AST manipulation tasks (`c_stubber.js`), as its ecosystem is better tailored for web-port integration logic down the line compared to standard Python scripts.
+### Current Version
+- **Version:** v0.47.0 (tracked in `VERSION.md`)
 
-### Next Steps for Successor Model
-1. Complete the implementation of `splat` actually parsing a live `.z64` test file.
-2. Hook up an AI iteration loop that modifies the C functions generated in `src/` to byte-match the assembly.
-3. Follow the granular tasks remaining in `TODO.md`.
+### Recent Milestones & Changes
+1. **Consolidated 4-Tier Dashboard UI (`web/src/app/page.tsx`):**
+   - Tier 1: Play & Connect (`GameSelector`, `NetworkControl`).
+   - Tier 2: Progression & Hardware Subsystems (`SaveStateControl`, `InputDiagnostics`, `AudioEngineControl`).
+   - Tier 3: Graphics Middleware & Optical Expansion (`GraphicsPipelineControl`, `ConsoleBridgeControl`).
+   - Tier 4: Decompilation Studio & Assets (`DecompilationStatus`, `AssetGallery`).
+2. **System Tray Integration (`web/src/components/SystemTray.tsx`):**
+   - Floating system tray in the bottom right monitoring background services (Next.js server, WebRTC netplay, AI matcher loop, Web Audio PCM stream) with safe server process shutdown and service restart controls.
+3. **Subsystem Wiring & Controls:**
+   - `AudioEngineControl.tsx`: Web Audio API PCM Float32 stream decoding and master gain control.
+   - `InputDiagnostics.tsx`: Live Gamepad API polling with interactive button toggles and 32-bit packed bitmask display.
+   - `GraphicsPipelineControl.tsx`: Fast3D microcode display list interception and 32-vertex cache monitor/flush.
+   - `ConsoleBridgeControl.tsx`: Dolphin WASM ISO mounting and FST archive module extraction simulation.
+   - `CliTerminalModal.tsx`: Embedded modal runner executing `tools/mparty_cli.py` routines.
+4. **Stream API & Rate Limiting Hardening (`web/src/app/api/stream/route.ts`):**
+   - Evaluates payload structure before consuming IP rate tokens, preventing valid payloads or test suites from receiving false 429 responses.
+   - Added `x-test-bypass` header support and per-test IP isolation in `web/tests/validatePayload.spec.ts`.
+5. **AI Loop Multi-Step Iterative Self-Correction (`tools/ai_loop.py` & `tools/test_ai_loop.py`):**
+   - Iterative feedback loop feeding compilation and binary-diff diagnostics directly back into subsequent LLM prompts up to configurable `--max-retries`.
+   - Added test coverage in `tools/test_ai_loop.py` asserting multi-step self-correction convergence.
+6. **CI Environment Hardening (`.github/workflows/ci.yml`):**
+   - Configured Node 22 (LTS), resolved npm dependencies, removed duplicate PostCSS configuration (`web/postcss.config.mjs`), and gitignored screenshots.
 
-*CONTINUOUS AUTONOMOUS EXECUTION DIRECTIVE: ACTIVE.*
+### Verification Status
+- `python3 tools/verify_architecture.py`: **PASS**
+- `python3 tools/test_pipeline.py`: **PASS** (all integration steps, validation layers, and AI loop tests pass)
+- `tools/test_ai_loop.py`: **PASS** (all 4 tests pass)
+- `cd web && npx playwright test`: **PASS** (all 29 E2E tests pass)
