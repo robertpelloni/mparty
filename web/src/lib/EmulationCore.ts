@@ -9,6 +9,7 @@
 import { InputManager } from './InputManager';
 import { AudioManager } from './AudioManager';
 import { SaveStateManager } from './SaveStateManager';
+import { GameCubeEmulator } from './GameCubeEmulator';
 
 export type EmulatorType = 'N64' | 'GameCube' | 'Wii';
 
@@ -25,12 +26,18 @@ export class EmulationCore {
   private inputManager: InputManager;
   private audioManager: AudioManager;
   private saveManager: SaveStateManager;
+  private gamecubeCore: GameCubeEmulator | null = null;
   private animationFrameId: number = 0;
+  private currentPlatform: EmulatorType = 'N64';
+
+  // Mock WASM memory layer for integration testing
+  private mockWasmMemory: Uint8Array;
 
   constructor(private canvasElementId: string) {
     this.inputManager = new InputManager();
     this.audioManager = new AudioManager();
     this.saveManager = new SaveStateManager();
+    this.mockWasmMemory = new Uint8Array(1024 * 1024 * 8); // 8MB mock N64 RDRAM
   }
 
   /**
@@ -63,12 +70,21 @@ export class EmulationCore {
     console.log(`EmulationCore: Attempting to load ${meta.title} (${meta.platform})...`);
     console.log(`EmulationCore: Buffer size is ${romBuffer.byteLength} bytes.`);
 
-    // TODO: In a real implementation, this would involve calling the Emscripten Module
-    // e.g., Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
-    //       Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
+    this.currentPlatform = meta.platform;
 
     // Simulate async load time
     await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (this.currentPlatform === 'GameCube' || this.currentPlatform === 'Wii') {
+        this.gamecubeCore = new GameCubeEmulator();
+        this.gamecubeCore.loadISO(meta.id);
+        console.log(`EmulationCore: Branched to Dolphin WASM for ${meta.platform} target.`);
+    } else {
+        // N64 Logic
+        console.log(`EmulationCore: Injecting ROM into mock WASM filesystem...`);
+        // Module.FS.writeFile('/target.z64', new Uint8Array(romBuffer));
+        // Module.ccall('loadROM', 'number', ['string'], ['/target.z64']);
+    }
 
     this.isLoaded = true;
     console.log(`EmulationCore: ${meta.title} successfully loaded into WASM memory space.`);
@@ -81,11 +97,17 @@ export class EmulationCore {
     if (!this.isLoaded) {
       throw new Error('EmulationCore: Cannot start, no ROM is loaded.');
     }
-    console.log('EmulationCore: Starting WASM execution loop...');
+    console.log(`EmulationCore: Starting WASM execution loop for ${this.currentPlatform}...`);
 
     this.inputManager.attachListeners();
     this.audioManager.initialize();
-    this.executionLoop();
+
+    if (this.currentPlatform === 'GameCube' || this.currentPlatform === 'Wii') {
+        console.log(`EmulationCore: Handing off event loop to Dolphin hypervisor.`);
+        // Note: Dolphin WASM would have its own runloop here
+    } else {
+        this.executionLoop();
+    }
   }
 
   private executionLoop = (): void => {
@@ -105,6 +127,10 @@ export class EmulationCore {
     // const leftBuffer = new Float32Array(Module.HEAPF32.buffer, leftAudioPtr, audioLength);
     // const rightBuffer = new Float32Array(Module.HEAPF32.buffer, rightAudioPtr, audioLength);
     // this.audioManager.pushAudioBuffer(leftBuffer, rightBuffer);
+
+    // 4. Hook raw PCM stream decode mock
+    const mockPcmBuffer = new ArrayBuffer(1024); // Dummy 1KB PCM payload
+    this.audioManager.decodePCMStream(mockPcmBuffer);
 
     this.animationFrameId = requestAnimationFrame(this.executionLoop);
   };
@@ -128,10 +154,10 @@ export class EmulationCore {
   public async triggerSaveState(gameId: string): Promise<void> {
     if (!this.isLoaded) return;
     console.log(`EmulationCore: Triggering memory snapshot for ${gameId}...`);
-    // TODO: Extract raw HEAPU8 buffer from Emscripten
-    // const memSnapshot = new Uint8Array(Module.HEAPU8.buffer);
-    const mockSnapshot = new Uint8Array(1024); // Dummy 1KB snapshot
-    await this.saveManager.saveState(gameId, mockSnapshot);
+
+    // Extract raw buffer from Emscripten memory (Mocked)
+    const memSnapshot = new Uint8Array(this.mockWasmMemory);
+    await this.saveManager.saveState(gameId, memSnapshot);
   }
 
   /**
@@ -144,8 +170,10 @@ export class EmulationCore {
 
     if (savedState) {
       console.log(`EmulationCore: Injecting ${savedState.length} bytes into WASM heap...`);
-      // TODO: Inject back into Emscripten memory boundary
-      // Module.HEAPU8.set(savedState);
+      // Inject back into Emscripten memory boundary (Mocked)
+      this.mockWasmMemory.set(savedState);
+    } else {
+      console.warn(`EmulationCore: No saved state found to load for ${gameId}.`);
     }
   }
 }

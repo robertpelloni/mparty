@@ -40,6 +40,29 @@ export class AudioManager {
   }
 
   /**
+   * Decodes an arbitrary raw PCM byte stream array into valid Web Audio Float32 arrays.
+   * Useful for loading external mock legacy audio banks like MUSYX.
+   */
+  public decodePCMStream(rawPCMBuffer: ArrayBuffer): void {
+      if (!this.audioContext) return;
+      console.log(`AudioManager: Decoding ${rawPCMBuffer.byteLength} bytes of raw PCM streams to internal queue.`);
+
+      // Mock logic to handle raw interleaved PCM data
+      const floatView = new Float32Array(rawPCMBuffer);
+      const halfLength = Math.floor(floatView.length / 2);
+
+      const left = new Float32Array(halfLength);
+      const right = new Float32Array(halfLength);
+
+      for(let i = 0; i < halfLength; i++) {
+          left[i] = floatView[i * 2];
+          right[i] = floatView[i * 2 + 1];
+      }
+
+      this.pushAudioBuffer(left, right);
+  }
+
+  /**
    * Shuts down the audio context and clears the buffer.
    */
   public close(): void {
@@ -57,7 +80,7 @@ export class AudioManager {
    * @param leftChannel Float32 array representing Left DAC PCM
    * @param rightChannel Float32 array representing Right DAC PCM
    */
-  public pushAudioBuffer(leftChannel: Float32Array<ArrayBuffer>, rightChannel: Float32Array<ArrayBuffer>): void {
+  public pushAudioBuffer(leftChannel: Float32Array, rightChannel: Float32Array): void {
     if (!this.audioContext) return;
 
     // Create a new AudioBuffer to hold this frame's audio

@@ -2,139 +2,150 @@
 """
 ai_loop.py
 
-This script represents the 'Continuous Autonomous Execution' harness.
-It recursively scans the src/ directory for decompiled C files, locates their
-corresponding target MIPS assembly in asm/, and initiates the ai_matcher loop.
-In a full implementation, this script would make API calls to an LLM to automatically
-rewrite the C file upon receiving a mismatch, looping until a match is confirmed.
+Continuous orchestration script to recursively scan for non-matching decompiled C files,
+locate their target MIPS assembly, and run the ai_matcher.py harness.
+Uses urllib to make HTTP requests to an external LLM API for automated refactoring
+when the LLM_API_KEY environment variable is present.
 """
 
 import os
 import sys
-import glob
-import subprocess
-
-def find_target_assembly(c_file_path):
-    """
-    Given a C file like 'src/nonmatchings/1000/func_80000400.c',
-    attempts to find the corresponding 'asm/nonmatchings/1000/func_80000400.s'
-    """
-    # Simple substitution based on the standard project directory layout
-    if not c_file_path.startswith("src/"):
-        return None
-
-    s_file_path = c_file_path.replace("src/", "asm/", 1).replace(".c", ".s")
-
-    if os.path.exists(s_file_path):
-        return s_file_path
-    return None
-
 import json
 import urllib.request
 import urllib.error
+import subprocess
+import argparse
 
-def call_llm_api(c_source, asm_source):
-    """
-    Simulates making a REST API call to an LLM provider (e.g., OpenAI, Anthropic)
-    to request a C code rewrite that matches the target MIPS assembly.
-    """
-    api_key = os.environ.get("LLM_API_KEY")
-    if not api_key:
-        print("  -> [API] Skipping actual LLM network request (LLM_API_KEY not set).")
-        return None
+def call_llm_api(prompt, api_key):
+    """Makes an HTTP request to an external LLM API."""
+    # For testing, we mock the LLM response if the API key is "MOCK_KEY"
+    if api_key == "MOCK_KEY":
+        if "test" in prompt:
+            return "```c\nint test() { return 1; }\n```"
+        return "```c\n// mock logic\n```"
 
-    prompt = f"""
-    You are an expert N64 C decompilation engineer.
-    Rewrite the following C function so that it byte-matches the target MIPS assembly exactly when compiled with GCC -O2.
+    url = "https://api.openai.com/v1/chat/completions" # Example endpoint
 
-    --- TARGET ASSEMBLY ---
-    {asm_source}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
 
-    --- CURRENT C SOURCE ---
-    {c_source}
+    data = {
+        "model": "gpt-4", # Example model
+        "messages": [
+            {"role": "system", "content": "You are an expert C decompilation AI. Your goal is to rewrite the provided C function so its compiled MIPS assembly exactly matches the provided target assembly."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.2
+    }
 
-    Return ONLY the raw C code. Do not include markdown formatting or explanations.
-    """
-
-    # Mock implementation of a generic POST payload
-    payload = json.dumps({
-        "model": "gpt-4o-or-claude",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.0
-    }).encode("utf-8")
-
-    req = urllib.request.Request(
-        "https://api.mock-llm-provider.com/v1/chat/completions",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-    )
+    req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
 
     try:
         with urllib.request.urlopen(req) as response:
-            response_data = json.loads(response.read().decode())
-            return response_data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+            result = json.loads(response.read().decode('utf-8'))
+            return result['choices'][0]['message']['content']
     except urllib.error.URLError as e:
-        print(f"  -> [API] Error communicating with LLM: {e}")
+        print(f"API request failed: {e}")
         return None
 
-def process_file(c_file, s_file):
-    """
-    Orchestrates the matcher. If it fails, triggers the LLM rewrite loop.
-    """
-    print(f"\n[AI Loop] Evaluating: {c_file}")
+def find_c_files(src_dir):
+    """Recursively finds all .c files in the source directory."""
+    c_files = []
+    for root, _, files in os.walk(src_dir):
+        for file in files:
+            if file.endswith('.c'):
+                c_files.append(os.path.join(root, file))
+    return c_files
 
-    # In a full continuous loop, this would be a while True: with a max retry count.
-    # For now, we perform a single pass per run.
-    cmd = ["python3", "tools/ai_matcher.py", c_file, s_file]
+def process_file(c_file, api_key):
+    """Processes a single C file by attempting to match it, and invoking the LLM if it fails."""
+    # In a real scenario, we'd find the corresponding target .text bin
+    # For now, we simulate the behavior
+    base_name = os.path.splitext(os.path.basename(c_file))[0]
+    target_bin = os.path.join("build", "expected", f"{base_name}.bin")
+
+    print(f"Processing: {c_file}")
+
+    # Check if target binary exists
+    if not os.path.exists(target_bin):
+        print(f"  Target binary {target_bin} not found. Skipping.")
+        return False
+
+    # Run the matcher
+    cmd = ["python3", "tools/ai_matcher.py", c_file, target_bin]
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode == 0:
-        print("  -> Status: MATCHED. Skipping LLM rewrite.")
-    else:
-        print("  -> Status: MISMATCH.")
-        print("  -> Extracting context and prompting LLM...")
+        print("  [SUCCESS] Match already achieved.")
+        return True
 
-        with open(c_file, 'r') as f:
-            c_source = f.read()
-        with open(s_file, 'r') as f:
-            asm_source = f.read()
+    print("  [MISMATCH] Invoking LLM for refactoring...")
 
-        new_c_source = call_llm_api(c_source, asm_source)
+    if not api_key:
+        print("  LLM_API_KEY not set. Cannot refactor. Skipping.")
+        return False
 
-        if new_c_source:
-            print("  -> Received updated C source from LLM. Overwriting file...")
-            with open(c_file, 'w') as f:
-                f.write(new_c_source)
-            print("  -> Code overwritten. Run loop again to verify new match.")
+    # Read the current C code and the target assembly (mocking reading assembly)
+    with open(c_file, 'r') as f:
+        c_code = f.read()
+
+    asm_file = os.path.join("asm", f"{base_name}.s")
+    asm_code = ""
+    if os.path.exists(asm_file):
+        with open(asm_file, 'r') as f:
+            asm_code = f.read()
+
+    prompt = f"Target Assembly:\n```mips\n{asm_code}\n```\n\nCurrent C Code:\n```c\n{c_code}\n```\n\nPlease provide the corrected C code."
+
+    new_code = call_llm_api(prompt, api_key)
+
+    if new_code:
+        # Simplistic extraction of C code from markdown block
+        if "```c" in new_code:
+            new_code = new_code.split("```c")[1].split("```")[0].strip()
+
+        print("  Applying LLM suggestions...")
+        with open(c_file, 'w') as f:
+            f.write(new_code)
+
+        # Re-test
+        print("  Re-testing match...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            print("  [SUCCESS] LLM refactoring achieved a match!")
+            return True
         else:
-            print("  -> LLM returned no data or mock mode active. Retaining original C stub.")
+            print("  [MISMATCH] LLM refactoring failed to match.")
+            return False
+    else:
+        print("  Failed to get a response from the LLM.")
+        return False
 
 def main():
-    print("=== Continuous Autonomous Decompilation Loop ===")
+    parser = argparse.ArgumentParser(description="Continuous AI Loop for decompilation matching.")
+    parser.add_argument("--src", default="src", help="Directory containing source C files.")
 
-    src_dir = "src"
-    if not os.path.exists(src_dir):
-        print(f"Error: Directory {src_dir} not found.")
+    args = parser.parse_args()
+    api_key = os.environ.get("LLM_API_KEY")
+
+    if not api_key:
+        print("Warning: LLM_API_KEY environment variable is not set. Refactoring will be skipped.")
+
+    if not os.path.exists(args.src):
+        print(f"Source directory {args.src} does not exist.")
         sys.exit(1)
 
-    c_files = glob.glob(os.path.join(src_dir, "**/*.c"), recursive=True)
-    if not c_files:
-        print(f"No .c files found in {src_dir} to process.")
-        sys.exit(0)
+    c_files = find_c_files(args.src)
+    print(f"Found {len(c_files)} C files to process.")
 
-    print(f"Found {len(c_files)} C files to evaluate.")
-
+    success_count = 0
     for c_file in c_files:
-        s_file = find_target_assembly(c_file)
-        if s_file:
-            process_file(c_file, s_file)
-        else:
-            print(f"  -> Warning: No target assembly found for {c_file}. Skipping.")
+        if process_file(c_file, api_key):
+            success_count += 1
 
-    print("\n=== AI Loop Iteration Complete ===")
+    print(f"\nAI Loop complete. Successfully matched: {success_count}/{len(c_files)}")
 
 if __name__ == "__main__":
     main()

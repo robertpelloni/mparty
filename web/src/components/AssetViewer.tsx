@@ -10,21 +10,38 @@ function Model({ url }: { url: string }) {
   return <primitive object={obj} />;
 }
 
-export default function AssetViewer() {
+interface AssetViewerProps {
+  url?: string;
+  type?: 'model' | 'texture';
+  name?: string;
+}
+
+export default function AssetViewer({ url = "/models/dummy_geometry.obj", type = 'model', name = "dummy_geometry.obj" }: AssetViewerProps) {
+
+  if (type === 'texture') {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-zinc-900/50">
+        <img
+          src={url}
+          alt={name}
+          className="max-w-full max-h-full object-contain drop-shadow-2xl"
+          style={{ imageRendering: 'pixelated' }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-4xl h-96 bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative shadow-2xl mt-8">
+    <div className="w-full h-full bg-zinc-900 relative shadow-2xl">
       <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1.5} />
         <directionalLight position={[-10, -10, -5]} intensity={0.5} />
         <Suspense fallback={null}>
-          <Model url="/models/dummy_geometry.obj" />
+          <Model url={url} />
         </Suspense>
         <OrbitControls autoRotate enableZoom={true} enablePan={true} />
       </Canvas>
-      <div className="absolute top-4 left-4 text-xs font-mono text-zinc-400 pointer-events-none bg-black/50 px-2 py-1 rounded">
-        Asset Viewer: dummy_geometry.obj
-      </div>
     </div>
   );
 }
