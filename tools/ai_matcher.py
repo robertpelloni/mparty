@@ -2,9 +2,13 @@
 """
 ai_matcher.py
 
-Automated AI decompilation matching harness.
-Compiles C code using gcc cross-compiler (mips-linux-gnu-gcc) with specified optimization flags (e.g., -O2).
-Extracts raw .text binaries via objcopy to compare file hashes against target MIPS assembly.
+An automated orchestration script for decompilation matching.
+It takes a C file and a target assembly file, compiles the C file,
+assembles the target, and compares the resulting object files to
+determine if they are a byte-for-byte match.
+
+Usage:
+  python3 tools/ai_matcher.py <path_to_c_file> <path_to_target_s_file>
 """
 
 import sys
@@ -13,88 +17,98 @@ import subprocess
 import hashlib
 import argparse
 
+# Toolchain definitions based on the project Makefile
+CROSS = "mips-linux-gnu-"
+CC = f"{CROSS}gcc"
+AS = f"{CROSS}as"
+
+# Flags based on standard N64 MIPS III decompilation targets
+CFLAGS = ["-O2", "-G", "0", "-mabi=32", "-mips3", "-fno-PIC", "-Iinclude", "-c"]
+ASFLAGS = ["-mabi=32", "-mips3"]
+
 def get_file_hash(filepath):
-    """Calculates the SHA256 hash of a file."""
-    hasher = hashlib.sha256()
+    """Returns the SHA1 hash of the given file."""
+    h = hashlib.sha1()
     with open(filepath, 'rb') as f:
-        buf = f.read()
-        hasher.update(buf)
-    return hasher.hexdigest()
+        while chunk := f.read(8192):
+            h.update(chunk)
+    return h.hexdigest()
 
-def compile_c_file(c_file, obj_file, compiler="mips-linux-gnu-gcc", opt_flag="-O2"):
-    """Compiles a C file to an object file."""
-    cmd = [compiler, opt_flag, "-c", c_file, "-o", obj_file]
-    print(f"Compiling: {' '.join(cmd)}")
-
-    # Mock compilation if mips-linux-gnu-gcc is not present for test environments
-    if not os.system(f"which {compiler} > /dev/null 2>&1") == 0:
-        print(f"Compiler '{compiler}' not found. Mocking compilation.")
-        with open(obj_file, 'w') as f:
-            f.write("mock obj file")
-        return True
-
+def compile_c(c_file, out_o):
+    """Compiles the C file into an object file."""
+    cmd = [CC] + CFLAGS + [c_file, "-o", out_o]
     try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Compilation failed for {c_file}:\n{e.stderr}")
-        return False
-    except FileNotFoundError:
-        print(f"Compiler '{compiler}' not found. Ensure the toolchain is installed.")
+        print(f"Compilation error for {c_file}:")
+        print(e.stderr.decode('utf-8'))
         return False
 
-def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
-    """Extracts the .text section from an object file to a raw binary."""
-    cmd = [objcopy, "-O", "binary", "-j", ".text", obj_file, text_bin]
-
-    # Mock objcopy if mips-linux-gnu-objcopy is not present
-    if not os.system(f"which {objcopy} > /dev/null 2>&1") == 0:
-        print(f"Objcopy '{objcopy}' not found. Mocking objcopy.")
-        # If testing ai loop logic, we just copy a hashable value. For our mock testing logic:
-        # We will write the size of the c file to the mock binary so it can match if it's "correct"
-        # Since we want to test LLM logic matching, we'll write something specific based on the file content.
-        with open(obj_file, 'r') as f:
-            content = f.read()
-        with open(text_bin, 'w') as f:
-            if "int test() { return 1; }" in content:
-                f.write("dummy binary")
-            else:
-                f.write("incorrect binary")
-        return True
-
+def assemble_s(s_file, out_o):
+    """Assembles the target .s file into an object file."""
+    cmd = [CC, "-c", "-Iinclude", "-x", "assembler-with-cpp"] + ASFLAGS + [s_file, "-o", out_o]
     try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Objcopy failed for {obj_file}:\n{e.stderr}")
-        return False
-    except FileNotFoundError:
-        print(f"Objcopy '{objcopy}' not found.")
+        print(f"Assembly error for {s_file}:")
+        print(e.stderr.decode('utf-8'))
         return False
 
-def compare_hashes(file1, file2):
-    """Compares the hashes of two files."""
-    if not os.path.exists(file1) or not os.path.exists(file2):
-        print(f"Missing files for comparison: {file1} or {file2}")
+def check_match(c_file, s_file):
+    print(f"--- AI Matcher ---")
+    print(f"Target C  : {c_file}")
+    print(f"Target ASM: {s_file}")
+    print("------------------")
+
+    build_dir = "build/matcher"
+    os.makedirs(build_dir, exist_ok=True)
+
+    c_obj = os.path.join(build_dir, "test.o")
+    s_obj = os.path.join(build_dir, "target.o")
+
+    # Clean previous artifacts
+    for obj in [c_obj, s_obj]:
+        if os.path.exists(obj):
+            os.remove(obj)
+
+    print("[1] Compiling C file...")
+    if not compile_c(c_file, c_obj):
+        print("FAIL: C file failed to compile.")
         return False
 
-    hash1 = get_file_hash(file1)
-    hash2 = get_file_hash(file2)
+    print("[2] Assembling target...")
+    if not assemble_s(s_file, s_obj):
+        print("FAIL: Target assembly failed.")
+        return False
 
-    if hash1 == hash2:
-        print(f"[MATCH] Hashes match: {hash1}")
+    print("[3] Stripping objects and extracting text sections for matching...")
+    # In order to avoid differing timestamps, ELF headers, or section layouts causing false mismatches,
+    # we use objcopy to extract purely the binary .text (MIPS instructions) from the object files.
+    c_bin = c_obj.replace(".o", ".bin")
+    s_bin = s_obj.replace(".o", ".bin")
+
+    subprocess.run([f"{CROSS}objcopy", "-O", "binary", "-j", ".text", c_obj, c_bin], check=True)
+    subprocess.run([f"{CROSS}objcopy", "-O", "binary", "-j", ".text", s_obj, s_bin], check=True)
+
+    c_hash = get_file_hash(c_bin)
+    s_hash = get_file_hash(s_bin)
+
+    print(f"C text Hash : {c_hash}")
+    print(f"ASM text Hash: {s_hash}")
+
+    if c_hash == s_hash:
+        print("\n>>> MATCH! <<< The compiled C logic successfully byte-matches the target assembly.")
         return True
     else:
-        print(f"[MISMATCH] Hashes differ.\n  {file1}: {hash1}\n  {file2}: {hash2}")
+        print("\n>>> MISMATCH <<< The generated binary does not match the target.")
         return False
 
 def main():
-    parser = argparse.ArgumentParser(description="AI Matcher Harness for C to MIPS assembly comparison.")
+    parser = argparse.ArgumentParser(description="Compile and diff C code against target MIPS assembly.")
     parser.add_argument("c_file", help="Path to the C source file.")
-    parser.add_argument("target_bin", help="Path to the target raw .text binary to match against.")
-    parser.add_argument("--compiler", default="mips-linux-gnu-gcc", help="Cross-compiler to use.")
-    parser.add_argument("--objcopy", default="mips-linux-gnu-objcopy", help="Objcopy tool to use.")
-    parser.add_argument("--opt", default="-O2", help="Optimization flag.")
+    parser.add_argument("s_file", help="Path to the target assembly file.")
 
     args = parser.parse_args()
 
@@ -102,32 +116,12 @@ def main():
         print(f"Error: C file {args.c_file} not found.")
         sys.exit(1)
 
-    base_name = os.path.splitext(os.path.basename(args.c_file))[0]
-    temp_obj = f"{base_name}_temp.o"
-    temp_bin = f"{base_name}_temp.bin"
-
-    print(f"--- Starting matching process for {args.c_file} ---")
-
-    if compile_c_file(args.c_file, temp_obj, args.compiler, args.opt):
-        if extract_text_section(temp_obj, temp_bin, args.objcopy):
-            match = compare_hashes(temp_bin, args.target_bin)
-
-            # Cleanup
-            if os.path.exists(temp_obj):
-                os.remove(temp_obj)
-            if os.path.exists(temp_bin):
-                os.remove(temp_bin)
-
-            if match:
-                sys.exit(0)
-            else:
-                sys.exit(1)
-        else:
-            if os.path.exists(temp_obj):
-                os.remove(temp_obj)
-            sys.exit(1)
-    else:
+    if not os.path.exists(args.s_file):
+        print(f"Error: ASM file {args.s_file} not found.")
         sys.exit(1)
+
+    matched = check_match(args.c_file, args.s_file)
+    sys.exit(0 if matched else 1)
 
 if __name__ == "__main__":
     main()

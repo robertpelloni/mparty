@@ -11,9 +11,7 @@
 
 export class AudioManager {
   private audioContext: AudioContext | null = null;
-  private gainNode: GainNode | null = null;
   private nextPlayTime: number = 0;
-  private masterVolume: number = 1.0;
 
   // Standard N64 native audio output sample rate
   private readonly SAMPLE_RATE = 32000;
@@ -34,55 +32,11 @@ export class AudioManager {
         sampleRate: this.SAMPLE_RATE,
         latencyHint: 'interactive'
       });
-      this.gainNode = this.audioContext.createGain();
-      this.gainNode.gain.setValueAtTime(this.masterVolume, this.audioContext.currentTime);
-      this.gainNode.connect(this.audioContext.destination);
-
       this.nextPlayTime = this.audioContext.currentTime;
       console.log(`AudioManager: Web Audio API initialized at ${this.SAMPLE_RATE}Hz`);
     } else if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
-  }
-
-  /**
-   * Sets master output volume (0.0 to 1.0).
-   */
-  public setMasterVolume(volume: number): void {
-    this.masterVolume = Math.max(0, Math.min(1, volume));
-    if (this.audioContext && this.gainNode) {
-      this.gainNode.gain.setValueAtTime(this.masterVolume, this.audioContext.currentTime);
-    }
-  }
-
-  /**
-   * Decodes an arbitrary raw PCM byte stream array into valid Web Audio Float32 arrays.
-   * Useful for loading external mock legacy audio banks like MUSYX.
-   */
-  public decodePCMStream(rawPCMBuffer: ArrayBuffer | Float32Array): void {
-      if (!this.audioContext) {
-        this.initialize();
-      }
-      if (!this.audioContext) return;
-      console.log(`AudioManager: Decoding raw PCM streams to internal queue.`);
-
-      // Normalize input to Float32Array
-      const floatView = rawPCMBuffer instanceof Float32Array
-        ? rawPCMBuffer
-        : new Float32Array(rawPCMBuffer);
-
-      const halfLength = Math.floor(floatView.length / 2);
-      if (halfLength === 0) return;
-
-      const left = new Float32Array(halfLength);
-      const right = new Float32Array(halfLength);
-
-      for(let i = 0; i < halfLength; i++) {
-          left[i] = floatView[i * 2];
-          right[i] = floatView[i * 2 + 1];
-      }
-
-      this.pushAudioBuffer(left, right);
   }
 
   /**
@@ -92,7 +46,6 @@ export class AudioManager {
     if (this.audioContext) {
       this.audioContext.close();
       this.audioContext = null;
-      this.gainNode = null;
       console.log('AudioManager: Web Audio context closed.');
     }
   }
@@ -104,7 +57,7 @@ export class AudioManager {
    * @param leftChannel Float32 array representing Left DAC PCM
    * @param rightChannel Float32 array representing Right DAC PCM
    */
-  public pushAudioBuffer(leftChannel: Float32Array, rightChannel: Float32Array): void {
+  public pushAudioBuffer(leftChannel: Float32Array<ArrayBuffer>, rightChannel: Float32Array<ArrayBuffer>): void {
     if (!this.audioContext) return;
 
     // Create a new AudioBuffer to hold this frame's audio
@@ -121,12 +74,7 @@ export class AudioManager {
     // Create a node to play this specific chunk
     const sourceNode = this.audioContext.createBufferSource();
     sourceNode.buffer = frameBuffer;
-
-    if (this.gainNode) {
-      sourceNode.connect(this.gainNode);
-    } else {
-      sourceNode.connect(this.audioContext.destination);
-    }
+    sourceNode.connect(this.audioContext.destination);
 
     // Ensure seamless scheduling. If the emulator fell behind, catch up to current time.
     const currentTime = this.audioContext.currentTime;

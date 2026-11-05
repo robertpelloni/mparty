@@ -113,17 +113,9 @@ export class InputManager {
     if (this.state.z) packed |= (1 << 2);
     if (this.state.start) packed |= (1 << 3);
 
-    // Resilient input validation: sanitize out-of-bounds or NaN analog values
-    let safeJoyX = Number.isFinite(this.state.joyX) ? this.state.joyX : 0;
-    let safeJoyY = Number.isFinite(this.state.joyY) ? this.state.joyY : 0;
-
-    // Cap to signed 8-bit limits
-    safeJoyX = Math.max(-128, Math.min(127, safeJoyX));
-    safeJoyY = Math.max(-128, Math.min(127, safeJoyY));
-
     // Analog sticks
-    packed |= ((safeJoyX & 0xFF) << 16);
-    packed |= ((safeJoyY & 0xFF) << 24);
+    packed |= ((this.state.joyX & 0xFF) << 16);
+    packed |= ((this.state.joyY & 0xFF) << 24);
 
     return packed;
   }

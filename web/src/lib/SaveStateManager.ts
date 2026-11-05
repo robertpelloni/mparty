@@ -63,11 +63,10 @@ export class SaveStateManager {
    * Note: These offsets will be dynamically mapped as decompilation finishes.
    */
   private extractUniversalState(gameId: string, memory: Uint8Array): UniversalGameState {
-      // Mock translation logic mapping to actual N64 RDRAM offsets
-      console.log(`SaveStateManager: Parsing Universal State offsets for ${gameId}...`);
+      // Mock translation logic based on IDEAS.md concept
       return {
-          globalCoins: 100,
-          globalStars: 5,
+          globalCoins: 100, // TODO: map to actual N64 RDRAM offset for coins
+          globalStars: 5,   // TODO: map to actual N64 RDRAM offset for stars
           unlockedBoards: ['Yoshi\'s Tropical Island'],
           unlockedMinigames: ['Bumper Balls']
       };
@@ -103,37 +102,6 @@ export class SaveStateManager {
       });
     } catch (e) {
       console.error(`SaveStateManager: Error saving state for ${gameId}`, e);
-    }
-  }
-
-  /**
-   * Exports a save state to a JSON string for user download.
-   */
-  public async exportSave(gameId: string): Promise<string | null> {
-    const data = await this.loadState(gameId);
-    if (!data) return null;
-    const universalData = this.extractUniversalState(gameId, data);
-    return JSON.stringify({
-      gameId,
-      timestamp: Date.now(),
-      data: Array.from(data),
-      universalData
-    });
-  }
-
-  /**
-   * Imports a save state from a JSON string.
-   */
-  public async importSave(gameId: string, jsonString: string): Promise<boolean> {
-    try {
-      const parsed = JSON.parse(jsonString);
-      if (parsed.gameId !== gameId || !parsed.data) return false;
-      const dataArray = new Uint8Array(parsed.data);
-      await this.saveState(gameId, dataArray);
-      return true;
-    } catch (e) {
-      console.error(`SaveStateManager: Error importing save.`, e);
-      return false;
     }
   }
 

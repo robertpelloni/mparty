@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { EmulationCore, RomMetadata } from '../lib/EmulationCore';
-import { Tooltip } from './Tooltip';
 
 export default function GameSelector() {
   const [availableGames, setAvailableGames] = useState<RomMetadata[]>([]);
@@ -57,21 +56,20 @@ export default function GameSelector() {
       ) : (
         <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isPlaying ? 'opacity-50 pointer-events-none' : ''}`}>
           {availableGames.map((game) => (
-            <Tooltip key={game.id} content={`Boot ${game.title} into the browser WebAssembly core.`}>
-              <div
-                className="p-6 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-blue-500 transition-colors flex flex-col items-center gap-4 bg-white dark:bg-zinc-900"
+            <div
+              key={game.id}
+            className="p-6 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-blue-500 transition-colors flex flex-col items-center gap-4 bg-white dark:bg-zinc-900"
+          >
+            <h3 className="font-bold text-lg">{game.title}</h3>
+            <span className="text-sm text-zinc-500">{game.platform}</span>
+              <button
+                onClick={() => handlePlay(game)}
+                disabled={isPlaying}
+                className="mt-2 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:bg-zinc-400"
               >
-                <h3 className="font-bold text-lg">{game.title}</h3>
-                <span className="text-sm text-zinc-500">{game.platform}</span>
-                <button
-                  onClick={() => handlePlay(game)}
-                  disabled={isPlaying}
-                  className="mt-2 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:bg-zinc-400"
-                >
-                  Play
-                </button>
-              </div>
-            </Tooltip>
+                Play
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -82,14 +80,12 @@ export default function GameSelector() {
           <span className="text-white font-semibold">
             {selectedGame ? `Running: ${selectedGame.title} (${selectedGame.platform})` : 'Emulator Idle'}
           </span>
-          <Tooltip content="Instantly halt the WebAssembly emulation loop and wipe browser RDRAM state.">
-            <button
-              onClick={handleStop}
-              className="text-red-500 hover:text-red-400 font-medium text-sm"
-            >
-              Power Off
-            </button>
-          </Tooltip>
+          <button
+            onClick={handleStop}
+            className="text-red-500 hover:text-red-400 font-medium text-sm"
+          >
+            Power Off
+          </button>
         </div>
 
         {/* The canvas target for the WASM context */}

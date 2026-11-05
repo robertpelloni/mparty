@@ -1,22 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tooltip } from './Tooltip';
-import { Network, Wifi, Globe, Copy, Check, FastForward } from 'lucide-react';
-import { NetplayManager } from '../lib/NetplayManager';
+import { Network, Wifi, Globe, Copy, Check } from 'lucide-react';
 
 export default function NetworkControl() {
   const [isHosting, setIsHosting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [latency, setLatency] = useState(50);
-  const [status, setStatus] = useState<string>("Offline");
-  const [netplay, setNetplay] = useState<NetplayManager | null>(null);
-
-  useEffect(() => {
-    setNetplay(new NetplayManager());
-    return () => netplay?.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const mockInviteCode = "MPARTY-8F2A-99B1";
 
@@ -26,45 +16,6 @@ export default function NetworkControl() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const startHosting = async () => {
-    if (!netplay) return;
-    try {
-      setStatus("Initializing Host...");
-      // In a real app we would exchange SDP via signaling server.
-      await netplay.hostGame();
-      setIsHosting(true);
-      setStatus("Hosting WebRTC Lobby");
-    } catch (e) {
-      console.error(e);
-      setStatus("Failed to Host");
-    }
-  };
-
-  const joinSession = async () => {
-     if (!netplay) return;
-     try {
-       setStatus("Attempting Peer Connection...");
-       // Mock an empty object just to test frontend UI logic
-       await netplay.joinGame({ type: 'offer', sdp: '' } as any);
-       setStatus("Connected via DataChannel");
-     } catch(e) {
-       console.log("Mock join error handled:", e);
-       setStatus("Joined Mock Lobby");
-     }
-  };
-const triggerRollback = () => {
-      if (netplay) {
-          netplay.predictInputState(1, latency);
-          setStatus("Predicted Next Frame (Rollback)");
-      }
-  };
-
-  const triggerDesync = () => {
-      if (netplay) {
-          const success = netplay.syncRemoteInputs(1, new Uint32Array([0x1])); // Force mismatch
-          setStatus(success ? "Inputs Synced" : "Desync Detected! Rolling Back...");
-      }
-  };
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm w-full">
       <div className="flex items-center justify-between mb-6">
@@ -83,7 +34,7 @@ const triggerRollback = () => {
         {!isHosting ? (
           <>
             <button
-              onClick={startHosting}
+              onClick={() => setIsHosting(true)}
               className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <Wifi className="w-4 h-4" /> Host Public Lobby
@@ -104,13 +55,9 @@ const triggerRollback = () => {
                 placeholder="Enter Invite Code"
                 className="flex-1 bg-black border border-zinc-800 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
               />
-              <button onClick={joinSession} className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors">
+              <button className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-colors">
                 Join
               </button>
-            </div>
-
-            <div className="text-center text-xs text-zinc-500 mt-2">
-              Status: {status}
             </div>
           </>
         ) : (
@@ -127,36 +74,6 @@ const triggerRollback = () => {
                 </button>
               </Tooltip>
             </div>
-
-            <div className="pt-2 border-t border-zinc-800 mt-4 space-y-3">
-                <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Target Latency Comp</span>
-                    <span className="font-mono text-indigo-400">{latency} ms</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="150"
-                    value={latency}
-                    onChange={(e) => setLatency(parseInt(e.target.value))}
-                    className="w-full accent-indigo-500"
-                /><Tooltip content="Force the WASM hypervisor to predict input state manually based on latency config. Testing rollback netcode sync.">
-                    <button
-                        onClick={triggerRollback}
-                        className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"
-                    >
-                        <FastForward className="w-4 h-4 text-indigo-400" /> Mock Rollback Prediction
-                    </button>
-                </Tooltip>
-                <Tooltip content="Simulate a remote input arriving that contradicts the local prediction, forcing a state rollback.">
-                    <button
-                        onClick={triggerDesync}
-                        className="w-full py-2 bg-red-950/30 hover:bg-red-900/40 border border-red-900 text-red-400 text-sm font-semibold rounded flex items-center justify-center gap-2 transition-colors"
-                    >
-                        Mock Client Desync
-                    </button>
-                </Tooltip>            </div>
-
             <button
               onClick={() => setIsHosting(false)}
               className="mt-4 text-sm text-red-400 hover:text-red-300 underline"

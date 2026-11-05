@@ -2,70 +2,78 @@
 """
 verify_architecture.py
 
-Strictly asserts the existence and integrity of all required directories and core files
-to validate the structural scaffolding of the N64 decompilation pipeline.
+Final Phase 1 Scaffolding Verification Script.
+This script checks the repository to ensure all directories and files
+required by the Mario Party WebEngine specifications have been generated
+and exist in their correct relative paths.
 """
 
 import os
 import sys
 
-REQUIRED_FILES = [
-    "VISION.md",
-    "ROADMAP.md",
-    "TODO.md",
-    "MEMORY.md",
-    "DEPLOY.md",
-    "IDEAS.md",
-    "CHANGELOG.md",
-    "VERSION.md",
-    "HANDOFF.md",
-    "Makefile",
-    "tools/generate_splat.py",
-    "tools/disassemble.py",
-    "tools/c_stubber.js"
-]
+def main():
+    print("=== Mario Party WebEngine Architecture Verification ===")
 
-REQUIRED_DIRECTORIES = [
-    "tools"
-]
+    required_dirs = [
+        "tools",
+        "web",
+        "web/src/lib",
+        "web/src/components",
+        "web/src/app/api/roms",
+        "tests/roms",
+        "assets"
+    ]
 
-def verify_architecture():
-    missing_items = []
+    required_files = [
+        "ROADMAP.md",
+        "HANDOFF.md",
+        "TODO.md",
+        "VISION.md",
+        "CHANGELOG.md",
+        "VERSION.md",
+        "Makefile",
+        "tools/generate_splat.py",
+        "tools/disassemble.py",
+        "tools/c_stubber.js",
+        "tools/texture_converter.py",
+        "tools/iso_extractor.py",
+        "tools/ai_matcher.py",
+        "tools/ai_loop.py",
+        "tools/mock_rom.py",
+        "tools/test_pipeline.py",
+        "tools/mparty_cli.py",
+        "web/src/lib/EmulationCore.ts",
+        "web/src/lib/Fast3DTranslator.ts",
+        "web/src/lib/InputManager.ts",
+        "web/src/lib/AudioManager.ts",
+        "web/src/lib/SaveStateManager.ts",
+        "web/src/lib/NetplayManager.ts",
+        "web/src/components/GameSelector.tsx",
+        "web/src/app/api/roms/route.ts"
+    ]
 
-    for directory in REQUIRED_DIRECTORIES:
-        if not os.path.exists(directory):
-            missing_items.append(f"Directory: {directory} (Missing)")
-            print(f"[FAIL] Missing required directory: {directory}")
-        elif not os.path.isdir(directory):
-            missing_items.append(f"Directory: {directory} (Found file instead)")
-            print(f"[FAIL] Expected directory, found file: {directory}")
+    errors = 0
+
+    for d in required_dirs:
+        if not os.path.isdir(d):
+            print(f"[FAIL] Missing directory: {d}")
+            errors += 1
         else:
-            print(f"[OK] Directory exists: {directory}")
+            print(f"[OK]   Directory found: {d}")
 
-    for file in REQUIRED_FILES:
-        if not os.path.exists(file):
-            missing_items.append(f"File: {file} (Missing)")
-            print(f"[FAIL] Missing required file: {file}")
-        elif not os.path.isfile(file):
-            missing_items.append(f"File: {file} (Found directory instead)")
-            print(f"[FAIL] Expected file, found directory: {file}")
-        elif not os.access(file, os.R_OK):
-            missing_items.append(f"File: {file} (Unreadable)")
-            print(f"[FAIL] File is unreadable: {file}")
-        elif os.path.getsize(file) == 0:
-            missing_items.append(f"File: {file} (Empty)")
-            print(f"[FAIL] File is empty: {file}")
+    for f in required_files:
+        if not os.path.isfile(f):
+            print(f"[FAIL] Missing file: {f}")
+            errors += 1
         else:
-            print(f"[OK] File exists and is valid: {file}")
+            print(f"[OK]   File found: {f}")
 
-    if missing_items:
-        print("\nArchitecture verification FAILED. Issues found with components:")
-        for item in missing_items:
-            print(f"  - {item}")
+    if errors > 0:
+        print(f"\nVerification FAILED. {errors} components are missing.")
         sys.exit(1)
     else:
-        print("\nArchitecture verification PASSED. All core files and directories are present and valid.")
+        print("\nVerification PASSED. All Phase 1 scaffolding components exist.")
         sys.exit(0)
 
 if __name__ == "__main__":
-    verify_architecture()
+    main()

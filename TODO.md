@@ -9,191 +9,31 @@
 - [x] Write a base `Makefile` for recompiling byte-matching ROMs.
 - [x] Verify functionality of newly created tools via basic syntax checking and dry-runs.
 - [x] Finalize initial repository structure with `HANDOFF.md` before concluding session.
-
-## Current Session Tasks
-
-- [x] Create `tools/verify_architecture.py`.
-- [x] Create `tools/generate_advanced_mock_rom.py`.
-- [x] Create `tools/test_pipeline.py`.
-- [x] Create `tools/ai_matcher.py`.
-- [x] Create `tools/ai_loop.py`.
-- [x] Create `tools/mparty_cli.py`.
-
-## Web Frontend Tasks
-
-- [x] Setup Next.js frontend
-- [x] Implement UI components
-- [x] Implement Dashboard API
-- [x] Configure Playwright tests
-
-## Graphics & Asset Pipeline
-
-- [x] Create `tools/texture_converter.py`.
-- [x] Create `tools/model_extractor.py`.
-- [x] Create `tools/audio_decoder.py`.
-- [x] Create `tools/iso_extractor.py`.
-
-## Engine Expansion
-
-- [x] Expand `tools/iso_extractor.py` to parse GCZ format.
-- [x] Create `web/src/lib/GameCubeEmulator.ts` for Dolphin WASM integration.
-
-## Engine Expansion Integration (v0.15.0)
-
-- [x] Integrate `GameCubeEmulator.ts` logic into `EmulationCore.ts` load procedures.
-
-## Main Event Loop
-
-- [x] Initialize the mparty event loop to handle incoming connections.
-
-## Network Parsing
-
-- [x] Expand the `mparty_cli.py` run loop to parse incoming network connection streams.
-
-## Memory Syncing
-
-- [x] Expand the `mparty_cli.py` run loop to dispatch data payloads to the frontend over WebSockets.
-- [x] Connect `web/src/lib/NetplayManager.ts` to the websocket stream.
-
-## CI/CD Pipeline
-
-- [x] Create GitHub Actions workflow to run the test suite on push.
-
-## Decompilation Infrastructure
-
-- [x] Parse actual `.z64` test ROM header in `tools/generate_splat.py`.
-- [x] Ensure `tools/disassemble.py` executes successfully on valid splat configurations.
-
-## WASM Netplay Protocol Integration (v0.12.0)
-
-- [x] Wire `hostGame()` and `joinGame()` from `NetplayManager.ts` to `NetworkControl.tsx` UI.
-
-## Rollback Netcode Integration (v0.18.0)
-
-- [x] Implement prediction method in `NetplayManager.ts` and add mock toggle button to `NetworkControl.tsx`.
-
-## UI Redesign and Reorganization (v0.13.0)
-
-- [x] Consolidate layout in `page.tsx` and prioritize high-value features.
-
-## Graphics Translation Pipeline (v0.14.0)
-
-- [x] Implement memory processing and vertex caching mocks in `Fast3DTranslator.ts`.
-## Automated AI Matching Web Hook (v0.21.0)
-
-- [x] Expose an API route in Next.js to trigger the `ai_loop.py` script and report back logs.
-- [x] Add a button in `DecompilationStatus.tsx` to manually trigger the AI matching pipeline for testing.
-
-## WebAsset Viewer Web Hook Integration (v0.22.0)
-
-- [x] Update frontend hook to intercept payload metrics dynamically instead of raw fallback buffers.
-- [x] Ensure `AssetGallery` pulls data efficiently utilizing robust network latency logic.
-
-## Compiler Optimization Alignment (v0.23.0)
-
-- [x] Ensure `Makefile` uses the `-O2` compiler flag for N64 GCC builds, aligning with `ai_matcher.py` optimizations.
-
-## Centralized Mparty CLI Dashboard (v0.24.0)
-
-- [x] Update `mparty_cli.py` with an interactive terminal menu using standard Python libraries to monitor all backend statuses.
-- [x] Ensure the CLI properly displays mock statuses for the Netplay server, Next.js dashboard, and AI matching pipeline.
-
-## WebAssembly WASM Netplay Integration (v0.25.0)
-
-- [x] Update `NetplayManager.ts` to implement a rollback netcode buffer interface capable of receiving remote game states.
-- [x] Expand the UI to include a visual 'Latency Config' slider to mock adjusting ping compensation for the `NetplayManager`.
-
-## Audio Stream Decoding Integration (v0.27.0)
-
-- [x] Update `AudioManager.ts` to implement a `decodePCMStream()` method for parsing raw Float32 data buffers.
-- [x] Ensure the Audio context buffers maintain a continuous queue to prevent underrun clicking during latency.
-
-## WebAssembly Audio Decoding Translation (v0.28.0)
-
-- [x] Update `EmulationCore.ts` to hook `AudioManager.decodePCMStream` directly into the emulator execution loop to parse WASM output blocks.
-- [x] Update the `Fast3DTranslator.ts` cache initialization step to properly pre-allocate geometric buffer capacity.
-
-## WebAssembly Netplay Sync Logic (v0.29.0)
-
-- [x] Update `NetplayManager.ts` to implement a `syncRemoteInputs()` method for resolving WebRTC payload mismatches.
-- [x] Add a `Mock Client Desync` button to `NetworkControl.tsx` to visualize the sync loop handling unexpected latency drops.
-
-## WebAssembly Universal Save State Integration (v0.34.0)
-
-- [x] Update `SaveStateManager.ts` to fully integrate the `extractUniversalState` loop into local IndexedDB payload syncing.
-- [x] Add explicit logs tracking when translation thresholds (e.g. cross-generation state conversions) trigger within `SaveStateControl.tsx`.
-
-## Test Suite Enhancements
-
-- [x] Create a test suite to validate the validation layer's failure modes.
-- [x] Refactor `tools/verify_architecture.py` to handle edge-case failure modes gracefully.
-
-- [x] Complete pre-commit and submit workflow for validation layer update.
-
-## API Hardening
-
-- [x] Create a new route `/api/stream/route.ts` to implement basic streaming payload stubs.
-- [x] Integrate rate limiting into `/api/stream/route.ts` to reject payloads exceeding frequency thresholds.
-- [x] Implement robust object validation mapping to ensure strictly structured action payloads (e.g., rejecting missing actions or non-array data).
-- [x] Create automated integration tests `tests/stream.spec.ts` for the newly created stream edge cases.
-
-## Input Validation Hardening
-
-- [x] Create a test suite for `InputManager` edge cases (e.g., NaN joystick inputs or out-of-bound values).
-- [x] Refactor `InputManager.ts` to cleanly cap input parameters and filter out NaNs.
-
-## Netplay Manager Refinements
-
-- [x] Prioritize writing targeted unit tests `tests/NetplayManager.spec.ts` for newly added async rollback handlers.
-- [x] Ensure rollback buffer sizes are maintained effectively without leaking historical states.
-
-## WASM Hypervisor Refinements
-
-- [x] Mocked the remaining `TODO` pointers in `EmulationCore.ts` and `SaveStateManager.ts` to flesh out the WASM filesystem injection logic.
-- [x] Ran syntax validation across updated hypervisor files to ensure no typings regressions.
-
-## API Hardening
-
-- [x] Create automated integration tests `tests/api_roms.spec.ts` for the existing `/api/roms` endpoint to ensure metadata stability.
-
-## Resilience Post-Mortem
-
-- A resilience review determined the standard Next.js API endpoints are not equipped to handle large bursts of parallel concurrent data payloads locally via standard request mapping. Future proposals must prioritize migrating the data stream mapping to a pure WebRTC UDP socket layer or dedicated persistent Node.js WebSockets to bypass typical HTTP bottlenecks.
-
-## Data Validation Layer Updates
-
-- [x] Harden `/api/stream/route.ts` against extremely large payloads and unmapped events (e.g. DoS vector protection).
-- [x] Create integration tests `tests/stream_async.spec.ts` for boundary checks.
-
-- [x] Integrate `tools/test_ai_loop.py` into the continuous integration testing pipeline.
-
-## Automated AI Matching Expansion
-
-- [x] Investigate modifying `tools/ai_loop.py` to directly hook into an LLM via the mock API layer to self-correct `.c` files during compilation.
-
-- [x] Harden `tools/test_ai_loop.py` to test LLM mock iteration failures and missing API key conditions.
-
-## Data Validation Layer Updates
-
-- [x] Implemented targeted unit tests for `validatePayload()` via `tests/validatePayload.spec.ts` capturing boundary checks on the new async data flow (e.g., nulls, numeric overrides, and nested references).
-
-## Graphics Translation Hardening
-
-- [x] Implemented targeted unit tests for `Fast3DTranslator.ts` (`tests/Fast3DTranslator.spec.ts`) capturing boundary checks on the internal microcode vertex cache (e.g. over-indexing preventing buffer overflows).
-
-## UI Consolidation and Subsystem Architecture (v0.46.0)
-
-- [x] Implemented `web/src/components/SystemTray.tsx` with server quit/restart controls and status indicators.
-- [x] Implemented `web/src/components/AudioEngineControl.tsx` wiring `AudioManager.decodePCMStream` and volume controls.
-- [x] Implemented `web/src/components/InputDiagnostics.tsx` wiring `InputManager` to 32-bit packed bitmasks.
-- [x] Implemented `web/src/components/GraphicsPipelineControl.tsx` wiring `Fast3DTranslator` display list decoding.
-- [x] Implemented `web/src/components/ConsoleBridgeControl.tsx` wiring `GameCubeEmulator` Dolphin WASM ISO mounting.
-- [x] Implemented `web/src/components/CliTerminalModal.tsx` for interactive terminal commands.
-- [x] Redesigned `web/src/app/page.tsx` into a consolidated 4-tier single-page dashboard.
-- [x] Created `web/tests/system_tray.spec.ts` for end-to-end subsystem and tray verification.
-
-## AI Loop Self-Correction & Multi-Step Matching (v0.47.0)
-
-- [x] Implemented multi-step iterative LLM self-correction loop in `tools/ai_loop.py` feeding compiler/matcher diagnostics into the prompt.
-- [x] Added unit test coverage for multi-step self-correction in `tools/test_ai_loop.py`.
-- [x] Integrated configurable API URLs and `--max-retries` parameter.
+- [x] Initialize Next.js/TypeScript frontend boilerplate.
+- [x] Integrate Emscripten toolchain wrapper for WebAssembly emulation cores.
+- [x] Implement AI decompilation matching harness (`tools/ai_matcher.py`).
+- [x] Implement Fast3D microcode translation abstraction for WebGL.
+- [x] Implement texture converter script (`tools/texture_converter.py`) for the Graphics & Asset Pipeline.
+- [x] Create ISO filesystem extractor stub for GameCube/Wii integration.
+- [x] Establish universal ROM metadata API route in frontend hub.
+- [x] Create automated integration test script (`tools/test_pipeline.py`) to validate full CI/CD loop.
+- [x] Create continuous AI orchestration loop stub (`tools/ai_loop.py`).
+- [x] Achieve Phase 1 completion by running the first automated C-to-ASM byte match.
+- [x] Implement InputManager wrapper to translate browser APIs to N64 controller bitmasks.
+- [x] Implement Web Audio API abstractions (`AudioManager.ts`) for continuous PCM playback.
+- [x] Create a centralized master CLI orchestrator (`mparty_cli.py`) for simplified developer execution.
+- [x] Establish IndexedDB persistence pipeline for emulation save states.
+- [x] Create WebRTC peer-to-peer NetplayManager for multiplayer input synchronization.
+- [x] Conclude Phase 1 scaffolding with a master structural verification script (`verify_architecture.py`).
+- [x] Implement Audio Decoder script (`tools/audio_decoder.py`) to parse MUSYX audio banks for the Audio Pipeline.
+- [x] Replace initial simple mock ROM generator with an advanced version injecting functional MIPS logic.
+- [x] Integrate generic LLM API request execution into the `ai_loop` orchestration script.
+- [x] Demonstrate continuous multi-file autonomous matching loop handling (Phase 2 startup).
+- [x] Implement 3D model geometry extraction scaffolding (`tools/model_extractor.py`) for the frontend asset pipeline.
+- [x] Implement `AssetViewer` component in Next.js using Three.js to render `.obj` files in the browser.
+- [x] Implement Universal Save State architecture mapping in `SaveStateManager.ts`.
+- [x] Implement Netplay Rollback architecture scaffold in `NetplayManager.ts` to mock GGPO-style input prediction.
+
+## Blockers
+
+- [ ] Await ingestion of target ROM file from human developer to unblock decompilation Phase 2.

@@ -79,7 +79,6 @@ export class NetplayManager {
       // and injects it into the local EmulationCore memory for player 2.
       const remoteInputBuffer = new Uint32Array(event.data);
       // console.log(`NetplayManager: Received remote input state: ${remoteInputBuffer[0]}`);
-      console.log("Mock NetplayManager: Received WebSocket stream payload from mparty_cli.py.");
     };
 
     this.dataChannel.onerror = (error) => {
@@ -100,45 +99,6 @@ export class NetplayManager {
       const buffer = new Uint32Array([packedInput]);
       this.dataChannel.send(buffer.buffer);
     }
-  }
-
-  // Buffer to store historical states for rollback prediction
-  private rollbackBuffer: Map<number, Uint32Array> = new Map();
-  private maxRollbackFrames: number = 7;
-
-  /**
-   * Predicts input states for rollback netcode logic (GGPO-style).
-   */
-  public predictInputState(currentFrame: number, latencyMs: number): void {
-      console.log(`NetplayManager: Triggering prediction for frame ${currentFrame} accounting for ${latencyMs}ms latency.`);
-      // Mock tracking state for rollback resolution
-      if (this.rollbackBuffer.size > this.maxRollbackFrames) {
-          this.rollbackBuffer.clear();
-      }
-      this.rollbackBuffer.set(currentFrame, new Uint32Array([0x0]));
-  }
-
-  /**
-   * Syncs and resolves historical input states against newly arrived remote inputs.
-   * If a prediction was incorrect, it triggers a state load to rollback the emulator.
-   */
-  public syncRemoteInputs(arrivedFrame: number, actualInput: Uint32Array): boolean {
-      console.log(`NetplayManager: Syncing arrived remote inputs for frame ${arrivedFrame}.`);
-
-      const predictedInput = this.rollbackBuffer.get(arrivedFrame);
-      if (!predictedInput) {
-          console.warn(`NetplayManager: Frame ${arrivedFrame} dropped from prediction buffer. Forcing hard sync.`);
-          return false;
-      }
-
-      if (predictedInput[0] !== actualInput[0]) {
-          console.log(`NetplayManager: [DESYNC] Prediction failed for frame ${arrivedFrame}. Requesting emulator rollback.`);
-          return false;
-      }
-
-      // Clean up validated frame
-      this.rollbackBuffer.delete(arrivedFrame);
-      return true;
   }
 
   /**
