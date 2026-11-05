@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { NetplayManager } from '../src/lib/NetplayManager';
+import { NetplayManager, NetplayPacket } from '../src/lib/NetplayManager';
 
 test.describe('NetplayManager Unit Tests', () => {
 
@@ -49,5 +49,42 @@ test.describe('NetplayManager Unit Tests', () => {
         // Remote input arrives for a frame not predicted/already cleared
         const result = netplay.syncRemoteInputs(999, new Uint32Array([0x0]));
         expect(result).toBe(false);
+    });
+
+    test('sendDataPacket should return false when channel is not open', () => {
+        const netplay = new NetplayManager();
+        const sent = netplay.sendDataPacket('ping', { test: true });
+        expect(sent).toBe(false);
+    });
+
+    test('should support registering packet handlers and dispatching incoming string messages', () => {
+        const netplay = new NetplayManager();
+        let receivedPacket: NetplayPacket | null = null;
+
+        netplay.onDataPacket((packet) => {
+            receivedPacket = packet;
+        });
+
+        // Mock open data channel and trigger onmessage
+        const mockChannel = {
+            readyState: 'open',
+            send: () => {},
+            close: () => {}
+        };
+        (netplay as any).dataChannel = mockChannel;
+        (netplay as any).setupChannelListeners();
+
+        const testPacket: NetplayPacket = {
+            action: 'sync_input',
+            data: [1, 2, 3],
+            timestamp: 123456789
+        };
+
+        // Simulate incoming message event
+        mockChannel['onmessage']({ data: JSON.stringify(testPacket) });
+
+        expect(receivedPacket).not.toBeNull();
+        expect(receivedPacket?.action).toBe('sync_input');
+        expect(receivedPacket?.data).toEqual([1, 2, 3]);
     });
 });

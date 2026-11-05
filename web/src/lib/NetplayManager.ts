@@ -5,11 +5,19 @@
  * This class establishes low-latency UDP data channels to broadcast
  * packed 32-bit controller inputs between clients, enabling remote
  * multiplayer for the WASM emulation cores without relying on a centralized server.
+ * Also provides high-throughput DataChannel packet streaming to bypass HTTP bottlenecking.
  */
+
+export interface NetplayPacket {
+  action: string;
+  data: any;
+  timestamp: number;
+}
 
 export class NetplayManager {
   private peerConnection: RTCPeerConnection | null = null;
   private dataChannel: RTCDataChannel | null = null;
+  private packetHandlers: Array<(packet: NetplayPacket) => void> = [];
 
   // Configuration uses public STUN servers to resolve NAT traversal
   private readonly rtcConfig: RTCConfiguration = {
@@ -67,6 +75,13 @@ export class NetplayManager {
     await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
+  /**
+   * Registers a callback listener for incoming WebRTC data packets.
+   */
+  public onDataPacket(handler: (packet: NetplayPacket) => void): void {
+    this.packetHandlers.push(handler);
+  }
+
   private setupChannelListeners(): void {
     if (!this.dataChannel) return;
 
@@ -75,10 +90,21 @@ export class NetplayManager {
     };
 
     this.dataChannel.onmessage = (event) => {
+      if (typeof event.data === 'string') {
+        try {
+          const packet: NetplayPacket = JSON.parse(event.data);
+          for (const handler of this.packetHandlers) {
+            handler(packet);
+          }
+        } catch (e) {
+          console.error('NetplayManager: Error parsing incoming packet:', e);
+        }
+        return;
+      }
+
       // In a real implementation, this receives the remote peer's 32-bit controller state
       // and injects it into the local EmulationCore memory for player 2.
       const remoteInputBuffer = new Uint32Array(event.data);
-      // console.log(`NetplayManager: Received remote input state: ${remoteInputBuffer[0]}`);
       console.log("Mock NetplayManager: Received WebSocket stream payload from mparty_cli.py.");
     };
 
@@ -100,6 +126,22 @@ export class NetplayManager {
       const buffer = new Uint32Array([packedInput]);
       this.dataChannel.send(buffer.buffer);
     }
+  }
+
+  /**
+   * Sends structured data packets over the raw WebRTC UDP channel, bypassing HTTP bottlenecks.
+   */
+  public sendDataPacket(action: string, data: any): boolean {
+    if (this.dataChannel && this.dataChannel.readyState === 'open') {
+      const packet: NetplayPacket = {
+        action,
+        data,
+        timestamp: Date.now()
+      };
+      this.dataChannel.send(JSON.stringify(packet));
+      return true;
+    }
+    return false;
   }
 
   // Buffer to store historical states for rollback prediction
@@ -153,6 +195,7 @@ export class NetplayManager {
       this.peerConnection.close();
       this.peerConnection = null;
     }
+    this.packetHandlers = [];
     console.log('NetplayManager: Connections terminated.');
   }
 }

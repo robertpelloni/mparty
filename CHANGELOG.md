@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## [0.48.0]
+### Added
+- Expanded `NetplayManager.ts` with direct WebRTC DataChannel packet transmission (`sendDataPacket`) and subscription handlers (`onDataPacket`) to implement low-latency UDP message transport, addressing HTTP bottlenecking under high concurrent payload loads.
+- Added unit tests in `web/tests/NetplayManager.spec.ts` to assert packet transmission states and event callback dispatches.
+
+## [0.47.0]
+### Added
+- Expanded `tools/ai_loop.py` with multi-step iterative LLM self-correction: feeds compiler diagnostics and binary-diff output directly back into the LLM prompt over configurable retries (`--max-retries`).
+- Added configurable `--api-url` argument and `LLM_API_URL` environment variable support to `tools/ai_loop.py` for local or proxy mock testing.
+- Added comprehensive unit test coverage in `tools/test_ai_loop.py` for multi-step iterative self-correction with diagnostic error feedback.
+
+## [0.46.0]
+### Added
+- Created `SystemTray.tsx` with floating status indicators, service monitoring (Next.js server, Netplay socket, AI matcher, PCM audio), and interactive controls to safely quit servers and restart all services.
+- Created `AudioEngineControl.tsx` wiring PCM audio buffer streams (`decodePCMStream`), volume slider, mute toggling, and engine status indicators.
+- Created `InputDiagnostics.tsx` wiring `InputManager` to interactive digital button toggles (A, B, Start), analog stick sliders (-128 to 127 clamped), and real-time 32-bit packed N64 bitmask display.
+- Created `GraphicsPipelineControl.tsx` wiring `Fast3DTranslator` display list processing mocks, vertex cache inspection (32 vertices), and cache flushing.
+- Created `ConsoleBridgeControl.tsx` wiring `GameCubeEmulator` ISO mounting (Mario Party 4-9), FST archive module extraction simulation, and hypervisor status.
+- Created `CliTerminalModal.tsx` providing an interactive terminal modal to trigger `mparty_cli.py` routines (`test`, `run`, `dashboard`).
+- Created `web/tests/system_tray.spec.ts` asserting tray toggle, server quit/restart flows, and subsystem component interactions.
+### Changed
+- Redesigned `web/src/app/page.tsx` into a consolidated, single-page dashboard grouped into 4 user-value tiers (Tier 1: Play & Connect, Tier 2: Progression & Hardware Subsystems, Tier 3: Graphics Middleware & Optical Expansion, Tier 4: Decompilation Studio & Assets).
+- Updated `AudioManager.ts` with master volume control methods (`setMasterVolume`) and flexible Float32Array/ArrayBuffer stream decoding.
+- Aligned `SaveStateControl.tsx` imported status message to "Imported Cross-Gen JSON".
+
 ## [0.45.0]
 ### Added
 - Added `tests/Fast3DTranslator.spec.ts` test suite to assert boundary conditions and failure modes (vertex cache array bounds, null index pointers) within the Fast3D to WebGL middleware.

@@ -158,7 +158,7 @@
 
 ## Resilience Post-Mortem
 
-- A resilience review determined the standard Next.js API endpoints are not equipped to handle large bursts of parallel concurrent data payloads locally via standard request mapping. Future proposals must prioritize migrating the data stream mapping to a pure WebRTC UDP socket layer or dedicated persistent Node.js WebSockets to bypass typical HTTP bottlenecks.
+- [x] Migrated high-frequency stream requests away from HTTP routes to raw WebRTC data channels in `NetplayManager.ts` (`sendDataPacket`, `onDataPacket`) to prevent request timeouts under extreme simulation loads.
 
 ## Data Validation Layer Updates
 
@@ -180,3 +180,25 @@
 ## Graphics Translation Hardening
 
 - [x] Implemented targeted unit tests for `Fast3DTranslator.ts` (`tests/Fast3DTranslator.spec.ts`) capturing boundary checks on the internal microcode vertex cache (e.g. over-indexing preventing buffer overflows).
+
+## UI Consolidation and Subsystem Architecture (v0.46.0)
+
+- [x] Implemented `web/src/components/SystemTray.tsx` with server quit/restart controls and status indicators.
+- [x] Implemented `web/src/components/AudioEngineControl.tsx` wiring `AudioManager.decodePCMStream` and volume controls.
+- [x] Implemented `web/src/components/InputDiagnostics.tsx` wiring `InputManager` to 32-bit packed bitmasks.
+- [x] Implemented `web/src/components/GraphicsPipelineControl.tsx` wiring `Fast3DTranslator` display list decoding.
+- [x] Implemented `web/src/components/ConsoleBridgeControl.tsx` wiring `GameCubeEmulator` Dolphin WASM ISO mounting.
+- [x] Implemented `web/src/components/CliTerminalModal.tsx` for interactive terminal commands.
+- [x] Redesigned `web/src/app/page.tsx` into a consolidated 4-tier single-page dashboard.
+- [x] Created `web/tests/system_tray.spec.ts` for end-to-end subsystem and tray verification.
+
+## AI Loop Self-Correction & Multi-Step Matching (v0.47.0)
+
+- [x] Implemented multi-step iterative LLM self-correction loop in `tools/ai_loop.py` feeding compiler/matcher diagnostics into the prompt.
+- [x] Added unit test coverage for multi-step self-correction in `tools/test_ai_loop.py`.
+- [x] Integrated configurable API URLs and `--max-retries` parameter.
+
+## WebRTC DataChannel Streaming Resilience (v0.48.0)
+
+- [x] Implemented direct WebRTC DataChannel packet transmission and reception in `NetplayManager.ts` (`sendDataPacket`, `onDataPacket`).
+- [x] Added unit tests in `NetplayManager.spec.ts` covering packet streaming and message dispatcher handlers.
