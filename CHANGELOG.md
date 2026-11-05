@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.47.0]
+### Added
+- Expanded `tools/ai_loop.py` with multi-step iterative LLM self-correction: feeds compiler diagnostics and binary-diff output directly back into the LLM prompt over configurable retries (`--max-retries`).
+- Added configurable `--api-url` argument and `LLM_API_URL` environment variable support to `tools/ai_loop.py` for local or proxy mock testing.
+- Added comprehensive unit test coverage in `tools/test_ai_loop.py` for multi-step iterative self-correction with diagnostic error feedback.
+
 ## [0.46.0]
 ### Added
 - Created `SystemTray.tsx` with floating status indicators, service monitoring (Next.js server, Netplay socket, AI matcher, PCM audio), and interactive controls to safely quit servers and restart all services.

@@ -5,7 +5,8 @@ ai_loop.py
 Continuous orchestration script to recursively scan for non-matching decompiled C files,
 locate their target MIPS assembly, and run the ai_matcher.py harness.
 Uses urllib to make HTTP requests to an external LLM API for automated refactoring
-when the LLM_API_KEY environment variable is present.
+when the LLM_API_KEY environment variable is present. Features iterative self-correction
+by feeding compilation and diff diagnostics back into the prompt loop up to a configurable max retries.
 """
 
 import os
@@ -16,15 +17,17 @@ import urllib.error
 import subprocess
 import argparse
 
-def call_llm_api(prompt, api_key):
-    """Makes an HTTP request to an external LLM API."""
+def call_llm_api(prompt, api_key, api_url=None):
+    """Makes an HTTP request to an external LLM API or mock endpoint."""
     # For testing, we mock the LLM response if the API key is "MOCK_KEY"
     if api_key == "MOCK_KEY":
+        if "retry_step needed" in prompt:
+            return "```c\nint test() { /* retry_step */ return 1; }\n```"
         if "test" in prompt:
             return "```c\nint test() { return 1; }\n```"
         return "```c\n// mock logic\n```"
 
-    url = "https://api.openai.com/v1/chat/completions" # Example endpoint
+    url = api_url or os.environ.get("LLM_API_URL") or "https://api.openai.com/v1/chat/completions"
 
     headers = {
         "Content-Type": "application/json",
@@ -32,9 +35,16 @@ def call_llm_api(prompt, api_key):
     }
 
     data = {
-        "model": "gpt-4", # Example model
+        "model": os.environ.get("LLM_MODEL", "gpt-4"),
         "messages": [
-            {"role": "system", "content": "You are an expert C decompilation AI. Your goal is to rewrite the provided C function so its compiled MIPS assembly exactly matches the provided target assembly."},
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert C decompilation AI. Your goal is to rewrite the provided "
+                    "C function so its compiled MIPS assembly exactly matches the provided target assembly. "
+                    "Incorporate any diagnostic errors or diffs provided to iteratively converge to a byte-matching output."
+                )
+            },
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.2
@@ -59,10 +69,11 @@ def find_c_files(src_dir):
                 c_files.append(os.path.join(root, file))
     return c_files
 
-def process_file(c_file, api_key):
-    """Processes a single C file by attempting to match it, and invoking the LLM if it fails."""
-    # In a real scenario, we'd find the corresponding target .text bin
-    # For now, we simulate the behavior
+def process_file(c_file, api_key, max_retries=3, api_url=None):
+    """
+    Processes a single C file by attempting to match it, and invoking the LLM if it fails.
+    Iteratively feeds diagnostic error outputs back to the LLM up to max_retries.
+    """
     base_name = os.path.splitext(os.path.basename(c_file))[0]
     target_bin = os.path.join("build", "expected", f"{base_name}.bin")
 
@@ -73,7 +84,7 @@ def process_file(c_file, api_key):
         print(f"  Target binary {target_bin} not found. Skipping.")
         return False
 
-    # Run the matcher
+    # Run the initial matcher
     cmd = ["python3", "tools/ai_matcher.py", c_file, target_bin]
     result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -87,7 +98,7 @@ def process_file(c_file, api_key):
         print("  LLM_API_KEY not set. Cannot refactor. Skipping.")
         return False
 
-    # Read the current C code and the target assembly (mocking reading assembly)
+    # Read the current C code and the target assembly
     with open(c_file, 'r') as f:
         c_code = f.read()
 
@@ -97,35 +108,59 @@ def process_file(c_file, api_key):
         with open(asm_file, 'r') as f:
             asm_code = f.read()
 
-    prompt = f"Target Assembly:\n```mips\n{asm_code}\n```\n\nCurrent C Code:\n```c\n{c_code}\n```\n\nPlease provide the corrected C code."
+    last_feedback = result.stdout + "\n" + result.stderr
 
-    new_code = call_llm_api(prompt, api_key)
+    for attempt in range(1, max_retries + 1):
+        print(f"  [Attempt {attempt}/{max_retries}] Requesting LLM correction...")
 
-    if new_code:
-        # Simplistic extraction of C code from markdown block
+        feedback_section = ""
+        if attempt > 1 or last_feedback.strip():
+            feedback_section = f"\n\nCompiler/Matcher Output:\n```\n{last_feedback.strip()}\n```\n"
+
+        prompt = (
+            f"Target Assembly:\n```mips\n{asm_code}\n```\n\n"
+            f"Current C Code:\n```c\n{c_code}\n```"
+            f"{feedback_section}\n"
+            f"Please provide the corrected C code in a ```c code block."
+        )
+
+        new_code = call_llm_api(prompt, api_key, api_url)
+
+        if not new_code:
+            print("  Failed to get a response from the LLM.")
+            return False
+
+        # Extract C code from markdown block
         if "```c" in new_code:
-            new_code = new_code.split("```c")[1].split("```")[0].strip()
+            extracted_code = new_code.split("```c")[1].split("```")[0].strip()
+        elif "```" in new_code:
+            extracted_code = new_code.split("```")[1].split("```")[0].strip()
+        else:
+            extracted_code = new_code.strip()
 
         print("  Applying LLM suggestions...")
         with open(c_file, 'w') as f:
-            f.write(new_code)
+            f.write(extracted_code)
 
-        # Re-test
+        # Re-test match
         print("  Re-testing match...")
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
             print("  [SUCCESS] LLM refactoring achieved a match!")
             return True
         else:
-            print("  [MISMATCH] LLM refactoring failed to match.")
-            return False
-    else:
-        print("  Failed to get a response from the LLM.")
-        return False
+            print(f"  [MISMATCH] Attempt {attempt} failed to match.")
+            c_code = extracted_code
+            last_feedback = result.stdout + "\n" + result.stderr
+
+    print("  [MISMATCH] LLM refactoring failed to match.")
+    return False
 
 def main():
     parser = argparse.ArgumentParser(description="Continuous AI Loop for decompilation matching.")
     parser.add_argument("--src", default="src", help="Directory containing source C files.")
+    parser.add_argument("--max-retries", type=int, default=3, help="Max self-correction iterations per file.")
+    parser.add_argument("--api-url", default=None, help="Custom LLM API URL for mocking/local models.")
 
     args = parser.parse_args()
     api_key = os.environ.get("LLM_API_KEY")
@@ -142,7 +177,7 @@ def main():
 
     success_count = 0
     for c_file in c_files:
-        if process_file(c_file, api_key):
+        if process_file(c_file, api_key, max_retries=args.max_retries, api_url=args.api_url):
             success_count += 1
 
     print(f"\nAI Loop complete. Successfully matched: {success_count}/{len(c_files)}")

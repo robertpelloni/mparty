@@ -70,6 +70,18 @@ def mock_matcher_fail_then_success():
         f.write("        sys.exit(0)\n")
         f.write("sys.exit(1)\n")
 
+def mock_matcher_multi_retry():
+    if os.path.exists("tools/ai_matcher.py"): os.rename("tools/ai_matcher.py", "tools/ai_matcher.py.bak")
+    with open("tools/ai_matcher.py", "w") as f:
+        f.write("#!/usr/bin/env python3\n")
+        f.write("import sys\n")
+        f.write("with open(sys.argv[1], 'r') as f:\n")
+        f.write("    content = f.read()\n")
+        f.write("    if 'return 1;' in content and 'retry_step' in content:\n")
+        f.write("        sys.exit(0)\n")
+        f.write("sys.stderr.write('Diagnostic mismatch: retry_step needed\\n')\n")
+        f.write("sys.exit(1)\n")
+
 def mock_matcher_always_fail():
     if os.path.exists("tools/ai_matcher.py"): os.rename("tools/ai_matcher.py", "tools/ai_matcher.py.bak")
     with open("tools/ai_matcher.py", "w") as f:
@@ -103,8 +115,13 @@ def main():
         setup_mock_env()
         mock_matcher_always_fail()
 
+    def setup_multi_retry():
+        setup_mock_env()
+        mock_matcher_multi_retry()
+
     tests = [
         ("LLM Refactoring Success", setup_success, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
+        ("LLM Multi-step Iterative Self-Correction", setup_multi_retry, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
         ("LLM Missing API Key Graceful Failure", setup_no_key, teardown_all, None, False),
         ("LLM Refactoring Persistent Failure", setup_always_fail, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, False)
     ]

@@ -169,7 +169,7 @@
 
 ## Automated AI Matching Expansion
 
-- [ ] Investigate modifying `tools/ai_loop.py` to directly hook into an LLM via the mock API layer to self-correct `.c` files during compilation.
+- [x] Investigate modifying `tools/ai_loop.py` to directly hook into an LLM via the mock API layer to self-correct `.c` files during compilation.
 
 - [x] Harden `tools/test_ai_loop.py` to test LLM mock iteration failures and missing API key conditions.
 
@@ -191,3 +191,9 @@
 - [x] Implemented `web/src/components/CliTerminalModal.tsx` for interactive terminal commands.
 - [x] Redesigned `web/src/app/page.tsx` into a consolidated 4-tier single-page dashboard.
 - [x] Created `web/tests/system_tray.spec.ts` for end-to-end subsystem and tray verification.
+
+## AI Loop Self-Correction & Multi-Step Matching (v0.47.0)
+
+- [x] Implemented multi-step iterative LLM self-correction loop in `tools/ai_loop.py` feeding compiler/matcher diagnostics into the prompt.
+- [x] Added unit test coverage for multi-step self-correction in `tools/test_ai_loop.py`.
+- [x] Integrated configurable API URLs and `--max-retries` parameter.
