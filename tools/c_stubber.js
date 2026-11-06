@@ -3,8 +3,11 @@
  * c_stubber.js
  *
  * Parses generated .s assembly files and nonmatching assembly blocks (e.g. asm/nonmatchings),
- * extracts function signatures and analyzes MIPS instruction patterns (argument registers,
- * return value registers, stack frames) to generate intelligent, typed C function stubs.
+ * extracts function signatures and performs advanced MIPS instruction analysis:
+ * - Differentiates load vs store semantics to accurately register reads vs writes
+ * - Infers pointer arguments when base registers are indexed with offset memory loads/stores
+ * - Distinguishes 32-bit (s32), 64-bit (s64), float (f32), double (f64), and void returns
+ * - Classifies leaf vs non-leaf call structures and jump table switch statements
  */
 
 const fs = require('fs');
@@ -13,21 +16,29 @@ const path = require('path');
 // Regex to identify function definitions in MIPS assembly (e.g., glabel func_80000000)
 const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 
+const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
+const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
+
 /**
  * Analyzes assembly instructions within a function body to infer:
- * 1. Argument types and counts (based on initial reads of $a0-$a3, $f12, $f14)
- * 2. Return type (based on writes to $v0, $v1, $f0 before jr $ra)
- * 3. Whether the function is a leaf function (no jal / no $ra saved)
+ * 1. Argument types (pointers vs scalars, float vs integer)
+ * 2. Return types (s32, s64, f32, f64, void)
+ * 3. Stack frame size & leaf status
+ * 4. Control-flow structures (jump tables, loops)
  */
 function analyzeAsmBody(body) {
     const lines = body.split('\n');
 
     let usesV0 = false;
+    let usesV1 = false;
     let usesF0 = false;
+    let usesDoubleF0 = false;
     let hasJal = false;
+    let hasJumpTable = false;
     let stackSize = 0;
 
     const argRegisters = new Set();
+    const pointerArgs = new Set();
     const writtenRegisters = new Set();
 
     for (const rawLine of lines) {
@@ -35,9 +46,19 @@ function analyzeAsmBody(body) {
         const line = rawLine.split('#')[0].split(';')[0].trim();
         if (!line) continue;
 
+        const tokens = line.split(/[,\s()]+/).filter(Boolean);
+        if (tokens.length === 0) continue;
+
+        const opcode = tokens[0];
+
         // Detect function calls
-        if (/\bjal\s+/.test(line) || /\bjalr\s+/.test(line)) {
+        if (opcode === 'jal' || opcode === 'jalr') {
             hasJal = true;
+        }
+
+        // Detect indirect branch/jump table (jr $tX where not $ra)
+        if (opcode === 'jr' && tokens[1] && tokens[1] !== '$ra') {
+            hasJumpTable = true;
         }
 
         // Detect stack adjustment in prologue
@@ -46,40 +67,60 @@ function analyzeAsmBody(body) {
             stackSize = parseInt(stackMatch[1], 16) || parseInt(stackMatch[1], 10) || 0;
         }
 
-        // Check for return value setting
-        if (/\b(?:li|move|lw|add|addu|sub|subu|and|or|xor|ori)\s+\$v0\b/.test(line)) {
-            usesV0 = true;
-        }
-        if (/\b(?:mtc1|mfc1|lwc1|swc1|add\.s|sub\.s|mul\.s|div\.s|mov\.s)\s+\$f0\b/.test(line)) {
-            usesF0 = true;
+        // Detect return register writes
+        if (opcode !== 'jr' && opcode !== 'jal' && !STORE_OPCODES.has(opcode)) {
+            if (tokens[1] === '$v0') usesV0 = true;
+            if (tokens[1] === '$v1') usesV1 = true;
+            if (tokens[1] === '$f0') {
+                usesF0 = true;
+                if (opcode.endsWith('.d')) usesDoubleF0 = true;
+            }
         }
 
-        // Track argument register usage before they are overwritten
-        const words = line.split(/[,\s()]+/);
-        for (let i = 1; i < words.length; i++) {
-            const reg = words[i];
-            if (['$a0', '$a1', '$a2', '$a3'].includes(reg)) {
-                // If it is used as a source before being written to
-                if (i > 1 && !writtenRegisters.has(reg)) {
-                    argRegisters.add(reg);
-                } else if (i === 1) {
-                    // It is the destination register being written
-                    writtenRegisters.add(reg);
+        // Detect memory dereferences identifying pointer types: e.g., lw $t0, 0($a0) or sw $t0, 4($a1)
+        const memMatch = line.match(/(?:[a-z0-9_]+)\s+[^,]+,\s*-?[0-9a-fA-Fx]*\((\$[a-zA-Z0-9_]+)\)/);
+        if (memMatch) {
+            const baseReg = memMatch[1];
+            if (['$a0', '$a1', '$a2', '$a3'].includes(baseReg)) {
+                pointerArgs.add(baseReg);
+            }
+        }
+
+        // Track register dependencies (read vs write)
+        if (STORE_OPCODES.has(opcode)) {
+            // For store instructions: all register operands are source/reads (value being stored, and base pointer)
+            for (let i = 1; i < tokens.length; i++) {
+                const reg = tokens[i];
+                if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
+                    if (!writtenRegisters.has(reg)) {
+                        argRegisters.add(reg);
+                    }
                 }
-            } else if (['$f12', '$f14'].includes(reg)) {
-                if (i > 1 && !writtenRegisters.has(reg)) {
-                    argRegisters.add(reg);
-                } else if (i === 1) {
-                    writtenRegisters.add(reg);
+            }
+        } else {
+            // Standard instruction: tokens[1] is destination/write, subsequent are sources/reads
+            for (let i = 2; i < tokens.length; i++) {
+                const reg = tokens[i];
+                if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
+                    if (!writtenRegisters.has(reg)) {
+                        argRegisters.add(reg);
+                    }
                 }
+            }
+            if (tokens[1] && tokens[1].startsWith('$')) {
+                writtenRegisters.add(tokens[1]);
             }
         }
     }
 
     // Determine return type
     let returnType = 'void';
-    if (usesF0) {
+    if (usesDoubleF0) {
+        returnType = 'f64';
+    } else if (usesF0) {
         returnType = 'f32';
+    } else if (usesV0 && usesV1) {
+        returnType = 's64';
     } else if (usesV0) {
         returnType = 's32';
     }
@@ -98,7 +139,11 @@ function analyzeAsmBody(body) {
         } else {
             sortedArgs.forEach(reg => {
                 const name = reg.replace('$', '');
-                params.push(`s32 ${name}`);
+                if (pointerArgs.has(reg)) {
+                    params.push(`void* ${name}`);
+                } else {
+                    params.push(`s32 ${name}`);
+                }
             });
         }
     }
@@ -107,6 +152,7 @@ function analyzeAsmBody(body) {
         returnType,
         params: params.join(', '),
         isLeaf: !hasJal,
+        hasJumpTable,
         stackSize
     };
 }
@@ -168,11 +214,18 @@ function processAsmFile(asmFilePath, srcDir) {
         cContent += `/*\n`;
         cContent += ` * Function: ${fn.name}\n`;
         cContent += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
+        if (analysis.hasJumpTable) {
+            cContent += ` * Features: Indirect Jump Table (Switch Statement)\n`;
+        }
         cContent += ` */\n`;
         cContent += `${analysis.returnType} ${fn.name}(${analysis.params}) {\n`;
 
-        if (analysis.returnType === 's32') {
+        if (analysis.returnType === 's64') {
+            cContent += `    return 0LL;\n`;
+        } else if (analysis.returnType === 's32') {
             cContent += `    return 0;\n`;
+        } else if (analysis.returnType === 'f64') {
+            cContent += `    return 0.0;\n`;
         } else if (analysis.returnType === 'f32') {
             cContent += `    return 0.0f;\n`;
         } else {

@@ -79,4 +79,35 @@ assert.strictEqual(extracted[0].name, 'func_one');
 assert.strictEqual(extracted[1].name, 'func_two');
 console.log('[OK] Test 4: Multiple function extraction passed.');
 
+// Test 5: Pointer parameter inference from memory loads/stores
+const pointerAsm = `
+    lw $t0, 0($a0)
+    sw $t0, 4($a1)
+    jr $ra
+    nop
+`;
+
+const res5 = analyzeAsmBody(pointerAsm);
+assert.strictEqual(res5.returnType, 'void');
+assert.strictEqual(res5.params, 'void* a0, void* a1', 'Expected pointer args void* a0, void* a1');
+console.log('[OK] Test 5: Pointer parameter inference passed.');
+
+// Test 6: 64-bit integer return ($v0, $v1) and indirect jump table (switch)
+const switch64Asm = `
+    sll $t0, $a0, 2
+    lw $t1, 0x80050000($t0)
+    jr $t1
+    nop
+case_0:
+    li $v0, 1
+    li $v1, 0
+    jr $ra
+    nop
+`;
+
+const res6 = analyzeAsmBody(switch64Asm);
+assert.strictEqual(res6.returnType, 's64', 'Expected returnType s64');
+assert.strictEqual(res6.hasJumpTable, true, 'Expected hasJumpTable true');
+console.log('[OK] Test 6: 64-bit return and jump table switch detection passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

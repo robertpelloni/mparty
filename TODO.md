@@ -219,3 +219,8 @@
 - [x] Added temperature stepping (`0.2`, `0.4`, `0.7`) and diff line penalty scoring in `tools/ai_loop.py` to retain best matching candidates.
 - [x] Implemented learned decompilation rule persistence in `build/decomp_rules.json`.
 - [x] Expanded `tools/test_ai_loop.py` with tests for rules caching and candidate convergence.
+
+## Advanced Stubber Heuristics & Control Flow (v0.52.0)
+
+- [x] Differentiated load/store semantics, inferred pointer argument types (`void*`), added 64-bit return detection (`s64`, `f64`), and detected indirect jump table switch statements in `tools/c_stubber.js`.
+- [x] Expanded test coverage in `tools/test_c_stubber.js`.

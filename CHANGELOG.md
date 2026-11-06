@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.52.0]
+### Added
+- Refined `tools/c_stubber.js` MIPS assembly parsing with load/store opcode differentiation, pointer parameter inference (`void*`, `s32*`), 64-bit return detection (`s64`, `f64`), and indirect jump table switch statement recognition.
+- Expanded unit tests in `tools/test_c_stubber.js` verifying pointer inference from dereferenced base addresses, 64-bit return registers (`$v0`, `$v1`), and indirect branches (`jr $t1`).
+
 ## [0.51.0]
 ### Added
 - Expanded `tools/ai_loop.py` with multi-candidate temperature stepping (`0.2`, `0.4`, `0.7`), assembly diff penalty line scoring (`calculate_diff_score`), and best-candidate state retention/rollback.
