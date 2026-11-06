@@ -6,7 +6,7 @@
  */
 
 const assert = require('assert');
-const { analyzeAsmBody, extractFunctionsFromAsm } = require('./c_stubber');
+const { analyzeAsmBody, extractFunctionsFromAsm, generateCStub } = require('./c_stubber');
 
 console.log('Testing c_stubber.js pattern analysis...\n');
 
@@ -109,5 +109,12 @@ const res6 = analyzeAsmBody(switch64Asm);
 assert.strictEqual(res6.returnType, 's64', 'Expected returnType s64');
 assert.strictEqual(res6.hasJumpTable, true, 'Expected hasJumpTable true');
 console.log('[OK] Test 6: 64-bit return and jump table switch detection passed.');
+
+// Test 7: Validate #pragma GLOBAL_ASM generation for nonmatching functions
+const stubOutput = generateCStub('func_test', res1, 'engine', true);
+assert(stubOutput.includes('#ifdef NON_MATCHING'), 'Expected #ifdef NON_MATCHING');
+assert(stubOutput.includes('#pragma GLOBAL_ASM("asm/nonmatchings/engine/func_test.s")'), 'Expected #pragma GLOBAL_ASM');
+assert(stubOutput.includes('s32 func_test(s32 a0, s32 a1)'), 'Expected signature s32 func_test(s32 a0, s32 a1)');
+console.log('[OK] Test 7: #pragma GLOBAL_ASM generation passed.');
 
 console.log('\nAll c_stubber tests passed successfully!');

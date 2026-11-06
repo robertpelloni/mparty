@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.53.0]
+### Added
+- Expanded `tools/disassemble.py` to automatically extract individual assembly functions into structured `asm/nonmatchings/<module>/<func>.s` directories.
+- Updated `tools/c_stubber.js` with `#pragma GLOBAL_ASM("asm/nonmatchings/...")` wrapper generation guarded by `#ifdef NON_MATCHING`, ensuring byte-parity builds during ongoing decompilation.
+- Added test coverage in `tools/test_c_stubber.js` verifying `#pragma GLOBAL_ASM` generation.
+
 ## [0.52.0]
 ### Added
 - Refined `tools/c_stubber.js` MIPS assembly parsing with load/store opcode differentiation, pointer parameter inference (`void*`, `s32*`), 64-bit return detection (`s64`, `f64`), and indirect jump table switch statement recognition.

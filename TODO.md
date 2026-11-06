@@ -224,3 +224,9 @@
 
 - [x] Differentiated load/store semantics, inferred pointer argument types (`void*`), added 64-bit return detection (`s64`, `f64`), and detected indirect jump table switch statements in `tools/c_stubber.js`.
 - [x] Expanded test coverage in `tools/test_c_stubber.js`.
+
+## Non-Matching Section Extraction & GLOBAL_ASM Stubs (v0.53.0)
+
+- [x] Expanded `tools/disassemble.py` to automatically extract individual functions into `asm/nonmatchings/<module>/<func>.s`.
+- [x] Added `#pragma GLOBAL_ASM` generation with `#ifdef NON_MATCHING` guards in `tools/c_stubber.js`.
+- [x] Added test case in `tools/test_c_stubber.js` verifying `#pragma GLOBAL_ASM` output formatting.

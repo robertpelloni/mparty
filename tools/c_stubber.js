@@ -8,6 +8,7 @@
  * - Infers pointer arguments when base registers are indexed with offset memory loads/stores
  * - Distinguishes 32-bit (s32), 64-bit (s64), float (f32), double (f64), and void returns
  * - Classifies leaf vs non-leaf call structures and jump table switch statements
+ * - Supports generating `#pragma GLOBAL_ASM("asm/nonmatchings/...")` fallbacks for byte-parity
  */
 
 const fs = require('fs');
@@ -88,7 +89,6 @@ function analyzeAsmBody(body) {
 
         // Track register dependencies (read vs write)
         if (STORE_OPCODES.has(opcode)) {
-            // For store instructions: all register operands are source/reads (value being stored, and base pointer)
             for (let i = 1; i < tokens.length; i++) {
                 const reg = tokens[i];
                 if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
@@ -98,7 +98,6 @@ function analyzeAsmBody(body) {
                 }
             }
         } else {
-            // Standard instruction: tokens[1] is destination/write, subsequent are sources/reads
             for (let i = 2; i < tokens.length; i++) {
                 const reg = tokens[i];
                 if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
@@ -195,6 +194,55 @@ function extractFunctionsFromAsm(code) {
     return functions;
 }
 
+/**
+ * Formats a C stub with optional #pragma GLOBAL_ASM fallback for non-matching functions.
+ */
+function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm = true) {
+    let out = `/*\n`;
+    out += ` * Function: ${funcName}\n`;
+    out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
+    if (analysis.hasJumpTable) {
+        out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
+    }
+    out += ` */\n`;
+
+    if (useGlobalAsm) {
+        out += `#ifdef NON_MATCHING\n`;
+        out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
+        if (analysis.returnType === 's64') {
+            out += `    return 0LL;\n`;
+        } else if (analysis.returnType === 's32') {
+            out += `    return 0;\n`;
+        } else if (analysis.returnType === 'f64') {
+            out += `    return 0.0;\n`;
+        } else if (analysis.returnType === 'f32') {
+            out += `    return 0.0f;\n`;
+        } else {
+            out += `    // TODO: implement\n`;
+        }
+        out += `}\n`;
+        out += `#else\n`;
+        out += `#pragma GLOBAL_ASM("asm/nonmatchings/${moduleName}/${funcName}.s")\n`;
+        out += `#endif\n\n`;
+    } else {
+        out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
+        if (analysis.returnType === 's64') {
+            out += `    return 0LL;\n`;
+        } else if (analysis.returnType === 's32') {
+            out += `    return 0;\n`;
+        } else if (analysis.returnType === 'f64') {
+            out += `    return 0.0;\n`;
+        } else if (analysis.returnType === 'f32') {
+            out += `    return 0.0f;\n`;
+        } else {
+            out += `    // TODO: implement\n`;
+        }
+        out += `}\n\n`;
+    }
+
+    return out;
+}
+
 function processAsmFile(asmFilePath, srcDir) {
     const code = fs.readFileSync(asmFilePath, 'utf8');
     const functions = extractFunctionsFromAsm(code);
@@ -211,27 +259,7 @@ function processAsmFile(asmFilePath, srcDir) {
 
     functions.forEach(fn => {
         const analysis = analyzeAsmBody(fn.body);
-        cContent += `/*\n`;
-        cContent += ` * Function: ${fn.name}\n`;
-        cContent += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
-        if (analysis.hasJumpTable) {
-            cContent += ` * Features: Indirect Jump Table (Switch Statement)\n`;
-        }
-        cContent += ` */\n`;
-        cContent += `${analysis.returnType} ${fn.name}(${analysis.params}) {\n`;
-
-        if (analysis.returnType === 's64') {
-            cContent += `    return 0LL;\n`;
-        } else if (analysis.returnType === 's32') {
-            cContent += `    return 0;\n`;
-        } else if (analysis.returnType === 'f64') {
-            cContent += `    return 0.0;\n`;
-        } else if (analysis.returnType === 'f32') {
-            cContent += `    return 0.0f;\n`;
-        } else {
-            cContent += `    // TODO: implement\n`;
-        }
-        cContent += `}\n\n`;
+        cContent += generateCStub(fn.name, analysis, baseName, true);
     });
 
     fs.writeFileSync(cFilePath, cContent);
@@ -249,7 +277,9 @@ function processDirectory(asmDir, srcDir) {
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            processDirectory(fullPath, path.join(srcDir, file));
+            if (file !== 'nonmatchings') {
+                processDirectory(fullPath, path.join(srcDir, file));
+            }
         } else if (file.endsWith('.s')) {
             processAsmFile(fullPath, srcDir);
         }
@@ -278,5 +308,6 @@ if (require.main === module) {
 module.exports = {
     analyzeAsmBody,
     extractFunctionsFromAsm,
+    generateCStub,
     processAsmFile
 };
