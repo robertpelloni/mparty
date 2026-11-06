@@ -207,3 +207,9 @@
 
 - [x] Expanded `tools/c_stubber.js` with pattern recognition for MIPS argument registers (`$a0-$a3`, `$f12`), return value registers (`$v0`, `$f0`), and stack frame analysis.
 - [x] Created dedicated unit test suite `tools/test_c_stubber.js` verifying typed stub generation from nonmatching assembly sequences.
+
+## Structured Assembly Diff Feedback in AI Decompilation Loop (v0.50.0)
+
+- [x] Added `generate_assembly_diff` in `tools/ai_matcher.py` to produce unified diffs between compiled disassembly and target assembly.
+- [x] Routed structured assembly diff diagnostics through `tools/ai_loop.py` for LLM prompt self-correction.
+- [x] Added test coverage in `tools/test_ai_loop.py` for structured diff feedback.

@@ -6,7 +6,8 @@ Continuous orchestration script to recursively scan for non-matching decompiled 
 locate their target MIPS assembly, and run the ai_matcher.py harness.
 Uses urllib to make HTTP requests to an external LLM API for automated refactoring
 when the LLM_API_KEY environment variable is present. Features iterative self-correction
-by feeding compilation and diff diagnostics back into the prompt loop up to a configurable max retries.
+by feeding compilation, binary hash diffs, and structured assembly diffs back into
+the prompt loop up to a configurable max retries.
 """
 
 import os
@@ -21,6 +22,8 @@ def call_llm_api(prompt, api_key, api_url=None):
     """Makes an HTTP request to an external LLM API or mock endpoint."""
     # For testing, we mock the LLM response if the API key is "MOCK_KEY"
     if api_key == "MOCK_KEY":
+        if "structured_diff_correction" in prompt:
+            return "```c\nint test() { /* structured_diff_applied */ return 1; }\n```"
         if "retry_step needed" in prompt:
             return "```c\nint test() { /* retry_step */ return 1; }\n```"
         if "test" in prompt:
@@ -42,7 +45,8 @@ def call_llm_api(prompt, api_key, api_url=None):
                 "content": (
                     "You are an expert C decompilation AI. Your goal is to rewrite the provided "
                     "C function so its compiled MIPS assembly exactly matches the provided target assembly. "
-                    "Incorporate any diagnostic errors or diffs provided to iteratively converge to a byte-matching output."
+                    "Incorporate any compiler errors, binary hash differences, or structured assembly diffs "
+                    "provided to iteratively converge to a byte-matching output."
                 )
             },
             {"role": "user", "content": prompt}
@@ -72,10 +76,11 @@ def find_c_files(src_dir):
 def process_file(c_file, api_key, max_retries=3, api_url=None):
     """
     Processes a single C file by attempting to match it, and invoking the LLM if it fails.
-    Iteratively feeds diagnostic error outputs back to the LLM up to max_retries.
+    Iteratively feeds diagnostic error outputs and assembly diffs back to the LLM up to max_retries.
     """
     base_name = os.path.splitext(os.path.basename(c_file))[0]
     target_bin = os.path.join("build", "expected", f"{base_name}.bin")
+    asm_file = os.path.join("asm", f"{base_name}.s")
 
     print(f"Processing: {c_file}")
 
@@ -84,8 +89,11 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
         print(f"  Target binary {target_bin} not found. Skipping.")
         return False
 
-    # Run the initial matcher
-    cmd = ["python3", "tools/ai_matcher.py", c_file, target_bin]
+    # Run the initial matcher with diff flag
+    cmd = ["python3", "tools/ai_matcher.py", c_file, target_bin, "--diff"]
+    if os.path.exists(asm_file):
+        cmd.extend(["--target-asm", asm_file])
+
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode == 0:
@@ -98,11 +106,10 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
         print("  LLM_API_KEY not set. Cannot refactor. Skipping.")
         return False
 
-    # Read the current C code and the target assembly
+    # Read current C code and target assembly
     with open(c_file, 'r') as f:
         c_code = f.read()
 
-    asm_file = os.path.join("asm", f"{base_name}.s")
     asm_code = ""
     if os.path.exists(asm_file):
         with open(asm_file, 'r') as f:
@@ -115,7 +122,7 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
 
         feedback_section = ""
         if attempt > 1 or last_feedback.strip():
-            feedback_section = f"\n\nCompiler/Matcher Output:\n```\n{last_feedback.strip()}\n```\n"
+            feedback_section = f"\n\nCompiler/Matcher Output & Disassembly Diff:\n```\n{last_feedback.strip()}\n```\n"
 
         prompt = (
             f"Target Assembly:\n```mips\n{asm_code}\n```\n\n"

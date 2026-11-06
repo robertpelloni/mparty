@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.50.0]
+### Added
+- Enhanced `tools/ai_matcher.py` with structured assembly diff extraction (`generate_assembly_diff`, `--diff`, `--target-asm`), comparing compiled object disassembly with target MIPS assembly lines.
+- Integrated structured assembly diff output into `tools/ai_loop.py` to pass normalized instruction diffs into LLM self-correction prompts for higher matching accuracy.
+- Added test coverage in `tools/test_ai_loop.py` verifying structured assembly diff diagnostics through multi-step self-correction.
+
 ## [0.49.0]
 ### Added
 - Refined C stub generation in `tools/c_stubber.js` with intelligent MIPS assembly pattern recognition to infer return types (`s32`, `f32`, `void`), argument registers (`$a0-$a3`, `$f12`, `$f14`), and stack frame dimensions (leaf vs non-leaf functions with `$sp` tracking).

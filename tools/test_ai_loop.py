@@ -82,6 +82,21 @@ def mock_matcher_multi_retry():
         f.write("sys.stderr.write('Diagnostic mismatch: retry_step needed\\n')\n")
         f.write("sys.exit(1)\n")
 
+def mock_matcher_diff_feedback():
+    if os.path.exists("tools/ai_matcher.py"): os.rename("tools/ai_matcher.py", "tools/ai_matcher.py.bak")
+    with open("tools/ai_matcher.py", "w") as f:
+        f.write("#!/usr/bin/env python3\n")
+        f.write("import sys\n")
+        f.write("with open(sys.argv[1], 'r') as f:\n")
+        f.write("    content = f.read()\n")
+        f.write("    if 'structured_diff_applied' in content:\n")
+        f.write("        sys.exit(0)\n")
+        f.write("print('--- [ASSEMBLY DIFF] ---')\n")
+        f.write("print('- mock_instruction_compiled $v0, 0')\n")
+        f.write("print('+ structured_diff_correction needed')\n")
+        f.write("print('-----------------------')\n")
+        f.write("sys.exit(1)\n")
+
 def mock_matcher_always_fail():
     if os.path.exists("tools/ai_matcher.py"): os.rename("tools/ai_matcher.py", "tools/ai_matcher.py.bak")
     with open("tools/ai_matcher.py", "w") as f:
@@ -119,9 +134,14 @@ def main():
         setup_mock_env()
         mock_matcher_multi_retry()
 
+    def setup_diff_feedback():
+        setup_mock_env()
+        mock_matcher_diff_feedback()
+
     tests = [
         ("LLM Refactoring Success", setup_success, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
         ("LLM Multi-step Iterative Self-Correction", setup_multi_retry, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
+        ("LLM Assembly Diff Structured Feedback", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
         ("LLM Missing API Key Graceful Failure", setup_no_key, teardown_all, None, False),
         ("LLM Refactoring Persistent Failure", setup_always_fail, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, False)
     ]

@@ -5,6 +5,8 @@ ai_matcher.py
 Automated AI decompilation matching harness.
 Compiles C code using gcc cross-compiler (mips-linux-gnu-gcc) with specified optimization flags (e.g., -O2).
 Extracts raw .text binaries via objcopy to compare file hashes against target MIPS assembly.
+Optionally generates normalized assembly diffs between compiled output and target assembly
+to provide structured feedback for LLM self-correction loops.
 """
 
 import sys
@@ -12,6 +14,7 @@ import os
 import subprocess
 import hashlib
 import argparse
+import difflib
 
 def get_file_hash(filepath):
     """Calculates the SHA256 hash of a file."""
@@ -50,9 +53,7 @@ def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
     # Mock objcopy if mips-linux-gnu-objcopy is not present
     if not os.system(f"which {objcopy} > /dev/null 2>&1") == 0:
         print(f"Objcopy '{objcopy}' not found. Mocking objcopy.")
-        # If testing ai loop logic, we just copy a hashable value. For our mock testing logic:
-        # We will write the size of the c file to the mock binary so it can match if it's "correct"
-        # Since we want to test LLM logic matching, we'll write something specific based on the file content.
+        # Check source content if present in obj_file mock or inspect environment
         with open(obj_file, 'r') as f:
             content = f.read()
         with open(text_bin, 'w') as f:
@@ -71,6 +72,36 @@ def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
     except FileNotFoundError:
         print(f"Objcopy '{objcopy}' not found.")
         return False
+
+def disassemble_obj(obj_file, objdump="mips-linux-gnu-objdump"):
+    """Disassembles the .text section of an object file to MIPS assembly lines."""
+    cmd = [objdump, "-d", "-j", ".text", obj_file]
+    if not os.system(f"which {objdump} > /dev/null 2>&1") == 0:
+        return ["mock_instruction_compiled $v0, 0\n"]
+
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return res.stdout.splitlines(keepends=True)
+    except Exception:
+        return []
+
+def generate_assembly_diff(obj_file, target_asm_file):
+    """Generates a unified diff between compiled disassembly and target assembly."""
+    if not os.path.exists(target_asm_file):
+        return ""
+
+    compiled_lines = disassemble_obj(obj_file)
+    with open(target_asm_file, 'r') as f:
+        target_lines = f.readlines()
+
+    diff = difflib.unified_diff(
+        compiled_lines,
+        target_lines,
+        fromfile="compiled_assembly",
+        tofile="target_assembly",
+        n=3
+    )
+    return "".join(diff)
 
 def compare_hashes(file1, file2):
     """Compares the hashes of two files."""
@@ -94,7 +125,10 @@ def main():
     parser.add_argument("target_bin", help="Path to the target raw .text binary to match against.")
     parser.add_argument("--compiler", default="mips-linux-gnu-gcc", help="Cross-compiler to use.")
     parser.add_argument("--objcopy", default="mips-linux-gnu-objcopy", help="Objcopy tool to use.")
+    parser.add_argument("--objdump", default="mips-linux-gnu-objdump", help="Objdump tool to use.")
     parser.add_argument("--opt", default="-O2", help="Optimization flag.")
+    parser.add_argument("--target-asm", default=None, help="Target assembly file for diff output generation.")
+    parser.add_argument("--diff", action="store_true", help="Print structured assembly diff on mismatch.")
 
     args = parser.parse_args()
 
@@ -111,6 +145,14 @@ def main():
     if compile_c_file(args.c_file, temp_obj, args.compiler, args.opt):
         if extract_text_section(temp_obj, temp_bin, args.objcopy):
             match = compare_hashes(temp_bin, args.target_bin)
+
+            if not match and (args.diff or args.target_asm):
+                asm_path = args.target_asm or os.path.join("asm", f"{base_name}.s")
+                diff_output = generate_assembly_diff(temp_obj, asm_path)
+                if diff_output:
+                    print("\n--- [ASSEMBLY DIFF] ---")
+                    print(diff_output)
+                    print("-----------------------\n")
 
             # Cleanup
             if os.path.exists(temp_obj):
