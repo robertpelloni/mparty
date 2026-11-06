@@ -7,7 +7,8 @@ locate their target MIPS assembly, and run the ai_matcher.py harness.
 Uses urllib to make HTTP requests to an external LLM API for automated refactoring
 when the LLM_API_KEY environment variable is present. Features iterative self-correction
 by feeding compilation, binary hash diffs, and structured assembly diffs back into
-the prompt loop up to a configurable max retries.
+the prompt loop up to a configurable max retries. Implements temperature stepping,
+diff scoring to retain best candidates, and records matching patterns to build/decomp_rules.json.
 """
 
 import os
@@ -18,7 +19,30 @@ import urllib.error
 import subprocess
 import argparse
 
-def call_llm_api(prompt, api_key, api_url=None):
+RULES_CACHE_FILE = os.path.join("build", "decomp_rules.json")
+
+def load_decomp_rules():
+    """Loads learned decompilation rules/patterns from disk."""
+    if os.path.exists(RULES_CACHE_FILE):
+        try:
+            with open(RULES_CACHE_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_decomp_rule(func_name, pattern_rule):
+    """Saves a learned decompilation pattern rule."""
+    os.makedirs(os.path.dirname(RULES_CACHE_FILE), exist_ok=True)
+    rules = load_decomp_rules()
+    rules[func_name] = pattern_rule
+    try:
+        with open(RULES_CACHE_FILE, "w") as f:
+            json.dump(rules, f, indent=2)
+    except Exception as e:
+        print(f"Failed to save decomp rule: {e}")
+
+def call_llm_api(prompt, api_key, api_url=None, temperature=0.2):
     """Makes an HTTP request to an external LLM API or mock endpoint."""
     # For testing, we mock the LLM response if the API key is "MOCK_KEY"
     if api_key == "MOCK_KEY":
@@ -51,7 +75,7 @@ def call_llm_api(prompt, api_key, api_url=None):
             },
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.2
+        "temperature": temperature
     }
 
     req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
@@ -63,6 +87,24 @@ def call_llm_api(prompt, api_key, api_url=None):
     except urllib.error.URLError as e:
         print(f"API request failed: {e}")
         return None
+
+def calculate_diff_score(output_text):
+    """
+    Computes a mismatch penalty score from assembly diff output.
+    Lower score represents closer match to target assembly.
+    """
+    penalty = 0
+    in_diff = False
+    for line in output_text.splitlines():
+        if "--- [ASSEMBLY DIFF] ---" in line:
+            in_diff = True
+            continue
+        if "-----------------------" in line:
+            in_diff = False
+            continue
+        if in_diff and (line.startswith("+") or line.startswith("-")):
+            penalty += 1
+    return penalty if penalty > 0 else len(output_text.splitlines())
 
 def find_c_files(src_dir):
     """Recursively finds all .c files in the source directory."""
@@ -77,6 +119,7 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
     """
     Processes a single C file by attempting to match it, and invoking the LLM if it fails.
     Iteratively feeds diagnostic error outputs and assembly diffs back to the LLM up to max_retries.
+    Employs temperature stepping (0.2 -> 0.4 -> 0.7) and scores diff lines to retain best candidates.
     """
     base_name = os.path.splitext(os.path.basename(c_file))[0]
     target_bin = os.path.join("build", "expected", f"{base_name}.bin")
@@ -108,7 +151,7 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
 
     # Read current C code and target assembly
     with open(c_file, 'r') as f:
-        c_code = f.read()
+        original_c_code = f.read()
 
     asm_code = ""
     if os.path.exists(asm_file):
@@ -116,9 +159,15 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
             asm_code = f.read()
 
     last_feedback = result.stdout + "\n" + result.stderr
+    best_candidate_code = original_c_code
+    best_candidate_score = calculate_diff_score(last_feedback)
+    c_code = original_c_code
+
+    temperatures = [0.2, 0.4, 0.7]
 
     for attempt in range(1, max_retries + 1):
-        print(f"  [Attempt {attempt}/{max_retries}] Requesting LLM correction...")
+        temp = temperatures[(attempt - 1) % len(temperatures)]
+        print(f"  [Attempt {attempt}/{max_retries}] Requesting LLM correction (temp={temp})...")
 
         feedback_section = ""
         if attempt > 1 or last_feedback.strip():
@@ -131,11 +180,11 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
             f"Please provide the corrected C code in a ```c code block."
         )
 
-        new_code = call_llm_api(prompt, api_key, api_url)
+        new_code = call_llm_api(prompt, api_key, api_url, temperature=temp)
 
         if not new_code:
             print("  Failed to get a response from the LLM.")
-            return False
+            break
 
         # Extract C code from markdown block
         if "```c" in new_code:
@@ -154,11 +203,25 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
             print("  [SUCCESS] LLM refactoring achieved a match!")
+            save_decomp_rule(base_name, {"matched_attempt": attempt, "temperature": temp})
             return True
         else:
-            print(f"  [MISMATCH] Attempt {attempt} failed to match.")
+            current_feedback = result.stdout + "\n" + result.stderr
+            current_score = calculate_diff_score(current_feedback)
+            print(f"  [MISMATCH] Attempt {attempt} score={current_score} (best={best_candidate_score}).")
+
+            if current_score <= best_candidate_score:
+                best_candidate_code = extracted_code
+                best_candidate_score = current_score
+
             c_code = extracted_code
-            last_feedback = result.stdout + "\n" + result.stderr
+            last_feedback = current_feedback
+
+    # Restore best candidate if failed to completely match
+    if best_candidate_code != c_code:
+        print(f"  Restoring best candidate code (score={best_candidate_score}).")
+        with open(c_file, 'w') as f:
+            f.write(best_candidate_code)
 
     print("  [MISMATCH] LLM refactoring failed to match.")
     return False

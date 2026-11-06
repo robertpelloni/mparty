@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.51.0]
+### Added
+- Expanded `tools/ai_loop.py` with multi-candidate temperature stepping (`0.2`, `0.4`, `0.7`), assembly diff penalty line scoring (`calculate_diff_score`), and best-candidate state retention/rollback.
+- Implemented persistent learned rule caching in `build/decomp_rules.json` to store successful refactoring parameters and temperatures per function.
+- Expanded unit test coverage in `tools/test_ai_loop.py` to validate candidate scoring, rule caching, and iterative convergence.
+
 ## [0.50.0]
 ### Added
 - Enhanced `tools/ai_matcher.py` with structured assembly diff extraction (`generate_assembly_diff`, `--diff`, `--target-asm`), comparing compiled object disassembly with target MIPS assembly lines.

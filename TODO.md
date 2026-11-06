@@ -213,3 +213,9 @@
 - [x] Added `generate_assembly_diff` in `tools/ai_matcher.py` to produce unified diffs between compiled disassembly and target assembly.
 - [x] Routed structured assembly diff diagnostics through `tools/ai_loop.py` for LLM prompt self-correction.
 - [x] Added test coverage in `tools/test_ai_loop.py` for structured diff feedback.
+
+## AI Loop Candidate Scoring & Rule Caching (v0.51.0)
+
+- [x] Added temperature stepping (`0.2`, `0.4`, `0.7`) and diff line penalty scoring in `tools/ai_loop.py` to retain best matching candidates.
+- [x] Implemented learned decompilation rule persistence in `build/decomp_rules.json`.
+- [x] Expanded `tools/test_ai_loop.py` with tests for rules caching and candidate convergence.
