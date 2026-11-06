@@ -230,3 +230,8 @@
 - [x] Expanded `tools/disassemble.py` to automatically extract individual functions into `asm/nonmatchings/<module>/<func>.s`.
 - [x] Added `#pragma GLOBAL_ASM` generation with `#ifdef NON_MATCHING` guards in `tools/c_stubber.js`.
 - [x] Added test case in `tools/test_c_stubber.js` verifying `#pragma GLOBAL_ASM` output formatting.
+
+## Pipeline Integration of Disassembly & Typed Stub Verification (v0.54.0)
+
+- [x] Integrated `tools/disassemble.py`, `asm/nonmatchings/` extraction, and typed C stub generation directly into the end-to-end integration test runner `tools/test_pipeline.py`.
+- [x] Added execution of `tools/test_c_stubber.js` to `test_pipeline.py`.

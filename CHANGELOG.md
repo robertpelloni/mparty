@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.54.0]
+### Added
+- Integrated end-to-end intelligent C stubbing, non-matching extraction, and `test_c_stubber.js` directly into `tools/test_pipeline.py`.
+- Automated validation of generated typed C signatures and `#pragma GLOBAL_ASM` blocks in the core testing pipeline.
+
 ## [0.53.0]
 ### Added
 - Expanded `tools/disassemble.py` to automatically extract individual assembly functions into structured `asm/nonmatchings/<module>/<func>.s` directories.
