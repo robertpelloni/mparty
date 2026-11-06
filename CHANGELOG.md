@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.49.0]
+### Added
+- Refined C stub generation in `tools/c_stubber.js` with intelligent MIPS assembly pattern recognition to infer return types (`s32`, `f32`, `void`), argument registers (`$a0-$a3`, `$f12`, `$f14`), and stack frame dimensions (leaf vs non-leaf functions with `$sp` tracking).
+- Added dedicated test suite `tools/test_c_stubber.js` validating assembly extraction, typed argument inferencing, float registers, and leaf/non-leaf categorization.
+
 ## [0.48.0]
 ### Added
 - Expanded `NetplayManager.ts` with direct WebRTC DataChannel packet transmission (`sendDataPacket`) and subscription handlers (`onDataPacket`) to implement low-latency UDP message transport, addressing HTTP bottlenecking under high concurrent payload loads.
