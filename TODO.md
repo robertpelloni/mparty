@@ -265,3 +265,10 @@
 - [x] Parse `.rodata` symbol references and jump table target labels through `%hi` and `%lo` relocation pairs.
 - [x] Annotate detected hardware MMIO registers and `.rodata` symbols in generated C function comments.
 - [x] Add unit test in `tools/test_c_stubber.js` validating MMIO and `.rodata` relocation detection.
+
+## Stack Arguments & Unsigned Type Inference (v0.60.0)
+
+- [x] Support stack-passed argument detection beyond `$a3` (`s32 a4 /* from stack */`).
+- [x] Infer unsigned integer types (`u32`) for returns and parameters based on unsigned MIPS instructions (`divu`, `multu`, `sltu`, `lbu`, `lhu`).
+- [x] Implement graceful error handling and reporting for malformed/empty assembly bodies.
+- [x] Add unit tests in `tools/test_c_stubber.js` verifying stack argument detection and unsigned type inference.

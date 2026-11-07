@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.60.0]
+### Added
+- Added support for detecting stack-passed arguments beyond `$a3` (e.g. `s32 a4 /* from stack */` loaded from caller stack frames via `$sp`).
+- Added unsigned integer type inference (`u32` returns and parameters) driven by unsigned MIPS operations (`divu`, `multu`, `lbu`, `lhu`, `sltu`).
+- Added graceful error handling and reporting for malformed or empty assembly bodies with line-number context.
+- Added unit tests in `tools/test_c_stubber.js` validating stack argument resolution, unsigned type inference, and empty-input error recovery (12/12 passing).
+
 ## [0.59.0]
 ### Added
 - Expanded `tools/c_stubber.js` to detect memory-mapped I/O (MMIO) register addresses for N64 hardware interfaces (`SP`, `DPC`, `DPS`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).

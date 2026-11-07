@@ -171,4 +171,29 @@ assert(stub10.includes('Hardware MMIO: MI_INTR_REG'), 'Expected Hardware MMIO in
 assert(stub10.includes('Rodata Symbols: D_80080000'), 'Expected Rodata Symbols in generated comments');
 console.log('[OK] Test 10: MMIO register and rodata symbol detection passed.');
 
+// Test 11: Stack argument detection (arguments beyond $a3) and unsigned type inference
+const stackUnsignedAsm = `
+    addiu $sp, $sp, -0x28
+    sw $s0, 0x18($sp)
+    divu $v0, $a0, $a1
+    lw $t1, 0x28($sp)
+    lw $s0, 0x18($sp)
+    addiu $sp, $sp, 0x28
+    jr $ra
+    nop
+`;
+
+const res11 = analyzeAsmBody(stackUnsignedAsm);
+assert.strictEqual(res11.returnType, 'u32', 'Expected returnType u32 from divu');
+assert(res11.params.includes('u32 a0'), 'Expected u32 a0 parameter');
+assert(res11.params.includes('u32 a1'), 'Expected u32 a1 parameter');
+assert(res11.params.includes('a4 /* from stack */'), 'Expected stack argument parameter a4');
+console.log('[OK] Test 11: Stack argument and unsigned type inference passed.');
+
+// Test 12: Empty or malformed input error recovery
+const res12 = analyzeAsmBody('');
+assert.strictEqual(res12.returnType, 'void');
+assert(res12.parseErrors.length > 0, 'Expected parse error on empty body');
+console.log('[OK] Test 12: Graceful error recovery on empty input passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

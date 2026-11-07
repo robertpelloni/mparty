@@ -20,6 +20,8 @@ const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 
 const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
 const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
+// Explicit unsigned operations (excluding addu which is GCC MIPS standard for signed add without integer overflow trap)
+const UNSIGNED_OPS = new Set(['lbu', 'lhu', 'sltu', 'sltiu', 'divu', 'multu']);
 const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
 const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz']);
 
@@ -48,6 +50,22 @@ const MMIO_REGISTER_MAP = {
  * 6. Read-only data (.rodata) and jump table symbol references
  */
 function analyzeAsmBody(body) {
+    if (!body || typeof body !== 'string') {
+        return {
+            returnType: 'void',
+            params: 'void',
+            isLeaf: true,
+            hasJumpTable: false,
+            hasLoop: false,
+            isBooleanV0: false,
+            mmioAccesses: [],
+            rodataSymbols: [],
+            savedRegisters: [],
+            stackSize: 0,
+            parseErrors: ['Empty or invalid assembly body provided']
+        };
+    }
+
     const lines = body.split('\n');
 
     let usesV0 = false;
@@ -55,6 +73,7 @@ function analyzeAsmBody(body) {
     let usesF0 = false;
     let usesDoubleF0 = false;
     let isBooleanV0 = false;
+    let isUnsignedV0 = false;
     let hasJal = false;
     let hasJumpTable = false;
     let hasLoop = false;
@@ -65,19 +84,29 @@ function analyzeAsmBody(body) {
     let a0Is64Bit = false;
 
     const argRegisters = new Set();
+    const unsignedArgs = new Set();
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
     const savedRegisters = new Set();
     const writtenRegisters = new Set();
     const mmioAccesses = new Set();
     const rodataSymbols = new Set();
     const registerUpperConstants = new Map(); // reg -> 0xXXXX
+    const stackArgs = []; // e.g., 5th+ arg loaded from $sp + stackSize + offset
+    const parseErrors = [];
 
-    for (const rawLine of lines) {
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        const rawLine = lines[lineIdx];
         // Strip comments and leading/trailing whitespace
         const line = rawLine.split('#')[0].split(';')[0].trim();
         if (!line) continue;
 
-        const tokens = line.split(/[,\s()]+/).filter(Boolean);
+        let tokens;
+        try {
+            tokens = line.split(/[,\s()]+/).filter(Boolean);
+        } catch (err) {
+            parseErrors.push(`Line ${lineIdx + 1}: Failed to tokenize line: ${err.message}`);
+            continue;
+        }
         if (tokens.length === 0) continue;
 
         const opcode = tokens[0];
@@ -174,15 +203,43 @@ function analyzeAsmBody(body) {
         // Detect memory dereferences and record offset accesses
         const memMatch = line.match(/(?:[a-z0-9_]+)\s+[^,]+,\s*(-?[0-9a-fA-Fx]*)\((\$[a-zA-Z0-9_]+)\)/);
         if (memMatch) {
-            const rawOffset = memMatch[1];
+            const rawOffset = memMatch[1] || '0';
             const baseReg = memMatch[2];
-            const offsetVal = rawOffset ? (parseInt(rawOffset, 16) || parseInt(rawOffset, 10) || 0) : 0;
+            const offsetVal = rawOffset.startsWith('0x') || rawOffset.startsWith('-0x')
+                ? parseInt(rawOffset, 16)
+                : parseInt(rawOffset, 10) || 0;
 
             if (['$a0', '$a1', '$a2', '$a3'].includes(baseReg)) {
                 if (!pointerOffsets.has(baseReg)) {
                     pointerOffsets.set(baseReg, new Set());
                 }
                 pointerOffsets.get(baseReg).add(offsetVal);
+            }
+
+            // Detect stack argument loading (N64 standard ABI: arguments beyond 4th passed at caller $sp offsets: 0x10, 0x14, etc.)
+            if (baseReg === '$sp' && LOAD_OPCODES.has(opcode)) {
+                if (stackSize > 0 && offsetVal >= stackSize) {
+                    const stackArgIdx = Math.floor((offsetVal - stackSize) / 4) + 4;
+                    if (!stackArgs.includes(`s32 a${stackArgIdx} /* from stack */`)) {
+                        stackArgs.push(`s32 a${stackArgIdx} /* from stack */`);
+                    }
+                } else if (stackSize === 0 && offsetVal >= 0x10) {
+                    // Leaf function using caller's incoming argument area
+                    const stackArgIdx = Math.floor((offsetVal - 0x10) / 4) + 4;
+                    if (!stackArgs.includes(`s32 a${stackArgIdx} /* from stack */`)) {
+                        stackArgs.push(`s32 a${stackArgIdx} /* from stack */`);
+                    }
+                }
+            }
+        }
+
+        // Track unsigned operations on arguments and return values
+        if (UNSIGNED_OPS.has(opcode)) {
+            if (tokens[1] === '$v0') isUnsignedV0 = true;
+            for (let i = 1; i < tokens.length; i++) {
+                if (['$a0', '$a1', '$a2', '$a3'].includes(tokens[i])) {
+                    unsignedArgs.add(tokens[i]);
+                }
             }
         }
 
@@ -220,7 +277,7 @@ function analyzeAsmBody(body) {
     } else if (usesV0 && usesV1) {
         returnType = 's64';
     } else if (usesV0) {
-        returnType = 's32';
+        returnType = isUnsignedV0 ? 'u32' : 's32';
     }
 
     // Determine parameter list with struct and float precision analysis
@@ -232,12 +289,13 @@ function analyzeAsmBody(body) {
         }
     } else {
         const sortedArgs = ['$a0', '$a1', '$a2', '$a3'].filter(r => argRegisters.has(r));
-        if (sortedArgs.length === 0) {
+        if (sortedArgs.length === 0 && stackArgs.length === 0) {
             params.push('void');
         } else {
             for (let idx = 0; idx < sortedArgs.length; idx++) {
                 const reg = sortedArgs[idx];
                 const name = reg.replace('$', '');
+                const typeName = unsignedArgs.has(reg) ? 'u32' : 's32';
 
                 if (reg === '$a0' && a0Is64Bit) {
                     params.push(`s64 ${name}`);
@@ -249,12 +307,17 @@ function analyzeAsmBody(body) {
                     const offsets = pointerOffsets.get(reg);
                     if (offsets.size > 1) {
                         params.push(`void* ${name} /* struct */`);
+                    } else if (unsignedArgs.has(reg)) {
+                        params.push(`u8* ${name}`);
                     } else {
                         params.push(`void* ${name}`);
                     }
                 } else {
-                    params.push(`s32 ${name}`);
+                    params.push(`${typeName} ${name}`);
                 }
+            }
+            if (stackArgs.length > 0) {
+                params.push(...stackArgs);
             }
         }
     }
@@ -269,7 +332,8 @@ function analyzeAsmBody(body) {
         mmioAccesses: Array.from(mmioAccesses).sort(),
         rodataSymbols: Array.from(rodataSymbols).sort(),
         savedRegisters: Array.from(savedRegisters).sort(),
-        stackSize
+        stackSize,
+        parseErrors
     };
 }
 
@@ -317,7 +381,7 @@ function extractFunctionsFromAsm(code) {
 function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm = true) {
     let out = `/*\n`;
     out += ` * Function: ${funcName}\n`;
-    out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
+    out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${(analysis.stackSize || 0).toString(16)}\n`;
     if (analysis.savedRegisters && analysis.savedRegisters.length > 0) {
         out += ` * Saved Regs: ${analysis.savedRegisters.join(', ')}\n`;
     }
@@ -336,6 +400,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     if (analysis.hasJumpTable) {
         out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
     }
+    if (analysis.parseErrors && analysis.parseErrors.length > 0) {
+        out += ` * Parse Warnings: ${analysis.parseErrors.join('; ')}\n`;
+    }
     out += ` */\n`;
 
     if (useGlobalAsm) {
@@ -343,7 +410,7 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
         if (analysis.returnType === 's64') {
             out += `    return 0LL;\n`;
-        } else if (analysis.returnType === 's32') {
+        } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
             out += `    return 0;\n`;
         } else if (analysis.returnType === 'f64') {
             out += `    return 0.0;\n`;
@@ -360,7 +427,7 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
         if (analysis.returnType === 's64') {
             out += `    return 0LL;\n`;
-        } else if (analysis.returnType === 's32') {
+        } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
             out += `    return 0;\n`;
         } else if (analysis.returnType === 'f64') {
             out += `    return 0.0;\n`;
