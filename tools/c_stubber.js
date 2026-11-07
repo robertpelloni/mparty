@@ -90,6 +90,8 @@ function analyzeAsmBody(body) {
     const writtenRegisters = new Set();
     const mmioAccesses = new Set();
     const rodataSymbols = new Set();
+    const globalDataReads = new Set();
+    const globalDataWrites = new Set();
     const registerUpperConstants = new Map(); // reg -> 0xXXXX
     const stackArgs = []; // e.g., 5th+ arg loaded from $sp + stackSize + offset
     const parseErrors = [];
@@ -169,7 +171,25 @@ function analyzeAsmBody(body) {
         // Detect %lo(symbol) references in instructions (e.g., lw $a0, %lo(D_80040000)($t0))
         const loMatch = line.match(/%lo\(([a-zA-Z0-9_]+)\)/);
         if (loMatch) {
-            rodataSymbols.add(loMatch[1]);
+            const sym = loMatch[1];
+            rodataSymbols.add(sym);
+            if (STORE_OPCODES.has(opcode)) {
+                globalDataWrites.add(sym);
+            } else if (LOAD_OPCODES.has(opcode)) {
+                globalDataReads.add(sym);
+            }
+        }
+
+        // Detect %gp_rel(symbol) references for small data/BSS
+        const gpMatch = line.match(/%gp_rel\(([a-zA-Z0-9_]+)\)/);
+        if (gpMatch) {
+            const sym = gpMatch[1];
+            rodataSymbols.add(sym);
+            if (STORE_OPCODES.has(opcode)) {
+                globalDataWrites.add(sym);
+            } else if (LOAD_OPCODES.has(opcode)) {
+                globalDataReads.add(sym);
+            }
         }
 
         // Detect MMIO accesses (e.g., lw $t1, 0($t0) where $t0 loaded with 0xA430 / 0x0430)
@@ -331,6 +351,8 @@ function analyzeAsmBody(body) {
         isBooleanV0,
         mmioAccesses: Array.from(mmioAccesses).sort(),
         rodataSymbols: Array.from(rodataSymbols).sort(),
+        globalDataReads: Array.from(globalDataReads).sort(),
+        globalDataWrites: Array.from(globalDataWrites).sort(),
         savedRegisters: Array.from(savedRegisters).sort(),
         stackSize,
         parseErrors
@@ -390,6 +412,12 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.rodataSymbols && analysis.rodataSymbols.length > 0) {
         out += ` * Rodata Symbols: ${analysis.rodataSymbols.join(', ')}\n`;
+    }
+    if (analysis.globalDataReads && analysis.globalDataReads.length > 0) {
+        out += ` * Global Reads: ${analysis.globalDataReads.join(', ')}\n`;
+    }
+    if (analysis.globalDataWrites && analysis.globalDataWrites.length > 0) {
+        out += ` * Global Writes: ${analysis.globalDataWrites.join(', ')}\n`;
     }
     if (analysis.isBooleanV0) {
         out += ` * Notes: Returns Boolean Condition Flag (slt)\n`;

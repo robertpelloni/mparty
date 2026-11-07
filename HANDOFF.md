@@ -6,13 +6,17 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.61.0 (tracked in `VERSION.md`)
+- **Version:** v0.62.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Batch Processing Statistics & Report Generation (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Global Pointer Relocations & Symbol Access Tracking (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Parses `%gp_rel` relocations to recognize small data/BSS variables accessed via `$gp`.
+   - Distinguishes and separates global data reads from global data writes across load/store instructions.
+   - Emits annotated `Global Reads:` and `Global Writes:` listings in generated C function comments.
+   - Verified by unit tests in `tools/test_c_stubber.js` (14/14 tests passing).
+2. **Batch Processing Statistics & Report Generation (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Tracks summary statistics during directory-wide stubbing: processed files, total functions typed, skipped files, warnings, and errors.
    - Emits summary reports to stdout and serializes structured JSON to `build/stubber_report.json`.
-   - Verified by unit tests in `tools/test_c_stubber.js` (13/13 tests passing).
 2. **Stack Arguments & Unsigned Type Inference (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Detects stack-passed arguments beyond `$a3` (e.g. `s32 a4 /* from stack */` loaded from caller frames via `$sp`).
    - Infers unsigned integer types (`u32`) for return values and parameters from operations like `divu`, `multu`, `sltu`, `lbu`, `lhu`.
@@ -56,6 +60,6 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 ### Verification Status
 - `python3 tools/verify_architecture.py`: **PASS**
 - `python3 tools/test_pipeline.py`: **PASS** (all 8 integration steps, validation layers, AI loop, C stubber unit tests, prototype header assertions, and live mock disassembly/stubbing pass)
-- `node tools/test_c_stubber.js`: **PASS** (all 13 pattern recognition, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
+- `node tools/test_c_stubber.js`: **PASS** (all 14 pattern recognition, gp relocations, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 6 tests pass)
 - `cd web && npx playwright test`: **PASS** (all 32 E2E and unit tests pass)

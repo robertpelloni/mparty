@@ -226,4 +226,25 @@ glabel func_valid
     fs.rmSync(tempSrcDir, { recursive: true, force: true });
 }
 
+// Test 14: Global pointer ($gp) relative relocations and Read/Write classification
+const gpRelAsm = `
+    lw $t0, %gp_rel(g_CurrentTurn)($gp)
+    addiu $t0, $t0, 1
+    sw $t0, %gp_rel(g_CurrentTurn)($gp)
+    lui $t1, %hi(D_80090000)
+    sw $t0, %lo(D_80090000)($t1)
+    jr $ra
+    nop
+`;
+
+const res14 = analyzeAsmBody(gpRelAsm);
+assert(res14.globalDataReads.includes('g_CurrentTurn'), 'Expected g_CurrentTurn in globalDataReads');
+assert(res14.globalDataWrites.includes('g_CurrentTurn'), 'Expected g_CurrentTurn in globalDataWrites');
+assert(res14.globalDataWrites.includes('D_80090000'), 'Expected D_80090000 in globalDataWrites');
+
+const stub14 = generateCStub('increment_turn', res14, 'game', false);
+assert(stub14.includes('Global Reads: g_CurrentTurn'), 'Expected Global Reads in comments');
+assert(stub14.includes('Global Writes: D_80090000, g_CurrentTurn'), 'Expected Global Writes in comments');
+console.log('[OK] Test 14: $gp-relative symbol tracking and Read/Write classification passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

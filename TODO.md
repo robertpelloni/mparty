@@ -278,3 +278,10 @@
 - [x] Add batch processing statistics tracking (total functions, generated files, skipped files, warnings, errors) to `tools/c_stubber.js`.
 - [x] Implement structured JSON report serialization to `build/stubber_report.json`.
 - [x] Add unit test in `tools/test_c_stubber.js` verifying batch directory processing and statistics metrics.
+
+## Global Pointer Relocations & Symbol Access Tracking (v0.62.0)
+
+- [x] Support `%gp_rel` relocation parsing to recognize small data/BSS symbol access.
+- [x] Distinguish global reads vs. global writes across instructions.
+- [x] Annotate separated `Global Reads:` and `Global Writes:` symbol summaries in generated C comments.
+- [x] Add unit test in `tools/test_c_stubber.js` validating `%gp_rel` tracking and read/write classification.

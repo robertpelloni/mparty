@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.62.0]
+### Added
+- Added `%gp_rel` relocation parsing to detect small data/BSS symbol access relative to `$gp`.
+- Differentiated global variable read accesses (`lw`, `lh`, `lb`, etc.) from write accesses (`sw`, `sh`, `sb`, etc.).
+- Annotated separated `Global Reads` and `Global Writes` symbol lists in generated C function comments.
+- Added Unit Test 14 in `tools/test_c_stubber.js` validating `%gp_rel` relocations and read/write classification (14/14 passing).
+
 ## [0.61.0]
 ### Added
 - Added batch processing statistics tracking, skipped file accounting, and warning reporting to `processDirectory` in `tools/c_stubber.js`.
