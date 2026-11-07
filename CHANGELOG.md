@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.61.0]
+### Added
+- Added batch processing statistics tracking, skipped file accounting, and warning reporting to `processDirectory` in `tools/c_stubber.js`.
+- Implemented structured JSON report emission to `build/stubber_report.json` during batch C-stubbing runs.
+- Added unit test in `tools/test_c_stubber.js` validating batch directory processing, function counting, and skipped file metrics (13/13 passing).
+
 ## [0.60.0]
 ### Added
 - Added support for detecting stack-passed arguments beyond `$a3` (e.g. `s32 a4 /* from stack */` loaded from caller stack frames via `$sp`).

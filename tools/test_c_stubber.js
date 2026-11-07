@@ -6,7 +6,10 @@
  */
 
 const assert = require('assert');
-const { analyzeAsmBody, extractFunctionsFromAsm, generateCStub } = require('./c_stubber');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { analyzeAsmBody, extractFunctionsFromAsm, generateCStub, processDirectory } = require('./c_stubber');
 
 console.log('Testing c_stubber.js pattern analysis...\n');
 
@@ -195,5 +198,32 @@ const res12 = analyzeAsmBody('');
 assert.strictEqual(res12.returnType, 'void');
 assert(res12.parseErrors.length > 0, 'Expected parse error on empty body');
 console.log('[OK] Test 12: Graceful error recovery on empty input passed.');
+
+// Test 13: Batch directory processing statistics reporting
+const tempAsmDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_test_asm_'));
+const tempSrcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_test_src_'));
+
+try {
+    // Write a valid asm file
+    fs.writeFileSync(path.join(tempAsmDir, 'valid.s'), `
+glabel func_valid
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+    `);
+
+    // Write a file with no functions (to be skipped)
+    fs.writeFileSync(path.join(tempAsmDir, 'empty.s'), `# Just a comment\n.word 0x00\n`);
+
+    const stats = processDirectory(tempAsmDir, tempSrcDir);
+    assert.strictEqual(stats.processedFiles.length, 1, 'Expected 1 processed file');
+    assert.strictEqual(stats.totalFunctions, 1, 'Expected 1 function typed');
+    assert.strictEqual(stats.skippedFiles.length, 1, 'Expected 1 skipped file');
+    assert(fs.existsSync(path.join(tempSrcDir, 'valid.c')), 'Expected generated valid.c');
+    console.log('[OK] Test 13: Batch directory processing statistics passed.');
+} finally {
+    fs.rmSync(tempAsmDir, { recursive: true, force: true });
+    fs.rmSync(tempSrcDir, { recursive: true, force: true });
+}
 
 console.log('\nAll c_stubber tests passed successfully!');

@@ -272,3 +272,9 @@
 - [x] Infer unsigned integer types (`u32`) for returns and parameters based on unsigned MIPS instructions (`divu`, `multu`, `sltu`, `lbu`, `lhu`).
 - [x] Implement graceful error handling and reporting for malformed/empty assembly bodies.
 - [x] Add unit tests in `tools/test_c_stubber.js` verifying stack argument detection and unsigned type inference.
+
+## Batch Processing Statistics & Report Generation (v0.61.0)
+
+- [x] Add batch processing statistics tracking (total functions, generated files, skipped files, warnings, errors) to `tools/c_stubber.js`.
+- [x] Implement structured JSON report serialization to `build/stubber_report.json`.
+- [x] Add unit test in `tools/test_c_stubber.js` verifying batch directory processing and statistics metrics.

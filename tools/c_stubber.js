@@ -442,12 +442,20 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     return out;
 }
 
-function processAsmFile(asmFilePath, srcDir) {
-    const code = fs.readFileSync(asmFilePath, 'utf8');
+function processAsmFile(asmFilePath, srcDir, stats = null) {
+    let code;
+    try {
+        code = fs.readFileSync(asmFilePath, 'utf8');
+    } catch (err) {
+        if (stats) stats.errors.push(`Failed to read file ${asmFilePath}: ${err.message}`);
+        return null;
+    }
+
     const functions = extractFunctionsFromAsm(code);
 
     if (functions.length === 0) {
-        return; // No functions found
+        if (stats) stats.skippedFiles.push(asmFilePath);
+        return null; // No functions found
     }
 
     const baseName = path.basename(asmFilePath, '.s');
@@ -456,16 +464,37 @@ function processAsmFile(asmFilePath, srcDir) {
     let cContent = `// Automatically generated typed stub for ${baseName}.s\n`;
     cContent += `#include "common.h"\n\n`;
 
+    let fileHasWarnings = false;
     functions.forEach(fn => {
         const analysis = analyzeAsmBody(fn.body);
+        if (analysis.parseErrors && analysis.parseErrors.length > 0) {
+            fileHasWarnings = true;
+            if (stats) stats.warningsCount += analysis.parseErrors.length;
+        }
+        if (stats) stats.totalFunctions++;
         cContent += generateCStub(fn.name, analysis, baseName, true);
     });
 
     fs.writeFileSync(cFilePath, cContent);
+    if (stats) {
+        stats.processedFiles.push(cFilePath);
+        if (fileHasWarnings) stats.filesWithWarnings++;
+    }
     console.log(`Generated ${cFilePath} with ${functions.length} intelligent typed stubs.`);
+    return cFilePath;
 }
 
-function processDirectory(asmDir, srcDir) {
+function processDirectory(asmDir, srcDir, stats = null) {
+    const isRootCall = !stats;
+    const currentStats = stats || {
+        totalFunctions: 0,
+        processedFiles: [],
+        skippedFiles: [],
+        filesWithWarnings: 0,
+        warningsCount: 0,
+        errors: []
+    };
+
     if (!fs.existsSync(srcDir)) {
         fs.mkdirSync(srcDir, { recursive: true });
     }
@@ -477,12 +506,30 @@ function processDirectory(asmDir, srcDir) {
 
         if (stat.isDirectory()) {
             if (file !== 'nonmatchings') {
-                processDirectory(fullPath, path.join(srcDir, file));
+                processDirectory(fullPath, path.join(srcDir, file), currentStats);
             }
         } else if (file.endsWith('.s')) {
-            processAsmFile(fullPath, srcDir);
+            processAsmFile(fullPath, srcDir, currentStats);
         }
     });
+
+    if (isRootCall) {
+        console.log(`\n=== C Stubber Processing Summary ===`);
+        console.log(`Total Files Generated: ${currentStats.processedFiles.length}`);
+        console.log(`Total Functions Typed: ${currentStats.totalFunctions}`);
+        console.log(`Files Skipped: ${currentStats.skippedFiles.length}`);
+        console.log(`Warnings Encountered: ${currentStats.warningsCount}`);
+        console.log(`Errors Encountered: ${currentStats.errors.length}`);
+
+        const buildDir = path.resolve('build');
+        if (fs.existsSync(buildDir)) {
+            const reportPath = path.join(buildDir, 'stubber_report.json');
+            fs.writeFileSync(reportPath, JSON.stringify(currentStats, null, 2));
+            console.log(`Report written to ${reportPath}`);
+        }
+    }
+
+    return currentStats;
 }
 
 function main() {
@@ -508,5 +555,6 @@ module.exports = {
     analyzeAsmBody,
     extractFunctionsFromAsm,
     generateCStub,
-    processAsmFile
+    processAsmFile,
+    processDirectory
 };
