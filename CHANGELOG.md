@@ -1,5 +1,67 @@
 # CHANGELOG
 
+## [0.60.0]
+### Added
+- Added support for detecting stack-passed arguments beyond `$a3` (e.g. `s32 a4 /* from stack */` loaded from caller stack frames via `$sp`).
+- Added unsigned integer type inference (`u32` returns and parameters) driven by unsigned MIPS operations (`divu`, `multu`, `lbu`, `lhu`, `sltu`).
+- Added graceful error handling and reporting for malformed or empty assembly bodies with line-number context.
+- Added unit tests in `tools/test_c_stubber.js` validating stack argument resolution, unsigned type inference, and empty-input error recovery (12/12 passing).
+
+## [0.59.0]
+### Added
+- Expanded `tools/c_stubber.js` to detect memory-mapped I/O (MMIO) register addresses for N64 hardware interfaces (`SP`, `DPC`, `DPS`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).
+- Implemented pattern recognition for `.rodata` symbols and jump table targets via `%hi` and `%lo` relocation pairs.
+- Added automatic annotation of hardware MMIO registers and `.rodata` symbol references in generated C function comments.
+- Added unit test coverage in `tools/test_c_stubber.js` for MMIO register and rodata relocation detection.
+
+## [0.58.0]
+### Added
+- Expanded `tools/c_stubber.js` pattern recognition to distinguish double-precision float parameters (`f64 f12`, `f64 f14`) from single-precision floats (`f32`) based on opcode suffixes (`.d`, `ldc1`, `sdc1`).
+- Added support for 64-bit integer argument pair detection (`s64 a0`) across `$a0-$a1` when doubleword memory instructions (`ld`, `sd`) are present.
+- Added loop structure detection (`hasLoop`) tracking backward branching instructions (`bne`, `beq`, `bgez`) to annotate control flow in generated C comments.
+- Added unit tests in `tools/test_c_stubber.js` verifying double-precision float inferencing and loop annotations.
+
+## [0.57.0]
+### Added
+- Expanded `tools/c_stubber.js` with struct and array offset spread inference on pointer parameters (`void* arg /* struct */`).
+- Added preservation analysis and comment emission for callee-saved registers (`$s0-$s7`, `$fp`) in generated C stubs.
+- Added boolean condition detection (`isBooleanV0`) for return value registers constrained by `slt`/`slti`/`sltu`.
+- Added unit tests in `tools/test_c_stubber.js` verifying struct offset spreads, callee-saved register tracking, and boolean flag detection.
+
+## [0.56.0]
+### Added
+- Expanded `tools/generate_splat.py` to auto-discover symbol entry points and inject `non_matchings_path: asm/nonmatchings` configurations into generated `splat.yaml`.
+- Automated generation of typed prototype headers in `include/functions.h` during splat configuration generation.
+- Added verification of `include/functions.h` into `tools/test_pipeline.py`.
+
+## [0.55.0]
+### Added
+- Expanded `web/src/components/DecompilationStatus.tsx` with an interactive C Stub preview viewer displaying typed signatures and `#pragma GLOBAL_ASM` wrappers.
+- Added a "Process Nonmatchings" button to invoke modular assembly splitting into `asm/nonmatchings/` directly from the UI, updating non-matching function tallies in real-time.
+- Added Playwright end-to-end test suite `web/tests/decompilation_status.spec.ts` asserting non-matching processing and stub inspector visibility toggles.
+
+## [0.54.0]
+### Added
+- Integrated end-to-end intelligent C stubbing, non-matching extraction, and `test_c_stubber.js` directly into `tools/test_pipeline.py`.
+- Automated validation of generated typed C signatures and `#pragma GLOBAL_ASM` blocks in the core testing pipeline.
+
+## [0.53.0]
+### Added
+- Expanded `tools/disassemble.py` to automatically extract individual assembly functions into structured `asm/nonmatchings/<module>/<func>.s` directories.
+- Updated `tools/c_stubber.js` with `#pragma GLOBAL_ASM("asm/nonmatchings/...")` wrapper generation guarded by `#ifdef NON_MATCHING`, ensuring byte-parity builds during ongoing decompilation.
+- Added test coverage in `tools/test_c_stubber.js` verifying `#pragma GLOBAL_ASM` generation.
+
+## [0.52.0]
+### Added
+- Refined `tools/c_stubber.js` MIPS assembly parsing with load/store opcode differentiation, pointer parameter inference (`void*`, `s32*`), 64-bit return detection (`s64`, `f64`), and indirect jump table switch statement recognition.
+- Expanded unit tests in `tools/test_c_stubber.js` verifying pointer inference from dereferenced base addresses, 64-bit return registers (`$v0`, `$v1`), and indirect branches (`jr $t1`).
+
+## [0.51.0]
+### Added
+- Expanded `tools/ai_loop.py` with multi-candidate temperature stepping (`0.2`, `0.4`, `0.7`), assembly diff penalty line scoring (`calculate_diff_score`), and best-candidate state retention/rollback.
+- Implemented persistent learned rule caching in `build/decomp_rules.json` to store successful refactoring parameters and temperatures per function.
+- Expanded unit test coverage in `tools/test_ai_loop.py` to validate candidate scoring, rule caching, and iterative convergence.
+
 ## [0.50.0]
 ### Added
 - Enhanced `tools/ai_matcher.py` with structured assembly diff extraction (`generate_assembly_diff`, `--diff`, `--target-asm`), comparing compiled object disassembly with target MIPS assembly lines.

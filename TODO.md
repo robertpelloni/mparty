@@ -213,3 +213,62 @@
 - [x] Added `generate_assembly_diff` in `tools/ai_matcher.py` to produce unified diffs between compiled disassembly and target assembly.
 - [x] Routed structured assembly diff diagnostics through `tools/ai_loop.py` for LLM prompt self-correction.
 - [x] Added test coverage in `tools/test_ai_loop.py` for structured diff feedback.
+
+## AI Loop Candidate Scoring & Rule Caching (v0.51.0)
+
+- [x] Added temperature stepping (`0.2`, `0.4`, `0.7`) and diff line penalty scoring in `tools/ai_loop.py` to retain best matching candidates.
+- [x] Implemented learned decompilation rule persistence in `build/decomp_rules.json`.
+- [x] Expanded `tools/test_ai_loop.py` with tests for rules caching and candidate convergence.
+
+## Advanced Stubber Heuristics & Control Flow (v0.52.0)
+
+- [x] Differentiated load/store semantics, inferred pointer argument types (`void*`), added 64-bit return detection (`s64`, `f64`), and detected indirect jump table switch statements in `tools/c_stubber.js`.
+- [x] Expanded test coverage in `tools/test_c_stubber.js`.
+
+## Non-Matching Section Extraction & GLOBAL_ASM Stubs (v0.53.0)
+
+- [x] Expanded `tools/disassemble.py` to automatically extract individual functions into `asm/nonmatchings/<module>/<func>.s`.
+- [x] Added `#pragma GLOBAL_ASM` generation with `#ifdef NON_MATCHING` guards in `tools/c_stubber.js`.
+- [x] Added test case in `tools/test_c_stubber.js` verifying `#pragma GLOBAL_ASM` output formatting.
+
+## Pipeline Integration of Disassembly & Typed Stub Verification (v0.54.0)
+
+- [x] Integrated `tools/disassemble.py`, `asm/nonmatchings/` extraction, and typed C stub generation directly into the end-to-end integration test runner `tools/test_pipeline.py`.
+- [x] Added execution of `tools/test_c_stubber.js` to `test_pipeline.py`.
+
+## Interactive Decompilation Pipeline UI & Stub Inspector (v0.55.0)
+
+- [x] Added C stub inspector viewer and non-matching processing trigger button to `DecompilationStatus.tsx`.
+- [x] Added Playwright test in `web/tests/decompilation_status.spec.ts` asserting non-matching flow and stub inspection modal.
+
+## Symbol Discovery & Function Prototype Header Generation (v0.56.0)
+
+- [x] Added symbol discovery and prototype header generation (`include/functions.h`) in `tools/generate_splat.py`.
+- [x] Added assertion in `tools/test_pipeline.py` verifying header generation.
+
+## Advanced Struct Offset Inferencing & Callee-Saved Registers (v0.57.0)
+
+- [x] Added struct offset spread inference on pointer parameters (`void* arg /* struct */`) in `tools/c_stubber.js`.
+- [x] Added callee-saved register tracking (`$s0-$s7`, `$fp`) and boolean condition detection in generated C stubs.
+- [x] Expanded unit tests in `tools/test_c_stubber.js` verifying struct offset spreads and boolean flag detection.
+
+## Floating-Point Argument Registers & 64-Bit Integer Pairs (v0.58.0)
+
+- [x] Distinguish double-precision float parameters (`f64 f12`, `f64 f14`) from single-precision floats (`f32`) based on opcode suffixes (`.d`, `ldc1`, `sdc1`) in `tools/c_stubber.js`.
+- [x] Support 64-bit integer argument pair detection (`s64 a0`) across `$a0-$a1` when doubleword memory instructions (`ld`, `sd`) are present.
+- [x] Add loop structure detection (`hasLoop`) tracking backward branching instructions (`bne`, `beq`, `bgez`) to annotate control flow in generated C comments.
+- [x] Expand unit tests in `tools/test_c_stubber.js` verifying double-precision float inferencing and loop annotations.
+
+## Memory-Mapped I/O & Rodata Relocations (v0.59.0)
+
+- [x] Detect memory-mapped I/O (MMIO) register addresses (`0xA4000000`-`0xA4800000`) for N64 hardware interfaces (`SP`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).
+- [x] Parse `.rodata` symbol references and jump table target labels through `%hi` and `%lo` relocation pairs.
+- [x] Annotate detected hardware MMIO registers and `.rodata` symbols in generated C function comments.
+- [x] Add unit test in `tools/test_c_stubber.js` validating MMIO and `.rodata` relocation detection.
+
+## Stack Arguments & Unsigned Type Inference (v0.60.0)
+
+- [x] Support stack-passed argument detection beyond `$a3` (`s32 a4 /* from stack */`).
+- [x] Infer unsigned integer types (`u32`) for returns and parameters based on unsigned MIPS instructions (`divu`, `multu`, `sltu`, `lbu`, `lhu`).
+- [x] Implement graceful error handling and reporting for malformed/empty assembly bodies.
+- [x] Add unit tests in `tools/test_c_stubber.js` verifying stack argument detection and unsigned type inference.

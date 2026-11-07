@@ -3,8 +3,9 @@ import os
 import subprocess
 import shutil
 import sys
+import json
 
-def run_test(name, setup, teardown, env_vars, expect_success=True):
+def run_test(name, setup, teardown, env_vars, expect_success=True, check_rule_saved=False):
     print(f"--- Running Test: {name} ---")
     setup()
 
@@ -18,11 +19,21 @@ def run_test(name, setup, teardown, env_vars, expect_success=True):
 
     result = subprocess.run(["python3", "tools/ai_loop.py"], capture_output=True, text=True, env=env)
 
+    rule_found = False
+    if check_rule_saved and os.path.exists("build/decomp_rules.json"):
+        with open("build/decomp_rules.json", "r") as f:
+            data = json.load(f)
+            if "test" in data:
+                rule_found = True
+
     teardown()
 
     passed = False
     if expect_success and "[SUCCESS] LLM refactoring achieved a match!" in result.stdout:
-        passed = True
+        if check_rule_saved:
+            passed = rule_found
+        else:
+            passed = True
     elif not expect_success and "[MISMATCH] LLM refactoring failed to match." in result.stdout:
         passed = True
     elif not expect_success and "Cannot refactor. Skipping." in result.stdout:
@@ -139,16 +150,17 @@ def main():
         mock_matcher_diff_feedback()
 
     tests = [
-        ("LLM Refactoring Success", setup_success, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
-        ("LLM Multi-step Iterative Self-Correction", setup_multi_retry, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
-        ("LLM Assembly Diff Structured Feedback", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True),
-        ("LLM Missing API Key Graceful Failure", setup_no_key, teardown_all, None, False),
-        ("LLM Refactoring Persistent Failure", setup_always_fail, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, False)
+        ("LLM Refactoring Success", setup_success, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
+        ("LLM Multi-step Iterative Self-Correction", setup_multi_retry, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
+        ("LLM Assembly Diff Structured Feedback", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
+        ("LLM Learned Rules Caching Validation", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, True),
+        ("LLM Missing API Key Graceful Failure", setup_no_key, teardown_all, None, False, False),
+        ("LLM Refactoring Persistent Failure", setup_always_fail, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, False, False)
     ]
 
-    for name, setup, teardown, env, expects in tests:
+    for name, setup, teardown, env, expects, check_rules in tests:
         total += 1
-        if run_test(name, setup, teardown, env, expects):
+        if run_test(name, setup, teardown, env, expects, check_rules):
             passed += 1
 
     print(f"\nCompleted: {passed}/{total} tests passed.")

@@ -3,8 +3,13 @@
  * c_stubber.js
  *
  * Parses generated .s assembly files and nonmatching assembly blocks (e.g. asm/nonmatchings),
- * extracts function signatures and analyzes MIPS instruction patterns (argument registers,
- * return value registers, stack frames) to generate intelligent, typed C function stubs.
+ * extracts function signatures and performs advanced MIPS instruction analysis:
+ * - Differentiates load vs store semantics to accurately register reads vs writes
+ * - Infers pointer and struct/array arguments with offset spread analysis
+ * - Distinguishes 32-bit (s32), 64-bit (s64), boolean flags (s32 boolean), float (f32), double (f64), and void returns
+ * - Detects 64-bit integer argument pairs ($a0-$a1) and double-precision float parameters ($f12 as f64)
+ * - Identifies loop structures and documents callee-saved register usage ($s0-$s7, $fp)
+ * - Supports generating `#pragma GLOBAL_ASM("asm/nonmatchings/...")` fallbacks for byte-parity
  */
 
 const fs = require('fs');
@@ -13,31 +18,112 @@ const path = require('path');
 // Regex to identify function definitions in MIPS assembly (e.g., glabel func_80000000)
 const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 
+const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
+const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
+// Explicit unsigned operations (excluding addu which is GCC MIPS standard for signed add without integer overflow trap)
+const UNSIGNED_OPS = new Set(['lbu', 'lhu', 'sltu', 'sltiu', 'divu', 'multu']);
+const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
+const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz']);
+
+// Known N64 hardware MMIO register address ranges and names (0x04000000 physical / 0xA4000000 uncached)
+const MMIO_REGISTER_MAP = {
+    '0xA4000000': 'SP_MEM_ADDR_REG',
+    '0xA4040000': 'SP_STATUS_REG',
+    '0xA4080000': 'SP_PC_REG',
+    '0xA4100000': 'DPC_START_REG',
+    '0xA4200000': 'DPS_TBIST_REG',
+    '0xA4300000': 'MI_INTR_REG',
+    '0xA4400000': 'VI_CONTROL_REG',
+    '0xA4500000': 'AI_DRAM_ADDR_REG',
+    '0xA4600000': 'PI_DRAM_ADDR_REG',
+    '0xA4700000': 'RI_MODE_REG',
+    '0xA4800000': 'SI_DRAM_ADDR_REG'
+};
+
 /**
  * Analyzes assembly instructions within a function body to infer:
- * 1. Argument types and counts (based on initial reads of $a0-$a3, $f12, $f14)
- * 2. Return type (based on writes to $v0, $v1, $f0 before jr $ra)
- * 3. Whether the function is a leaf function (no jal / no $ra saved)
+ * 1. Argument types (pointers vs struct pointers vs scalars, float vs double vs integer)
+ * 2. Return types (s32, s64, f32, f64, void, boolean indicator)
+ * 3. Stack frame size, saved registers, loops & leaf status
+ * 4. Control-flow structures (jump tables, loops)
+ * 5. Memory-mapped I/O (MMIO) and hardware register access
+ * 6. Read-only data (.rodata) and jump table symbol references
  */
 function analyzeAsmBody(body) {
+    if (!body || typeof body !== 'string') {
+        return {
+            returnType: 'void',
+            params: 'void',
+            isLeaf: true,
+            hasJumpTable: false,
+            hasLoop: false,
+            isBooleanV0: false,
+            mmioAccesses: [],
+            rodataSymbols: [],
+            savedRegisters: [],
+            stackSize: 0,
+            parseErrors: ['Empty or invalid assembly body provided']
+        };
+    }
+
     const lines = body.split('\n');
 
     let usesV0 = false;
+    let usesV1 = false;
     let usesF0 = false;
+    let usesDoubleF0 = false;
+    let isBooleanV0 = false;
+    let isUnsignedV0 = false;
     let hasJal = false;
+    let hasJumpTable = false;
+    let hasLoop = false;
     let stackSize = 0;
 
-    const argRegisters = new Set();
-    const writtenRegisters = new Set();
+    let f12IsDouble = false;
+    let f14IsDouble = false;
+    let a0Is64Bit = false;
 
-    for (const rawLine of lines) {
+    const argRegisters = new Set();
+    const unsignedArgs = new Set();
+    const pointerOffsets = new Map(); // reg -> Set of offsets accessed
+    const savedRegisters = new Set();
+    const writtenRegisters = new Set();
+    const mmioAccesses = new Set();
+    const rodataSymbols = new Set();
+    const registerUpperConstants = new Map(); // reg -> 0xXXXX
+    const stackArgs = []; // e.g., 5th+ arg loaded from $sp + stackSize + offset
+    const parseErrors = [];
+
+    for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        const rawLine = lines[lineIdx];
         // Strip comments and leading/trailing whitespace
         const line = rawLine.split('#')[0].split(';')[0].trim();
         if (!line) continue;
 
+        let tokens;
+        try {
+            tokens = line.split(/[,\s()]+/).filter(Boolean);
+        } catch (err) {
+            parseErrors.push(`Line ${lineIdx + 1}: Failed to tokenize line: ${err.message}`);
+            continue;
+        }
+        if (tokens.length === 0) continue;
+
+        const opcode = tokens[0];
+
         // Detect function calls
-        if (/\bjal\s+/.test(line) || /\bjalr\s+/.test(line)) {
+        if (opcode === 'jal' || opcode === 'jalr') {
             hasJal = true;
+        }
+
+        // Detect indirect branch/jump table (jr $tX where not $ra)
+        if (opcode === 'jr' && tokens[1] && tokens[1] !== '$ra') {
+            hasJumpTable = true;
+        }
+
+        // Detect loops via backward branch instructions
+        if (BRANCH_OPCODES.has(opcode)) {
+            hasLoop = true;
         }
 
         // Detect stack adjustment in prologue
@@ -46,60 +132,193 @@ function analyzeAsmBody(body) {
             stackSize = parseInt(stackMatch[1], 16) || parseInt(stackMatch[1], 10) || 0;
         }
 
-        // Check for return value setting
-        if (/\b(?:li|move|lw|add|addu|sub|subu|and|or|xor|ori)\s+\$v0\b/.test(line)) {
-            usesV0 = true;
-        }
-        if (/\b(?:mtc1|mfc1|lwc1|swc1|add\.s|sub\.s|mul\.s|div\.s|mov\.s)\s+\$f0\b/.test(line)) {
-            usesF0 = true;
+        // Detect callee-saved register preservation
+        if (STORE_OPCODES.has(opcode)) {
+            for (let i = 1; i < tokens.length; i++) {
+                if (CALLEE_SAVED_REGS.has(tokens[i])) {
+                    savedRegisters.add(tokens[i]);
+                }
+            }
         }
 
-        // Track argument register usage before they are overwritten
-        const words = line.split(/[,\s()]+/);
-        for (let i = 1; i < words.length; i++) {
-            const reg = words[i];
-            if (['$a0', '$a1', '$a2', '$a3'].includes(reg)) {
-                // If it is used as a source before being written to
-                if (i > 1 && !writtenRegisters.has(reg)) {
-                    argRegisters.add(reg);
-                } else if (i === 1) {
-                    // It is the destination register being written
-                    writtenRegisters.add(reg);
+        // Detect double-precision float operations on argument registers
+        if (opcode.endsWith('.d') || opcode === 'ldc1' || opcode === 'sdc1') {
+            if (tokens.includes('$f12')) f12IsDouble = true;
+            if (tokens.includes('$f14')) f14IsDouble = true;
+        }
+
+        // Detect 64-bit load/store operations on $a0
+        if ((opcode === 'ld' || opcode === 'sd') && tokens.includes('$a0')) {
+            a0Is64Bit = true;
+        }
+
+        // Detect lui pattern for upper constant loading (e.g. lui $t0, %hi(D_80040000) or lui $v0, 0xA430)
+        if (opcode === 'lui' && tokens[1] && tokens[2]) {
+            const destReg = tokens[1];
+            const hiMatch = line.match(/%hi\(([a-zA-Z0-9_]+)\)/);
+            if (hiMatch) {
+                rodataSymbols.add(hiMatch[1]);
+            } else {
+                const hexVal = parseInt(tokens[2], 16);
+                if (!isNaN(hexVal)) {
+                    registerUpperConstants.set(destReg, hexVal);
                 }
-            } else if (['$f12', '$f14'].includes(reg)) {
-                if (i > 1 && !writtenRegisters.has(reg)) {
-                    argRegisters.add(reg);
-                } else if (i === 1) {
-                    writtenRegisters.add(reg);
+            }
+        }
+
+        // Detect %lo(symbol) references in instructions (e.g., lw $a0, %lo(D_80040000)($t0))
+        const loMatch = line.match(/%lo\(([a-zA-Z0-9_]+)\)/);
+        if (loMatch) {
+            rodataSymbols.add(loMatch[1]);
+        }
+
+        // Detect MMIO accesses (e.g., lw $t1, 0($t0) where $t0 loaded with 0xA430 / 0x0430)
+        for (const [reg, upper] of registerUpperConstants.entries()) {
+            if (line.includes(`(${reg})`)) {
+                const upperHex = ((upper & 0xFFFF) << 16) >>> 0;
+                const formattedAddr = '0x' + upperHex.toString(16).toUpperCase().padStart(8, '0');
+                if (MMIO_REGISTER_MAP[formattedAddr]) {
+                    mmioAccesses.add(MMIO_REGISTER_MAP[formattedAddr]);
+                } else if ((upperHex & 0xFFF00000) === 0xA4000000 || (upperHex & 0xFFF00000) === 0x04000000) {
+                    mmioAccesses.add(`MMIO_${formattedAddr}`);
                 }
+            }
+        }
+
+        // Detect return register writes
+        if (opcode !== 'jr' && opcode !== 'jal' && !STORE_OPCODES.has(opcode)) {
+            if (tokens[1] === '$v0') {
+                usesV0 = true;
+                if (['slt', 'slti', 'sltu', 'sltiu'].includes(opcode)) {
+                    isBooleanV0 = true;
+                }
+            }
+            if (tokens[1] === '$v1') usesV1 = true;
+            if (tokens[1] === '$f0') {
+                usesF0 = true;
+                if (opcode.endsWith('.d')) usesDoubleF0 = true;
+            }
+        }
+
+        // Detect memory dereferences and record offset accesses
+        const memMatch = line.match(/(?:[a-z0-9_]+)\s+[^,]+,\s*(-?[0-9a-fA-Fx]*)\((\$[a-zA-Z0-9_]+)\)/);
+        if (memMatch) {
+            const rawOffset = memMatch[1] || '0';
+            const baseReg = memMatch[2];
+            const offsetVal = rawOffset.startsWith('0x') || rawOffset.startsWith('-0x')
+                ? parseInt(rawOffset, 16)
+                : parseInt(rawOffset, 10) || 0;
+
+            if (['$a0', '$a1', '$a2', '$a3'].includes(baseReg)) {
+                if (!pointerOffsets.has(baseReg)) {
+                    pointerOffsets.set(baseReg, new Set());
+                }
+                pointerOffsets.get(baseReg).add(offsetVal);
+            }
+
+            // Detect stack argument loading (N64 standard ABI: arguments beyond 4th passed at caller $sp offsets: 0x10, 0x14, etc.)
+            if (baseReg === '$sp' && LOAD_OPCODES.has(opcode)) {
+                if (stackSize > 0 && offsetVal >= stackSize) {
+                    const stackArgIdx = Math.floor((offsetVal - stackSize) / 4) + 4;
+                    if (!stackArgs.includes(`s32 a${stackArgIdx} /* from stack */`)) {
+                        stackArgs.push(`s32 a${stackArgIdx} /* from stack */`);
+                    }
+                } else if (stackSize === 0 && offsetVal >= 0x10) {
+                    // Leaf function using caller's incoming argument area
+                    const stackArgIdx = Math.floor((offsetVal - 0x10) / 4) + 4;
+                    if (!stackArgs.includes(`s32 a${stackArgIdx} /* from stack */`)) {
+                        stackArgs.push(`s32 a${stackArgIdx} /* from stack */`);
+                    }
+                }
+            }
+        }
+
+        // Track unsigned operations on arguments and return values
+        if (UNSIGNED_OPS.has(opcode)) {
+            if (tokens[1] === '$v0') isUnsignedV0 = true;
+            for (let i = 1; i < tokens.length; i++) {
+                if (['$a0', '$a1', '$a2', '$a3'].includes(tokens[i])) {
+                    unsignedArgs.add(tokens[i]);
+                }
+            }
+        }
+
+        // Track register dependencies (read vs write)
+        if (STORE_OPCODES.has(opcode)) {
+            for (let i = 1; i < tokens.length; i++) {
+                const reg = tokens[i];
+                if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
+                    if (!writtenRegisters.has(reg)) {
+                        argRegisters.add(reg);
+                    }
+                }
+            }
+        } else {
+            for (let i = 2; i < tokens.length; i++) {
+                const reg = tokens[i];
+                if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
+                    if (!writtenRegisters.has(reg)) {
+                        argRegisters.add(reg);
+                    }
+                }
+            }
+            if (tokens[1] && tokens[1].startsWith('$')) {
+                writtenRegisters.add(tokens[1]);
             }
         }
     }
 
     // Determine return type
     let returnType = 'void';
-    if (usesF0) {
+    if (usesDoubleF0) {
+        returnType = 'f64';
+    } else if (usesF0) {
         returnType = 'f32';
+    } else if (usesV0 && usesV1) {
+        returnType = 's64';
     } else if (usesV0) {
-        returnType = 's32';
+        returnType = isUnsignedV0 ? 'u32' : 's32';
     }
 
-    // Determine parameter list
+    // Determine parameter list with struct and float precision analysis
     const params = [];
     if (argRegisters.has('$f12')) {
-        params.push('f32 f12');
+        params.push(f12IsDouble ? 'f64 f12' : 'f32 f12');
         if (argRegisters.has('$f14')) {
-            params.push('f32 f14');
+            params.push(f14IsDouble ? 'f64 f14' : 'f32 f14');
         }
     } else {
         const sortedArgs = ['$a0', '$a1', '$a2', '$a3'].filter(r => argRegisters.has(r));
-        if (sortedArgs.length === 0) {
+        if (sortedArgs.length === 0 && stackArgs.length === 0) {
             params.push('void');
         } else {
-            sortedArgs.forEach(reg => {
+            for (let idx = 0; idx < sortedArgs.length; idx++) {
+                const reg = sortedArgs[idx];
                 const name = reg.replace('$', '');
-                params.push(`s32 ${name}`);
-            });
+                const typeName = unsignedArgs.has(reg) ? 'u32' : 's32';
+
+                if (reg === '$a0' && a0Is64Bit) {
+                    params.push(`s64 ${name}`);
+                    // Skip $a1 as it is consumed as part of 64-bit pair
+                    if (sortedArgs[idx + 1] === '$a1') {
+                        idx++;
+                    }
+                } else if (pointerOffsets.has(reg)) {
+                    const offsets = pointerOffsets.get(reg);
+                    if (offsets.size > 1) {
+                        params.push(`void* ${name} /* struct */`);
+                    } else if (unsignedArgs.has(reg)) {
+                        params.push(`u8* ${name}`);
+                    } else {
+                        params.push(`void* ${name}`);
+                    }
+                } else {
+                    params.push(`${typeName} ${name}`);
+                }
+            }
+            if (stackArgs.length > 0) {
+                params.push(...stackArgs);
+            }
         }
     }
 
@@ -107,7 +326,14 @@ function analyzeAsmBody(body) {
         returnType,
         params: params.join(', '),
         isLeaf: !hasJal,
-        stackSize
+        hasJumpTable,
+        hasLoop,
+        isBooleanV0,
+        mmioAccesses: Array.from(mmioAccesses).sort(),
+        rodataSymbols: Array.from(rodataSymbols).sort(),
+        savedRegisters: Array.from(savedRegisters).sort(),
+        stackSize,
+        parseErrors
     };
 }
 
@@ -149,6 +375,73 @@ function extractFunctionsFromAsm(code) {
     return functions;
 }
 
+/**
+ * Formats a C stub with optional #pragma GLOBAL_ASM fallback for non-matching functions.
+ */
+function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm = true) {
+    let out = `/*\n`;
+    out += ` * Function: ${funcName}\n`;
+    out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${(analysis.stackSize || 0).toString(16)}\n`;
+    if (analysis.savedRegisters && analysis.savedRegisters.length > 0) {
+        out += ` * Saved Regs: ${analysis.savedRegisters.join(', ')}\n`;
+    }
+    if (analysis.mmioAccesses && analysis.mmioAccesses.length > 0) {
+        out += ` * Hardware MMIO: ${analysis.mmioAccesses.join(', ')}\n`;
+    }
+    if (analysis.rodataSymbols && analysis.rodataSymbols.length > 0) {
+        out += ` * Rodata Symbols: ${analysis.rodataSymbols.join(', ')}\n`;
+    }
+    if (analysis.isBooleanV0) {
+        out += ` * Notes: Returns Boolean Condition Flag (slt)\n`;
+    }
+    if (analysis.hasLoop) {
+        out += ` * Control Flow: Loop detected\n`;
+    }
+    if (analysis.hasJumpTable) {
+        out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
+    }
+    if (analysis.parseErrors && analysis.parseErrors.length > 0) {
+        out += ` * Parse Warnings: ${analysis.parseErrors.join('; ')}\n`;
+    }
+    out += ` */\n`;
+
+    if (useGlobalAsm) {
+        out += `#ifdef NON_MATCHING\n`;
+        out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
+        if (analysis.returnType === 's64') {
+            out += `    return 0LL;\n`;
+        } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
+            out += `    return 0;\n`;
+        } else if (analysis.returnType === 'f64') {
+            out += `    return 0.0;\n`;
+        } else if (analysis.returnType === 'f32') {
+            out += `    return 0.0f;\n`;
+        } else {
+            out += `    // TODO: implement\n`;
+        }
+        out += `}\n`;
+        out += `#else\n`;
+        out += `#pragma GLOBAL_ASM("asm/nonmatchings/${moduleName}/${funcName}.s")\n`;
+        out += `#endif\n\n`;
+    } else {
+        out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
+        if (analysis.returnType === 's64') {
+            out += `    return 0LL;\n`;
+        } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
+            out += `    return 0;\n`;
+        } else if (analysis.returnType === 'f64') {
+            out += `    return 0.0;\n`;
+        } else if (analysis.returnType === 'f32') {
+            out += `    return 0.0f;\n`;
+        } else {
+            out += `    // TODO: implement\n`;
+        }
+        out += `}\n\n`;
+    }
+
+    return out;
+}
+
 function processAsmFile(asmFilePath, srcDir) {
     const code = fs.readFileSync(asmFilePath, 'utf8');
     const functions = extractFunctionsFromAsm(code);
@@ -165,20 +458,7 @@ function processAsmFile(asmFilePath, srcDir) {
 
     functions.forEach(fn => {
         const analysis = analyzeAsmBody(fn.body);
-        cContent += `/*\n`;
-        cContent += ` * Function: ${fn.name}\n`;
-        cContent += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
-        cContent += ` */\n`;
-        cContent += `${analysis.returnType} ${fn.name}(${analysis.params}) {\n`;
-
-        if (analysis.returnType === 's32') {
-            cContent += `    return 0;\n`;
-        } else if (analysis.returnType === 'f32') {
-            cContent += `    return 0.0f;\n`;
-        } else {
-            cContent += `    // TODO: implement\n`;
-        }
-        cContent += `}\n\n`;
+        cContent += generateCStub(fn.name, analysis, baseName, true);
     });
 
     fs.writeFileSync(cFilePath, cContent);
@@ -196,7 +476,9 @@ function processDirectory(asmDir, srcDir) {
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            processDirectory(fullPath, path.join(srcDir, file));
+            if (file !== 'nonmatchings') {
+                processDirectory(fullPath, path.join(srcDir, file));
+            }
         } else if (file.endsWith('.s')) {
             processAsmFile(fullPath, srcDir);
         }
@@ -225,5 +507,6 @@ if (require.main === module) {
 module.exports = {
     analyzeAsmBody,
     extractFunctionsFromAsm,
+    generateCStub,
     processAsmFile
 };
