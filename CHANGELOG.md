@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.63.0]
+### Added
+- Expanded `tools/generate_splat.py` with multi-title configuration profiles (`GAME_PROFILES`) and automatic detection for Mario Party 1 (`mp1`), Mario Party 2 (`mp2`), and Mario Party 3 (`mp3`).
+- Added `--game` / `-g` CLI option to `tools/generate_splat.py` to target distinct game assembly, source, asset, and overlay memory layouts.
+- Created `tools/test_generate_splat.py` test suite validating profile resolution, filename auto-detection, and multi-title YAML configuration generation.
+- Integrated `Test Splat Multi-Title Generation` directly into `tools/test_pipeline.py`.
+
 ## [0.62.0]
 ### Added
 - Added `%gp_rel` relocation parsing to detect small data/BSS symbol access relative to `$gp`.

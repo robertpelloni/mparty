@@ -37,7 +37,10 @@ def main():
     # 4. Intelligent C Stubber Pattern Tests
     run_step("Test C Stubber", "node tools/test_c_stubber.js")
 
-    # 5. Generate Mock ROM
+    # 5. Multi-title Splat Generation Tests
+    run_step("Test Splat Multi-Title Generation", "python3 tools/test_generate_splat.py")
+
+    # 6. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
     # 6. Generate Splat Yaml & Function Prototypes

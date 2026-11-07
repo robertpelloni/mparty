@@ -285,3 +285,10 @@
 - [x] Distinguish global reads vs. global writes across instructions.
 - [x] Annotate separated `Global Reads:` and `Global Writes:` symbol summaries in generated C comments.
 - [x] Add unit test in `tools/test_c_stubber.js` validating `%gp_rel` tracking and read/write classification.
+
+## Multi-Title Splat Configurations for Mario Party 1-3 (v0.63.0)
+
+- [x] Add multi-title configuration profiles (`GAME_PROFILES`) and automatic detection for Mario Party 1 (`mp1`), Mario Party 2 (`mp2`), and Mario Party 3 (`mp3`) in `tools/generate_splat.py`.
+- [x] Add `--game` / `-g` CLI option to `tools/generate_splat.py`.
+- [x] Create `tools/test_generate_splat.py` unit test suite validating profile resolution and YAML output.
+- [x] Integrate multi-title splat test into `tools/test_pipeline.py`.
