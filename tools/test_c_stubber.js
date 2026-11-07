@@ -151,4 +151,24 @@ assert.strictEqual(res9.params, 'f64 f12', 'Expected params f64 f12');
 assert.strictEqual(res9.hasLoop, true, 'Expected hasLoop true');
 console.log('[OK] Test 9: Double-precision float and loop detection passed.');
 
+// Test 10: Memory-mapped I/O (MMIO) and Rodata symbol referencing
+const mmioRodataAsm = `
+    lui $t0, 0xA430
+    lw $v0, 0($t0)
+    lui $t1, %hi(D_80080000)
+    lw $a0, %lo(D_80080000)($t1)
+    jr $ra
+    nop
+`;
+
+const res10 = analyzeAsmBody(mmioRodataAsm);
+assert.strictEqual(res10.returnType, 's32', 'Expected returnType s32');
+assert(res10.mmioAccesses.includes('MI_INTR_REG'), 'Expected MI_INTR_REG in mmioAccesses');
+assert(res10.rodataSymbols.includes('D_80080000'), 'Expected D_80080000 in rodataSymbols');
+
+const stub10 = generateCStub('read_hardware_intr', res10, 'system', false);
+assert(stub10.includes('Hardware MMIO: MI_INTR_REG'), 'Expected Hardware MMIO in generated comments');
+assert(stub10.includes('Rodata Symbols: D_80080000'), 'Expected Rodata Symbols in generated comments');
+console.log('[OK] Test 10: MMIO register and rodata symbol detection passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

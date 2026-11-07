@@ -23,12 +23,29 @@ const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc
 const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
 const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz']);
 
+// Known N64 hardware MMIO register address ranges and names (0x04000000 physical / 0xA4000000 uncached)
+const MMIO_REGISTER_MAP = {
+    '0xA4000000': 'SP_MEM_ADDR_REG',
+    '0xA4040000': 'SP_STATUS_REG',
+    '0xA4080000': 'SP_PC_REG',
+    '0xA4100000': 'DPC_START_REG',
+    '0xA4200000': 'DPS_TBIST_REG',
+    '0xA4300000': 'MI_INTR_REG',
+    '0xA4400000': 'VI_CONTROL_REG',
+    '0xA4500000': 'AI_DRAM_ADDR_REG',
+    '0xA4600000': 'PI_DRAM_ADDR_REG',
+    '0xA4700000': 'RI_MODE_REG',
+    '0xA4800000': 'SI_DRAM_ADDR_REG'
+};
+
 /**
  * Analyzes assembly instructions within a function body to infer:
  * 1. Argument types (pointers vs struct pointers vs scalars, float vs double vs integer)
  * 2. Return types (s32, s64, f32, f64, void, boolean indicator)
  * 3. Stack frame size, saved registers, loops & leaf status
  * 4. Control-flow structures (jump tables, loops)
+ * 5. Memory-mapped I/O (MMIO) and hardware register access
+ * 6. Read-only data (.rodata) and jump table symbol references
  */
 function analyzeAsmBody(body) {
     const lines = body.split('\n');
@@ -51,6 +68,9 @@ function analyzeAsmBody(body) {
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
     const savedRegisters = new Set();
     const writtenRegisters = new Set();
+    const mmioAccesses = new Set();
+    const rodataSymbols = new Set();
+    const registerUpperConstants = new Map(); // reg -> 0xXXXX
 
     for (const rawLine of lines) {
         // Strip comments and leading/trailing whitespace
@@ -101,6 +121,39 @@ function analyzeAsmBody(body) {
         // Detect 64-bit load/store operations on $a0
         if ((opcode === 'ld' || opcode === 'sd') && tokens.includes('$a0')) {
             a0Is64Bit = true;
+        }
+
+        // Detect lui pattern for upper constant loading (e.g. lui $t0, %hi(D_80040000) or lui $v0, 0xA430)
+        if (opcode === 'lui' && tokens[1] && tokens[2]) {
+            const destReg = tokens[1];
+            const hiMatch = line.match(/%hi\(([a-zA-Z0-9_]+)\)/);
+            if (hiMatch) {
+                rodataSymbols.add(hiMatch[1]);
+            } else {
+                const hexVal = parseInt(tokens[2], 16);
+                if (!isNaN(hexVal)) {
+                    registerUpperConstants.set(destReg, hexVal);
+                }
+            }
+        }
+
+        // Detect %lo(symbol) references in instructions (e.g., lw $a0, %lo(D_80040000)($t0))
+        const loMatch = line.match(/%lo\(([a-zA-Z0-9_]+)\)/);
+        if (loMatch) {
+            rodataSymbols.add(loMatch[1]);
+        }
+
+        // Detect MMIO accesses (e.g., lw $t1, 0($t0) where $t0 loaded with 0xA430 / 0x0430)
+        for (const [reg, upper] of registerUpperConstants.entries()) {
+            if (line.includes(`(${reg})`)) {
+                const upperHex = ((upper & 0xFFFF) << 16) >>> 0;
+                const formattedAddr = '0x' + upperHex.toString(16).toUpperCase().padStart(8, '0');
+                if (MMIO_REGISTER_MAP[formattedAddr]) {
+                    mmioAccesses.add(MMIO_REGISTER_MAP[formattedAddr]);
+                } else if ((upperHex & 0xFFF00000) === 0xA4000000 || (upperHex & 0xFFF00000) === 0x04000000) {
+                    mmioAccesses.add(`MMIO_${formattedAddr}`);
+                }
+            }
         }
 
         // Detect return register writes
@@ -213,6 +266,8 @@ function analyzeAsmBody(body) {
         hasJumpTable,
         hasLoop,
         isBooleanV0,
+        mmioAccesses: Array.from(mmioAccesses).sort(),
+        rodataSymbols: Array.from(rodataSymbols).sort(),
         savedRegisters: Array.from(savedRegisters).sort(),
         stackSize
     };
@@ -265,6 +320,12 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
     if (analysis.savedRegisters && analysis.savedRegisters.length > 0) {
         out += ` * Saved Regs: ${analysis.savedRegisters.join(', ')}\n`;
+    }
+    if (analysis.mmioAccesses && analysis.mmioAccesses.length > 0) {
+        out += ` * Hardware MMIO: ${analysis.mmioAccesses.join(', ')}\n`;
+    }
+    if (analysis.rodataSymbols && analysis.rodataSymbols.length > 0) {
+        out += ` * Rodata Symbols: ${analysis.rodataSymbols.join(', ')}\n`;
     }
     if (analysis.isBooleanV0) {
         out += ` * Notes: Returns Boolean Condition Flag (slt)\n`;

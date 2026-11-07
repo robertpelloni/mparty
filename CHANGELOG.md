@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.59.0]
+### Added
+- Expanded `tools/c_stubber.js` to detect memory-mapped I/O (MMIO) register addresses for N64 hardware interfaces (`SP`, `DPC`, `DPS`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).
+- Implemented pattern recognition for `.rodata` symbols and jump table targets via `%hi` and `%lo` relocation pairs.
+- Added automatic annotation of hardware MMIO registers and `.rodata` symbol references in generated C function comments.
+- Added unit test coverage in `tools/test_c_stubber.js` for MMIO register and rodata relocation detection.
+
 ## [0.58.0]
 ### Added
 - Expanded `tools/c_stubber.js` pattern recognition to distinguish double-precision float parameters (`f64 f12`, `f64 f14`) from single-precision floats (`f32`) based on opcode suffixes (`.d`, `ldc1`, `sdc1`).

@@ -258,3 +258,10 @@
 - [x] Support 64-bit integer argument pair detection (`s64 a0`) across `$a0-$a1` when doubleword memory instructions (`ld`, `sd`) are present.
 - [x] Add loop structure detection (`hasLoop`) tracking backward branching instructions (`bne`, `beq`, `bgez`) to annotate control flow in generated C comments.
 - [x] Expand unit tests in `tools/test_c_stubber.js` verifying double-precision float inferencing and loop annotations.
+
+## Memory-Mapped I/O & Rodata Relocations (v0.59.0)
+
+- [x] Detect memory-mapped I/O (MMIO) register addresses (`0xA4000000`-`0xA4800000`) for N64 hardware interfaces (`SP`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).
+- [x] Parse `.rodata` symbol references and jump table target labels through `%hi` and `%lo` relocation pairs.
+- [x] Annotate detected hardware MMIO registers and `.rodata` symbols in generated C function comments.
+- [x] Add unit test in `tools/test_c_stubber.js` validating MMIO and `.rodata` relocation detection.

@@ -6,14 +6,18 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.58.0 (tracked in `VERSION.md`)
+- **Version:** v0.59.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Double-Precision Float & 64-Bit Integer Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Memory-Mapped I/O & Rodata Relocations (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Detects memory-mapped I/O (MMIO) register addresses (`0xA4000000`-`0xA4800000`) for N64 hardware interfaces (`SP`, `MI`, `VI`, `AI`, `PI`, `RI`, `SI`).
+   - Parses `.rodata` symbol references and jump table target labels through `%hi` and `%lo` relocation pairs.
+   - Annotates detected hardware MMIO registers and `.rodata` symbols in generated C function comments.
+   - Verified by unit tests in `tools/test_c_stubber.js` (10/10 tests passing).
+2. **Double-Precision Float & 64-Bit Integer Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Distinguishes double-precision float parameters (`f64 f12`, `f64 f14`) from single-precision floats (`f32`) based on opcode suffixes (`.d`, `ldc1`, `sdc1`).
    - Supports 64-bit integer argument pair detection (`s64 a0`) across `$a0-$a1` when doubleword memory instructions (`ld`, `sd`) are present.
    - Annotates loop structures (`hasLoop`) tracking backward branching instructions (`bne`, `beq`, `bgez`) in generated C comments.
-   - Verified by expanded unit tests in `tools/test_c_stubber.js` (9/9 tests passing).
 2. **Advanced Struct Offset Inferencing & Callee-Saved Registers (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Infers struct pointer parameters (`void* arg /* struct */`) when base registers show multiple distinct offset accesses.
    - Preserves and documents callee-saved registers (`$s0-$s7`, `$fp`) in generated C stub comments.
@@ -45,6 +49,6 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 ### Verification Status
 - `python3 tools/verify_architecture.py`: **PASS**
 - `python3 tools/test_pipeline.py`: **PASS** (all 8 integration steps, validation layers, AI loop, C stubber unit tests, prototype header assertions, and live mock disassembly/stubbing pass)
-- `node tools/test_c_stubber.js`: **PASS** (all 9 pattern recognition, struct inference, float64, and GLOBAL_ASM tests pass)
+- `node tools/test_c_stubber.js`: **PASS** (all 10 pattern recognition, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 6 tests pass)
 - `cd web && npx playwright test`: **PASS** (all 32 E2E and unit tests pass)
