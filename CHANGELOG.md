@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.58.0]
+### Added
+- Expanded `tools/c_stubber.js` pattern recognition to distinguish double-precision float parameters (`f64 f12`, `f64 f14`) from single-precision floats (`f32`) based on opcode suffixes (`.d`, `ldc1`, `sdc1`).
+- Added support for 64-bit integer argument pair detection (`s64 a0`) across `$a0-$a1` when doubleword memory instructions (`ld`, `sd`) are present.
+- Added loop structure detection (`hasLoop`) tracking backward branching instructions (`bne`, `beq`, `bgez`) to annotate control flow in generated C comments.
+- Added unit tests in `tools/test_c_stubber.js` verifying double-precision float inferencing and loop annotations.
+
 ## [0.57.0]
 ### Added
 - Expanded `tools/c_stubber.js` with struct and array offset spread inference on pointer parameters (`void* arg /* struct */`).

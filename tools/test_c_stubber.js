@@ -134,4 +134,21 @@ assert(res8.isBooleanV0, 'Expected isBooleanV0 true');
 assert(res8.params.includes('struct'), 'Expected struct parameter annotation');
 console.log('[OK] Test 8: Struct offset spread and boolean detection passed.');
 
+// Test 9: Double-precision float parameter and 64-bit integer argument pair with loop
+const doubleLoopAsm = `
+loop_head:
+    add.d $f0, $f12, $f12
+    ld $t0, 0($a0)
+    bne $t0, $zero, loop_head
+    nop
+    jr $ra
+    nop
+`;
+
+const res9 = analyzeAsmBody(doubleLoopAsm);
+assert.strictEqual(res9.returnType, 'f64', 'Expected returnType f64');
+assert.strictEqual(res9.params, 'f64 f12', 'Expected params f64 f12');
+assert.strictEqual(res9.hasLoop, true, 'Expected hasLoop true');
+console.log('[OK] Test 9: Double-precision float and loop detection passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

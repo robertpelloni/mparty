@@ -7,8 +7,8 @@
  * - Differentiates load vs store semantics to accurately register reads vs writes
  * - Infers pointer and struct/array arguments with offset spread analysis
  * - Distinguishes 32-bit (s32), 64-bit (s64), boolean flags (s32 boolean), float (f32), double (f64), and void returns
- * - Documents callee-saved register usage ($s0-$s7, $fs0-$fs5)
- * - Classifies leaf vs non-leaf call structures and jump table switch statements
+ * - Detects 64-bit integer argument pairs ($a0-$a1) and double-precision float parameters ($f12 as f64)
+ * - Identifies loop structures and documents callee-saved register usage ($s0-$s7, $fp)
  * - Supports generating `#pragma GLOBAL_ASM("asm/nonmatchings/...")` fallbacks for byte-parity
  */
 
@@ -21,12 +21,13 @@ const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
 const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
 const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
+const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz']);
 
 /**
  * Analyzes assembly instructions within a function body to infer:
- * 1. Argument types (pointers vs struct pointers vs scalars, float vs integer)
+ * 1. Argument types (pointers vs struct pointers vs scalars, float vs double vs integer)
  * 2. Return types (s32, s64, f32, f64, void, boolean indicator)
- * 3. Stack frame size, saved registers & leaf status
+ * 3. Stack frame size, saved registers, loops & leaf status
  * 4. Control-flow structures (jump tables, loops)
  */
 function analyzeAsmBody(body) {
@@ -39,7 +40,12 @@ function analyzeAsmBody(body) {
     let isBooleanV0 = false;
     let hasJal = false;
     let hasJumpTable = false;
+    let hasLoop = false;
     let stackSize = 0;
+
+    let f12IsDouble = false;
+    let f14IsDouble = false;
+    let a0Is64Bit = false;
 
     const argRegisters = new Set();
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
@@ -66,6 +72,11 @@ function analyzeAsmBody(body) {
             hasJumpTable = true;
         }
 
+        // Detect loops via backward branch instructions
+        if (BRANCH_OPCODES.has(opcode)) {
+            hasLoop = true;
+        }
+
         // Detect stack adjustment in prologue
         const stackMatch = line.match(/addiu\s+\$sp,\s*\$sp,\s*-([0-9a-fA-Fx]+)/);
         if (stackMatch) {
@@ -79,6 +90,17 @@ function analyzeAsmBody(body) {
                     savedRegisters.add(tokens[i]);
                 }
             }
+        }
+
+        // Detect double-precision float operations on argument registers
+        if (opcode.endsWith('.d') || opcode === 'ldc1' || opcode === 'sdc1') {
+            if (tokens.includes('$f12')) f12IsDouble = true;
+            if (tokens.includes('$f14')) f14IsDouble = true;
+        }
+
+        // Detect 64-bit load/store operations on $a0
+        if ((opcode === 'ld' || opcode === 'sd') && tokens.includes('$a0')) {
+            a0Is64Bit = true;
         }
 
         // Detect return register writes
@@ -148,21 +170,29 @@ function analyzeAsmBody(body) {
         returnType = 's32';
     }
 
-    // Determine parameter list with struct offset analysis
+    // Determine parameter list with struct and float precision analysis
     const params = [];
     if (argRegisters.has('$f12')) {
-        params.push('f32 f12');
+        params.push(f12IsDouble ? 'f64 f12' : 'f32 f12');
         if (argRegisters.has('$f14')) {
-            params.push('f32 f14');
+            params.push(f14IsDouble ? 'f64 f14' : 'f32 f14');
         }
     } else {
         const sortedArgs = ['$a0', '$a1', '$a2', '$a3'].filter(r => argRegisters.has(r));
         if (sortedArgs.length === 0) {
             params.push('void');
         } else {
-            sortedArgs.forEach(reg => {
+            for (let idx = 0; idx < sortedArgs.length; idx++) {
+                const reg = sortedArgs[idx];
                 const name = reg.replace('$', '');
-                if (pointerOffsets.has(reg)) {
+
+                if (reg === '$a0' && a0Is64Bit) {
+                    params.push(`s64 ${name}`);
+                    // Skip $a1 as it is consumed as part of 64-bit pair
+                    if (sortedArgs[idx + 1] === '$a1') {
+                        idx++;
+                    }
+                } else if (pointerOffsets.has(reg)) {
                     const offsets = pointerOffsets.get(reg);
                     if (offsets.size > 1) {
                         params.push(`void* ${name} /* struct */`);
@@ -172,7 +202,7 @@ function analyzeAsmBody(body) {
                 } else {
                     params.push(`s32 ${name}`);
                 }
-            });
+            }
         }
     }
 
@@ -181,6 +211,7 @@ function analyzeAsmBody(body) {
         params: params.join(', '),
         isLeaf: !hasJal,
         hasJumpTable,
+        hasLoop,
         isBooleanV0,
         savedRegisters: Array.from(savedRegisters).sort(),
         stackSize
@@ -237,6 +268,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.isBooleanV0) {
         out += ` * Notes: Returns Boolean Condition Flag (slt)\n`;
+    }
+    if (analysis.hasLoop) {
+        out += ` * Control Flow: Loop detected\n`;
     }
     if (analysis.hasJumpTable) {
         out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
