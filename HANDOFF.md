@@ -6,13 +6,16 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.64.0 (tracked in `VERSION.md`)
+- **Version:** v0.65.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Modular Non-Matching Extraction & Granular Stubbing (`tools/disassemble.py` & `tools/c_stubber.js`):**
+1. **AI Loop Non-Matching Target Resolution (`tools/ai_loop.py` & `tools/test_ai_loop.py`):**
+   - Implemented `locate_target_asm` and `locate_target_bin` in `tools/ai_loop.py` to recursively discover target assembly and expected binary files across modular `asm/nonmatchings/` and `build/expected/` directories.
+   - Added `--nonmatchings-dir` CLI option.
+   - Verified by unit tests in `tools/test_ai_loop.py` (7/7 tests passing).
+2. **Modular Non-Matching Extraction & Granular Stubbing (`tools/disassemble.py` & `tools/c_stubber.js`):**
    - Enhanced `tools/disassemble.py` to recursively scan subdirectories under `asm/` and extract non-matching functions into `asm/nonmatchings/`.
    - Added `--process-nonmatchings` flag in `tools/c_stubber.js` for modular per-function stub generation.
-   - Verified by unit tests in `tools/test_c_stubber.js` (15/15 tests passing).
 2. **Multi-Title Splat Configurations for Mario Party 1-3 (`tools/generate_splat.py` & `tools/test_generate_splat.py`):**
    - Implemented title presets for Mario Party 1 (`mp1`), Mario Party 2 (`mp2`), and Mario Party 3 (`mp3`) configuring distinct asm, src, asset, and overlay segment paths.
    - Added `--game` / `-g` CLI option with automated filename detection fallback.
@@ -69,5 +72,5 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 - `python3 tools/test_pipeline.py`: **PASS** (all 9 integration steps: architecture, validation layers, AI loop, C stubber unit tests, multi-title splat tests, prototype header assertions, and live mock disassembly/stubbing pass)
 - `python3 tools/test_generate_splat.py`: **PASS** (all 3 multi-title test suites pass)
 - `node tools/test_c_stubber.js`: **PASS** (all 15 pattern recognition, recursive non-matching stubbing, gp relocations, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
-- `tools/test_ai_loop.py`: **PASS** (all 6 tests pass)
+- `tools/test_ai_loop.py`: **PASS** (all 7 tests pass)
 - `cd web && npx playwright test`: **PASS** (all 32 E2E and unit tests pass)

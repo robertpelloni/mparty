@@ -149,11 +149,25 @@ def main():
         setup_mock_env()
         mock_matcher_diff_feedback()
 
+    def setup_nonmatchings_target():
+        os.makedirs("src/module", exist_ok=True)
+        os.makedirs("build/expected/module", exist_ok=True)
+        os.makedirs("asm/nonmatchings/module", exist_ok=True)
+
+        with open("src/module/test.c", "w") as f:
+            f.write("int test() { return 0; }")
+        with open("build/expected/module/test.bin", "w") as f:
+            f.write("mock binary")
+        with open("asm/nonmatchings/module/test.s", "w") as f:
+            f.write("mock nonmatching assembly")
+        mock_matcher_fail_then_success()
+
     tests = [
         ("LLM Refactoring Success", setup_success, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
         ("LLM Multi-step Iterative Self-Correction", setup_multi_retry, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
         ("LLM Assembly Diff Structured Feedback", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
         ("LLM Learned Rules Caching Validation", setup_diff_feedback, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, True),
+        ("LLM Non-Matching Target Resolution", setup_nonmatchings_target, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, True, False),
         ("LLM Missing API Key Graceful Failure", setup_no_key, teardown_all, None, False, False),
         ("LLM Refactoring Persistent Failure", setup_always_fail, teardown_all, {"LLM_API_KEY": "MOCK_KEY"}, False, False)
     ]

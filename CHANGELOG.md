@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.65.0]
+### Added
+- Enhanced `tools/ai_loop.py` with `locate_target_asm` and `locate_target_bin` supporting recursive assembly and binary resolution across modular `asm/nonmatchings/` and `build/expected/` directories.
+- Added `--nonmatchings-dir` CLI parameter to `tools/ai_loop.py` for targeted non-matching function refinement.
+- Added unit test in `tools/test_ai_loop.py` verifying non-matching target resolution (7/7 tests passing).
+
 ## [0.64.0]
 ### Added
 - Enhanced `tools/disassemble.py` to recursively scan all subdirectories under `asm/` for `.s` files, extracting modular non-matching functions into `asm/nonmatchings/<module_path>/<func>.s`.

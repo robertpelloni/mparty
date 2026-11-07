@@ -115,26 +115,58 @@ def find_c_files(src_dir):
                 c_files.append(os.path.join(root, file))
     return c_files
 
-def process_file(c_file, api_key, max_retries=3, api_url=None):
+def locate_target_asm(base_name, nonmatchings_dir="asm/nonmatchings"):
+    """
+    Locates target assembly file either at asm/<base_name>.s
+    or inside asm/nonmatchings/**/<base_name>.s.
+    """
+    direct_asm = os.path.join("asm", f"{base_name}.s")
+    if os.path.exists(direct_asm):
+        return direct_asm
+
+    if os.path.exists(nonmatchings_dir):
+        for root, _, files in os.walk(nonmatchings_dir):
+            if f"{base_name}.s" in files:
+                return os.path.join(root, f"{base_name}.s")
+    return None
+
+def locate_target_bin(base_name):
+    """
+    Locates target expected binary either at build/expected/<base_name>.bin
+    or recursively under build/expected/**/<base_name>.bin.
+    """
+    direct_bin = os.path.join("build", "expected", f"{base_name}.bin")
+    if os.path.exists(direct_bin):
+        return direct_bin
+
+    expected_dir = os.path.join("build", "expected")
+    if os.path.exists(expected_dir):
+        for root, _, files in os.walk(expected_dir):
+            if f"{base_name}.bin" in files:
+                return os.path.join(root, f"{base_name}.bin")
+    return None
+
+def process_file(c_file, api_key, max_retries=3, api_url=None, nonmatchings_dir="asm/nonmatchings"):
     """
     Processes a single C file by attempting to match it, and invoking the LLM if it fails.
     Iteratively feeds diagnostic error outputs and assembly diffs back to the LLM up to max_retries.
     Employs temperature stepping (0.2 -> 0.4 -> 0.7) and scores diff lines to retain best candidates.
+    Supports locating modular functions inside asm/nonmatchings/ and build/expected/.
     """
     base_name = os.path.splitext(os.path.basename(c_file))[0]
-    target_bin = os.path.join("build", "expected", f"{base_name}.bin")
-    asm_file = os.path.join("asm", f"{base_name}.s")
+    target_bin = locate_target_bin(base_name)
+    asm_file = locate_target_asm(base_name, nonmatchings_dir)
 
     print(f"Processing: {c_file}")
 
     # Check if target binary exists
-    if not os.path.exists(target_bin):
-        print(f"  Target binary {target_bin} not found. Skipping.")
+    if not target_bin or not os.path.exists(target_bin):
+        print(f"  Target binary for {base_name} not found. Skipping.")
         return False
 
     # Run the initial matcher with diff flag
     cmd = ["python3", "tools/ai_matcher.py", c_file, target_bin, "--diff"]
-    if os.path.exists(asm_file):
+    if asm_file and os.path.exists(asm_file):
         cmd.extend(["--target-asm", asm_file])
 
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -154,7 +186,7 @@ def process_file(c_file, api_key, max_retries=3, api_url=None):
         original_c_code = f.read()
 
     asm_code = ""
-    if os.path.exists(asm_file):
+    if asm_file and os.path.exists(asm_file):
         with open(asm_file, 'r') as f:
             asm_code = f.read()
 
@@ -231,6 +263,7 @@ def main():
     parser.add_argument("--src", default="src", help="Directory containing source C files.")
     parser.add_argument("--max-retries", type=int, default=3, help="Max self-correction iterations per file.")
     parser.add_argument("--api-url", default=None, help="Custom LLM API URL for mocking/local models.")
+    parser.add_argument("--nonmatchings-dir", default="asm/nonmatchings", help="Root directory containing non-matching function assembly.")
 
     args = parser.parse_args()
     api_key = os.environ.get("LLM_API_KEY")
@@ -247,7 +280,7 @@ def main():
 
     success_count = 0
     for c_file in c_files:
-        if process_file(c_file, api_key, max_retries=args.max_retries, api_url=args.api_url):
+        if process_file(c_file, api_key, max_retries=args.max_retries, api_url=args.api_url, nonmatchings_dir=args.nonmatchings_dir):
             success_count += 1
 
     print(f"\nAI Loop complete. Successfully matched: {success_count}/{len(c_files)}")

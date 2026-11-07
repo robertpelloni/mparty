@@ -298,3 +298,9 @@
 - [x] Enhance `tools/disassemble.py` to recursively scan subdirectories under `asm/` and extract non-matching functions into `asm/nonmatchings/`.
 - [x] Support `--process-nonmatchings` flag in `tools/c_stubber.js` for modular per-function stub generation.
 - [x] Add unit test in `tools/test_c_stubber.js` validating modular non-matching directory processing.
+
+## AI Loop Non-Matching Target Resolution (v0.65.0)
+
+- [x] Add `locate_target_asm` and `locate_target_bin` in `tools/ai_loop.py` to resolve target assembly and binaries across `asm/nonmatchings/` and `build/expected/`.
+- [x] Add `--nonmatchings-dir` CLI parameter to `tools/ai_loop.py`.
+- [x] Add unit test in `tools/test_ai_loop.py` verifying non-matching directory target resolution.
