@@ -240,3 +240,8 @@
 
 - [x] Added C stub inspector viewer and non-matching processing trigger button to `DecompilationStatus.tsx`.
 - [x] Added Playwright test in `web/tests/decompilation_status.spec.ts` asserting non-matching flow and stub inspection modal.
+
+## Symbol Discovery & Function Prototype Header Generation (v0.56.0)
+
+- [x] Added symbol discovery and prototype header generation (`include/functions.h`) in `tools/generate_splat.py`.
+- [x] Added assertion in `tools/test_pipeline.py` verifying header generation.

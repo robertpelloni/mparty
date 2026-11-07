@@ -5,7 +5,8 @@ test_pipeline.py
 Automates end-to-end integration testing of the decompilation toolchain.
 It dynamically generates required mock directories, assets, and ROMs on-the-fly
 to avoid committing static binaries to version control, testing ROM generation,
-splat config generation, non-matching section extraction, and intelligent C stubbing.
+splat config generation, function prototype generation, non-matching section extraction,
+and intelligent C stubbing.
 """
 
 import os
@@ -39,12 +40,16 @@ def main():
     # 5. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
-    # 6. Generate Splat Yaml
+    # 6. Generate Splat Yaml & Function Prototypes
     run_step("Generate Splat config", "python3 tools/generate_splat.py test_baserom.z64 --out test_splat.yaml")
 
-    # Check if yaml was created
+    # Check if yaml and include/functions.h were created
     if not os.path.exists("test_splat.yaml"):
         print("[ERROR] Splat config not found!")
+        sys.exit(1)
+
+    if not os.path.exists("include/functions.h"):
+        print("[ERROR] include/functions.h prototype header not found!")
         sys.exit(1)
 
     # 7. Disassembly & Stubbing Verification
@@ -86,6 +91,7 @@ def main():
     print("Cleaning up test artifacts...")
     if os.path.exists("test_baserom.z64"): os.remove("test_baserom.z64")
     if os.path.exists("test_splat.yaml"): os.remove("test_splat.yaml")
+    if os.path.exists("include/functions.h"): os.remove("include/functions.h")
     if os.path.exists("asm/test_module"): shutil.rmtree("asm/test_module")
     if os.path.exists("asm/nonmatchings"): shutil.rmtree("asm/nonmatchings")
     if os.path.exists("src/test_module"): shutil.rmtree("src/test_module")

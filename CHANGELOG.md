@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.56.0]
+### Added
+- Expanded `tools/generate_splat.py` to auto-discover symbol entry points and inject `non_matchings_path: asm/nonmatchings` configurations into generated `splat.yaml`.
+- Automated generation of typed prototype headers in `include/functions.h` during splat configuration generation.
+- Added verification of `include/functions.h` into `tools/test_pipeline.py`.
+
 ## [0.55.0]
 ### Added
 - Expanded `web/src/components/DecompilationStatus.tsx` with an interactive C Stub preview viewer displaying typed signatures and `#pragma GLOBAL_ASM` wrappers.
