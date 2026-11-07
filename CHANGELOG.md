@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.55.0]
+### Added
+- Expanded `web/src/components/DecompilationStatus.tsx` with an interactive C Stub preview viewer displaying typed signatures and `#pragma GLOBAL_ASM` wrappers.
+- Added a "Process Nonmatchings" button to invoke modular assembly splitting into `asm/nonmatchings/` directly from the UI, updating non-matching function tallies in real-time.
+- Added Playwright end-to-end test suite `web/tests/decompilation_status.spec.ts` asserting non-matching processing and stub inspector visibility toggles.
+
 ## [0.54.0]
 ### Added
 - Integrated end-to-end intelligent C stubbing, non-matching extraction, and `test_c_stubber.js` directly into `tools/test_pipeline.py`.

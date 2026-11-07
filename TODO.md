@@ -235,3 +235,8 @@
 
 - [x] Integrated `tools/disassemble.py`, `asm/nonmatchings/` extraction, and typed C stub generation directly into the end-to-end integration test runner `tools/test_pipeline.py`.
 - [x] Added execution of `tools/test_c_stubber.js` to `test_pipeline.py`.
+
+## Interactive Decompilation Pipeline UI & Stub Inspector (v0.55.0)
+
+- [x] Added C stub inspector viewer and non-matching processing trigger button to `DecompilationStatus.tsx`.
+- [x] Added Playwright test in `web/tests/decompilation_status.spec.ts` asserting non-matching flow and stub inspection modal.
