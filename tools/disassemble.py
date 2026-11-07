@@ -86,14 +86,20 @@ def run_splat(yaml_config):
         print("Splat execution unavailable or failed. Scaffolding non-matching directory layout.")
         create_directories()
 
-    # Process all root .s assembly files into modular asm/nonmatchings/
+    # Process all root and subdirectory .s assembly files into modular asm/nonmatchings/
     asm_dir = "asm"
     nonmatchings_dir = os.path.join(asm_dir, "nonmatchings")
     if os.path.exists(asm_dir):
-        for entry in os.listdir(asm_dir):
-            full_path = os.path.join(asm_dir, entry)
-            if os.path.isfile(full_path) and entry.endswith('.s'):
-                extract_nonmatchings_from_file(full_path, nonmatchings_dir)
+        for root, dirs, files in os.walk(asm_dir):
+            # Do not extract already extracted nonmatchings files
+            if os.path.abspath(root).startswith(os.path.abspath(nonmatchings_dir)):
+                continue
+            for file in files:
+                if file.endswith('.s'):
+                    full_path = os.path.join(root, file)
+                    rel_dir = os.path.relpath(root, asm_dir)
+                    target_root = nonmatchings_dir if rel_dir == '.' else os.path.join(nonmatchings_dir, rel_dir)
+                    extract_nonmatchings_from_file(full_path, target_root)
 
 def main():
     parser = argparse.ArgumentParser(description="Orchestrate ROM disassembly using splat.")

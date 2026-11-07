@@ -247,4 +247,33 @@ assert(stub14.includes('Global Reads: g_CurrentTurn'), 'Expected Global Reads in
 assert(stub14.includes('Global Writes: D_80090000, g_CurrentTurn'), 'Expected Global Writes in comments');
 console.log('[OK] Test 14: $gp-relative symbol tracking and Read/Write classification passed.');
 
+// Test 15: Modular non-matching directory processing with processNonmatchings flag
+const tempNonmatchAsmDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_nm_asm_'));
+const tempNonmatchSrcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_nm_src_'));
+
+try {
+    const nmDir = path.join(tempNonmatchAsmDir, 'nonmatchings', 'minigame');
+    fs.mkdirSync(nmDir, { recursive: true });
+    fs.writeFileSync(path.join(nmDir, 'minigame_tick.s'), `
+glabel minigame_tick
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+    `);
+
+    // First call without processNonmatchings flag: nonmatchings should be skipped
+    const statsWithout = processDirectory(tempNonmatchAsmDir, tempNonmatchSrcDir, null, false);
+    assert.strictEqual(statsWithout.processedFiles.length, 0, 'Expected nonmatchings to be skipped by default');
+
+    // Second call with processNonmatchings flag: nonmatchings should be processed
+    const statsWith = processDirectory(tempNonmatchAsmDir, tempNonmatchSrcDir, null, true);
+    assert.strictEqual(statsWith.processedFiles.length, 1, 'Expected 1 nonmatching file to be processed');
+    assert.strictEqual(statsWith.totalFunctions, 1, 'Expected 1 nonmatching function typed');
+    assert(fs.existsSync(path.join(tempNonmatchSrcDir, 'nonmatchings', 'minigame', 'minigame_tick.c')));
+    console.log('[OK] Test 15: Modular non-matching directory processing passed.');
+} finally {
+    fs.rmSync(tempNonmatchAsmDir, { recursive: true, force: true });
+    fs.rmSync(tempNonmatchSrcDir, { recursive: true, force: true });
+}
+
 console.log('\nAll c_stubber tests passed successfully!');

@@ -512,7 +512,7 @@ function processAsmFile(asmFilePath, srcDir, stats = null) {
     return cFilePath;
 }
 
-function processDirectory(asmDir, srcDir, stats = null) {
+function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = false) {
     const isRootCall = !stats;
     const currentStats = stats || {
         totalFunctions: 0,
@@ -533,8 +533,8 @@ function processDirectory(asmDir, srcDir, stats = null) {
         const stat = fs.statSync(fullPath);
 
         if (stat.isDirectory()) {
-            if (file !== 'nonmatchings') {
-                processDirectory(fullPath, path.join(srcDir, file), currentStats);
+            if (file !== 'nonmatchings' || processNonmatchings) {
+                processDirectory(fullPath, path.join(srcDir, file), currentStats, processNonmatchings);
             }
         } else if (file.endsWith('.s')) {
             processAsmFile(fullPath, srcDir, currentStats);
@@ -562,8 +562,19 @@ function processDirectory(asmDir, srcDir, stats = null) {
 
 function main() {
     const args = process.argv.slice(2);
-    const asmDir = args[0] || './asm';
-    const srcDir = args[1] || './src';
+    let processNonmatchings = false;
+    const positional = [];
+
+    for (const arg of args) {
+        if (arg === '--process-nonmatchings') {
+            processNonmatchings = true;
+        } else {
+            positional.push(arg);
+        }
+    }
+
+    const asmDir = positional[0] || './asm';
+    const srcDir = positional[1] || './src';
 
     if (!fs.existsSync(asmDir)) {
         console.error(`Error: asm directory '${asmDir}' not found.`);
@@ -571,7 +582,7 @@ function main() {
     }
 
     console.log(`Stubbing C files from ${asmDir} into ${srcDir}...`);
-    processDirectory(asmDir, srcDir);
+    processDirectory(asmDir, srcDir, null, processNonmatchings);
     console.log("C stubbing complete.");
 }
 

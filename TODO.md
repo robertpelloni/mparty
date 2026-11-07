@@ -292,3 +292,9 @@
 - [x] Add `--game` / `-g` CLI option to `tools/generate_splat.py`.
 - [x] Create `tools/test_generate_splat.py` unit test suite validating profile resolution and YAML output.
 - [x] Integrate multi-title splat test into `tools/test_pipeline.py`.
+
+## Modular Non-Matching Extraction & Granular Stubbing (v0.64.0)
+
+- [x] Enhance `tools/disassemble.py` to recursively scan subdirectories under `asm/` and extract non-matching functions into `asm/nonmatchings/`.
+- [x] Support `--process-nonmatchings` flag in `tools/c_stubber.js` for modular per-function stub generation.
+- [x] Add unit test in `tools/test_c_stubber.js` validating modular non-matching directory processing.

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.64.0]
+### Added
+- Enhanced `tools/disassemble.py` to recursively scan all subdirectories under `asm/` for `.s` files, extracting modular non-matching functions into `asm/nonmatchings/<module_path>/<func>.s`.
+- Added `--process-nonmatchings` flag and recursive processing option to `tools/c_stubber.js` for granular per-function C stub generation.
+- Added Unit Test 15 in `tools/test_c_stubber.js` validating modular non-matching directory processing and stub generation (15/15 passing).
+
 ## [0.63.0]
 ### Added
 - Expanded `tools/generate_splat.py` with multi-title configuration profiles (`GAME_PROFILES`) and automatic detection for Mario Party 1 (`mp1`), Mario Party 2 (`mp2`), and Mario Party 3 (`mp3`).
