@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.57.0]
+### Added
+- Expanded `tools/c_stubber.js` with struct and array offset spread inference on pointer parameters (`void* arg /* struct */`).
+- Added preservation analysis and comment emission for callee-saved registers (`$s0-$s7`, `$fp`) in generated C stubs.
+- Added boolean condition detection (`isBooleanV0`) for return value registers constrained by `slt`/`slti`/`sltu`.
+- Added unit tests in `tools/test_c_stubber.js` verifying struct offset spreads, callee-saved register tracking, and boolean flag detection.
+
 ## [0.56.0]
 ### Added
 - Expanded `tools/generate_splat.py` to auto-discover symbol entry points and inject `non_matchings_path: asm/nonmatchings` configurations into generated `splat.yaml`.

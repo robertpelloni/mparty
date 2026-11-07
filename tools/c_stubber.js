@@ -5,8 +5,9 @@
  * Parses generated .s assembly files and nonmatching assembly blocks (e.g. asm/nonmatchings),
  * extracts function signatures and performs advanced MIPS instruction analysis:
  * - Differentiates load vs store semantics to accurately register reads vs writes
- * - Infers pointer arguments when base registers are indexed with offset memory loads/stores
- * - Distinguishes 32-bit (s32), 64-bit (s64), float (f32), double (f64), and void returns
+ * - Infers pointer and struct/array arguments with offset spread analysis
+ * - Distinguishes 32-bit (s32), 64-bit (s64), boolean flags (s32 boolean), float (f32), double (f64), and void returns
+ * - Documents callee-saved register usage ($s0-$s7, $fs0-$fs5)
  * - Classifies leaf vs non-leaf call structures and jump table switch statements
  * - Supports generating `#pragma GLOBAL_ASM("asm/nonmatchings/...")` fallbacks for byte-parity
  */
@@ -19,12 +20,13 @@ const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 
 const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
 const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
+const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
 
 /**
  * Analyzes assembly instructions within a function body to infer:
- * 1. Argument types (pointers vs scalars, float vs integer)
- * 2. Return types (s32, s64, f32, f64, void)
- * 3. Stack frame size & leaf status
+ * 1. Argument types (pointers vs struct pointers vs scalars, float vs integer)
+ * 2. Return types (s32, s64, f32, f64, void, boolean indicator)
+ * 3. Stack frame size, saved registers & leaf status
  * 4. Control-flow structures (jump tables, loops)
  */
 function analyzeAsmBody(body) {
@@ -34,12 +36,14 @@ function analyzeAsmBody(body) {
     let usesV1 = false;
     let usesF0 = false;
     let usesDoubleF0 = false;
+    let isBooleanV0 = false;
     let hasJal = false;
     let hasJumpTable = false;
     let stackSize = 0;
 
     const argRegisters = new Set();
-    const pointerArgs = new Set();
+    const pointerOffsets = new Map(); // reg -> Set of offsets accessed
+    const savedRegisters = new Set();
     const writtenRegisters = new Set();
 
     for (const rawLine of lines) {
@@ -68,9 +72,23 @@ function analyzeAsmBody(body) {
             stackSize = parseInt(stackMatch[1], 16) || parseInt(stackMatch[1], 10) || 0;
         }
 
+        // Detect callee-saved register preservation
+        if (STORE_OPCODES.has(opcode)) {
+            for (let i = 1; i < tokens.length; i++) {
+                if (CALLEE_SAVED_REGS.has(tokens[i])) {
+                    savedRegisters.add(tokens[i]);
+                }
+            }
+        }
+
         // Detect return register writes
         if (opcode !== 'jr' && opcode !== 'jal' && !STORE_OPCODES.has(opcode)) {
-            if (tokens[1] === '$v0') usesV0 = true;
+            if (tokens[1] === '$v0') {
+                usesV0 = true;
+                if (['slt', 'slti', 'sltu', 'sltiu'].includes(opcode)) {
+                    isBooleanV0 = true;
+                }
+            }
             if (tokens[1] === '$v1') usesV1 = true;
             if (tokens[1] === '$f0') {
                 usesF0 = true;
@@ -78,12 +96,18 @@ function analyzeAsmBody(body) {
             }
         }
 
-        // Detect memory dereferences identifying pointer types: e.g., lw $t0, 0($a0) or sw $t0, 4($a1)
-        const memMatch = line.match(/(?:[a-z0-9_]+)\s+[^,]+,\s*-?[0-9a-fA-Fx]*\((\$[a-zA-Z0-9_]+)\)/);
+        // Detect memory dereferences and record offset accesses
+        const memMatch = line.match(/(?:[a-z0-9_]+)\s+[^,]+,\s*(-?[0-9a-fA-Fx]*)\((\$[a-zA-Z0-9_]+)\)/);
         if (memMatch) {
-            const baseReg = memMatch[1];
+            const rawOffset = memMatch[1];
+            const baseReg = memMatch[2];
+            const offsetVal = rawOffset ? (parseInt(rawOffset, 16) || parseInt(rawOffset, 10) || 0) : 0;
+
             if (['$a0', '$a1', '$a2', '$a3'].includes(baseReg)) {
-                pointerArgs.add(baseReg);
+                if (!pointerOffsets.has(baseReg)) {
+                    pointerOffsets.set(baseReg, new Set());
+                }
+                pointerOffsets.get(baseReg).add(offsetVal);
             }
         }
 
@@ -124,7 +148,7 @@ function analyzeAsmBody(body) {
         returnType = 's32';
     }
 
-    // Determine parameter list
+    // Determine parameter list with struct offset analysis
     const params = [];
     if (argRegisters.has('$f12')) {
         params.push('f32 f12');
@@ -138,8 +162,13 @@ function analyzeAsmBody(body) {
         } else {
             sortedArgs.forEach(reg => {
                 const name = reg.replace('$', '');
-                if (pointerArgs.has(reg)) {
-                    params.push(`void* ${name}`);
+                if (pointerOffsets.has(reg)) {
+                    const offsets = pointerOffsets.get(reg);
+                    if (offsets.size > 1) {
+                        params.push(`void* ${name} /* struct */`);
+                    } else {
+                        params.push(`void* ${name}`);
+                    }
                 } else {
                     params.push(`s32 ${name}`);
                 }
@@ -152,6 +181,8 @@ function analyzeAsmBody(body) {
         params: params.join(', '),
         isLeaf: !hasJal,
         hasJumpTable,
+        isBooleanV0,
+        savedRegisters: Array.from(savedRegisters).sort(),
         stackSize
     };
 }
@@ -201,6 +232,12 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     let out = `/*\n`;
     out += ` * Function: ${funcName}\n`;
     out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${analysis.stackSize.toString(16)}\n`;
+    if (analysis.savedRegisters && analysis.savedRegisters.length > 0) {
+        out += ` * Saved Regs: ${analysis.savedRegisters.join(', ')}\n`;
+    }
+    if (analysis.isBooleanV0) {
+        out += ` * Notes: Returns Boolean Condition Flag (slt)\n`;
+    }
     if (analysis.hasJumpTable) {
         out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
     }

@@ -26,7 +26,8 @@ assert.strictEqual(res1.returnType, 's32', 'Expected returnType s32');
 assert.strictEqual(res1.params, 's32 a0, s32 a1', 'Expected params s32 a0, s32 a1');
 assert.strictEqual(res1.isLeaf, true, 'Expected isLeaf true');
 assert.strictEqual(res1.stackSize, 0x18, 'Expected stackSize 0x18');
-console.log('[OK] Test 1: Leaf s32 function with ($a0, $a1) passed.');
+assert.deepStrictEqual(res1.savedRegisters, ['$s0'], 'Expected savedRegisters [$s0]');
+console.log('[OK] Test 1: Leaf s32 function with ($a0, $a1) and saved $s0 passed.');
 
 // Test 2: Floating point function returning $f0 and taking $f12
 const floatAsm = `
@@ -115,6 +116,22 @@ const stubOutput = generateCStub('func_test', res1, 'engine', true);
 assert(stubOutput.includes('#ifdef NON_MATCHING'), 'Expected #ifdef NON_MATCHING');
 assert(stubOutput.includes('#pragma GLOBAL_ASM("asm/nonmatchings/engine/func_test.s")'), 'Expected #pragma GLOBAL_ASM');
 assert(stubOutput.includes('s32 func_test(s32 a0, s32 a1)'), 'Expected signature s32 func_test(s32 a0, s32 a1)');
+assert(stubOutput.includes('Saved Regs: $s0'), 'Expected Saved Regs in comment');
 console.log('[OK] Test 7: #pragma GLOBAL_ASM generation passed.');
+
+// Test 8: Struct pointer offset spread inference and boolean condition flag
+const structBoolAsm = `
+    lw $t0, 0x0($a0)
+    lw $t1, 0x4($a0)
+    slt $v0, $t0, $t1
+    jr $ra
+    nop
+`;
+
+const res8 = analyzeAsmBody(structBoolAsm);
+assert.strictEqual(res8.returnType, 's32', 'Expected returnType s32');
+assert(res8.isBooleanV0, 'Expected isBooleanV0 true');
+assert(res8.params.includes('struct'), 'Expected struct parameter annotation');
+console.log('[OK] Test 8: Struct offset spread and boolean detection passed.');
 
 console.log('\nAll c_stubber tests passed successfully!');

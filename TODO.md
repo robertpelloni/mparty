@@ -245,3 +245,9 @@
 
 - [x] Added symbol discovery and prototype header generation (`include/functions.h`) in `tools/generate_splat.py`.
 - [x] Added assertion in `tools/test_pipeline.py` verifying header generation.
+
+## Advanced Struct Offset Inferencing & Callee-Saved Registers (v0.57.0)
+
+- [x] Added struct offset spread inference on pointer parameters (`void* arg /* struct */`) in `tools/c_stubber.js`.
+- [x] Added callee-saved register tracking (`$s0-$s7`, `$fp`) and boolean condition detection in generated C stubs.
+- [x] Expanded unit tests in `tools/test_c_stubber.js` verifying struct offset spreads and boolean flag detection.
