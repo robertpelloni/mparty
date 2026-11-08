@@ -333,4 +333,25 @@ assert(res19.mmioAccesses.includes('AI_STATUS_REG'), 'Expected AI_STATUS_REG (0x
 assert(res19.mmioAccesses.includes('VI_WIDTH_REG'), 'Expected VI_WIDTH_REG (0xA4400008)');
 console.log('[OK] Test 19: Granular MMIO sub-register mapping with non-zero offsets passed.');
 
+// Test 20: Rodata float constant recognition and clean isolation from mutable globals
+const rodataFloatAsm = `
+    lui $t0, %hi(D_80085000)
+    lwc1 $f0, %lo(D_80085000)($t0)
+    lui $t1, %hi(D_80086000)
+    lw $a0, %lo(D_80086000)($t1)
+    sw $a0, %lo(D_80086000)($t1)
+    jr $ra
+    nop
+`;
+
+const res20 = analyzeAsmBody(rodataFloatAsm);
+assert(res20.rodataFloats.includes('D_80085000'), 'Expected D_80085000 in rodataFloats');
+assert(res20.rodataSymbols.includes('D_80085000'), 'Expected D_80085000 in rodataSymbols');
+assert(!res20.rodataSymbols.includes('D_80086000'), 'Written symbol D_80086000 must NOT be in rodataSymbols');
+assert(res20.globalDataWrites.includes('D_80086000'), 'Expected D_80086000 in globalDataWrites');
+
+const stub20 = generateCStub('load_rodata_float', res20, 'math', false);
+assert(stub20.includes('Rodata Floats: D_80085000'), 'Expected Rodata Floats in generated comments');
+console.log('[OK] Test 20: Rodata float constant recognition and clean isolation passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

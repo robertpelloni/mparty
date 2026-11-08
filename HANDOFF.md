@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.81.0 (tracked in `VERSION.md`)
+- **Version:** v0.82.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Centralized CLI Mario Party 4 Integration (`tools/mparty_cli.py` & `tools/test_mparty_cli.py`):**
+1. **Rodata Relocation Refinement & Float Constant Recognition (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Implemented `rodataFloats` tracking to detect floating-point constants loaded via `lwc1`/`ldc1` from `%lo(symbol)`.
+   - Filtered out symbols with store operations from `rodataSymbols` to strictly isolate read-only memory from mutable global data.
+   - Added Unit Test 20 in `tools/test_c_stubber.js`.
+2. **Centralized CLI Mario Party 4 Integration (`tools/mparty_cli.py` & `tools/test_mparty_cli.py`):**
    - Added `mp4` to `tools/mparty_cli.py` (`GAME_NAMES`, `GAME_CYCLE`, and `--game` argument parser).
    - Updated unit tests in `tools/test_mparty_cli.py` asserting title cycling and execution with `mp4`.
 2. **Decompilation Studio Mario Party 4 Target Selection (`DecompilationStatus.tsx` & `/api/ai`):**

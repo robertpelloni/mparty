@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.82.0]
+### Added
+- Refined `.rodata` relocation tracking in `tools/c_stubber.js` by recognizing floating-point constant loads (`lwc1`, `ldc1`) and annotating them as `Rodata Floats: ...`.
+- Strictly isolated pure read-only data symbols in `rodataSymbols` by filtering out symbols with memory write access.
+- Added Unit Test 20 in `tools/test_c_stubber.js` (20/20 unit tests passing).
+
 ## [0.81.0]
 ### Added
 - Added Mario Party 4 (`mp4`) support to `tools/mparty_cli.py` across title names, parser choices, and cyclic dashboard rotations.

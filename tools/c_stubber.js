@@ -130,6 +130,7 @@ function analyzeAsmBody(body) {
     const writtenRegisters = new Set();
     const mmioAccesses = new Set();
     const rodataSymbols = new Set();
+    const rodataFloats = new Set();
     const globalDataReads = new Set();
     const globalDataWrites = new Set();
     const registerUpperConstants = new Map(); // reg -> 0xXXXX
@@ -222,6 +223,9 @@ function analyzeAsmBody(body) {
         if (loMatch) {
             const sym = loMatch[1];
             rodataSymbols.add(sym);
+            if (opcode === 'lwc1' || opcode === 'ldc1') {
+                rodataFloats.add(sym);
+            }
             if (STORE_OPCODES.has(opcode)) {
                 globalDataWrites.add(sym);
             } else if (LOAD_OPCODES.has(opcode)) {
@@ -427,7 +431,8 @@ function analyzeAsmBody(body) {
         isBooleanV0,
         mmioAccesses: Array.from(mmioAccesses).sort(),
         cop0Registers: Array.from(cop0Registers).sort(),
-        rodataSymbols: Array.from(rodataSymbols).sort(),
+        rodataSymbols: Array.from(rodataSymbols).filter(sym => !globalDataWrites.has(sym)).sort(),
+        rodataFloats: Array.from(rodataFloats).sort(),
         globalDataReads: Array.from(globalDataReads).sort(),
         globalDataWrites: Array.from(globalDataWrites).sort(),
         savedRegisters: Array.from(savedRegisters).sort(),
@@ -492,6 +497,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.rodataSymbols && analysis.rodataSymbols.length > 0) {
         out += ` * Rodata Symbols: ${analysis.rodataSymbols.join(', ')}\n`;
+    }
+    if (analysis.rodataFloats && analysis.rodataFloats.length > 0) {
+        out += ` * Rodata Floats: ${analysis.rodataFloats.join(', ')}\n`;
     }
     if (analysis.globalDataReads && analysis.globalDataReads.length > 0) {
         out += ` * Global Reads: ${analysis.globalDataReads.join(', ')}\n`;

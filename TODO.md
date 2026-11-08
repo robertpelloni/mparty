@@ -394,3 +394,9 @@
 
 - [x] Add `mp4` to `tools/mparty_cli.py` title parser, cycle sequence, and status formatting.
 - [x] Expand unit tests in `tools/test_mparty_cli.py`.
+
+## Rodata Relocation Refinement & Float Constant Recognition (v0.82.0)
+
+- [x] Differentiate read-only rodata from mutable global data in `tools/c_stubber.js`.
+- [x] Add `rodataFloats` recognition and annotation.
+- [x] Add Unit Test 20 in `tools/test_c_stubber.js`.
