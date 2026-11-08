@@ -316,3 +316,9 @@
 - [x] Add `--game` / `-g` argument in `tools/mparty_cli.py`.
 - [x] Render target title in interactive terminal dashboard header.
 - [x] Create `tools/test_mparty_cli.py` and integrate into `tools/test_pipeline.py`.
+
+## AI Matcher Assembly Normalization (v0.68.0)
+
+- [x] Add `normalize_instruction` in `tools/ai_matcher.py` to strip addresses and comments from disassembly.
+- [x] Support normalized diff output in `generate_assembly_diff`.
+- [x] Create `tools/test_ai_matcher.py` unit test suite and integrate into `tools/test_pipeline.py`.

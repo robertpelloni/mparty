@@ -34,6 +34,9 @@ def main():
     # 3. AI Loop Matcher Tests
     run_step("Test AI Loop", "python3 tools/test_ai_loop.py")
 
+    # 4. AI Matcher Harness Tests
+    run_step("Test AI Matcher", "python3 tools/test_ai_matcher.py")
+
     # 4. Intelligent C Stubber Pattern Tests
     run_step("Test C Stubber", "node tools/test_c_stubber.js")
 

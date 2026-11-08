@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.67.0 (tracked in `VERSION.md`)
+- **Version:** v0.68.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Multi-Title Targeting in Centralized CLI (`tools/mparty_cli.py` & `tools/test_mparty_cli.py`):**
+1. **AI Matcher Assembly Normalization (`tools/ai_matcher.py` & `tools/test_ai_matcher.py`):**
+   - Implemented `normalize_instruction` in `tools/ai_matcher.py` to strip variable addresses, hexadecimal opcode dumps, and comments from objdump disassembly output.
+   - Enhanced `generate_assembly_diff` to highlight true MIPS instruction differences in LLM feedback loops.
+   - Created `tools/test_ai_matcher.py` and integrated into `tools/test_pipeline.py`.
+2. **Multi-Title Targeting in Centralized CLI (`tools/mparty_cli.py` & `tools/test_mparty_cli.py`):**
    - Added `--game` / `-g` option to `tools/mparty_cli.py` for targeting Mario Party 1, 2, or 3.
    - Added title-aware interactive dashboard header displaying active profile details.
    - Created `tools/test_mparty_cli.py` and integrated into `tools/test_pipeline.py`.
@@ -76,7 +80,8 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 
 ### Verification Status
 - `python3 tools/verify_architecture.py`: **PASS**
-- `python3 tools/test_pipeline.py`: **PASS** (all 10 integration steps: architecture, validation layers, AI loop, C stubber unit tests, multi-title splat tests, centralized CLI tests, prototype header assertions, and live mock disassembly/stubbing pass)
+- `python3 tools/test_pipeline.py`: **PASS** (all 11 integration steps: architecture, validation layers, AI loop, AI matcher, C stubber unit tests, multi-title splat tests, centralized CLI tests, prototype header assertions, and live mock disassembly/stubbing pass)
+- `python3 tools/test_ai_matcher.py`: **PASS** (all 3 unit tests pass)
 - `python3 tools/test_generate_splat.py`: **PASS** (all 3 multi-title test suites pass)
 - `python3 tools/test_mparty_cli.py`: **PASS** (all 3 CLI test suites pass)
 - `node tools/test_c_stubber.js`: **PASS** (all 15 pattern recognition, recursive non-matching stubbing, gp relocations, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.68.0]
+### Added
+- Enhanced `tools/ai_matcher.py` with `normalize_instruction` to strip machine memory offsets, address hex tags, and formatting discrepancies from disassembly output.
+- Added normalized assembly diff generation to highlight true opcode and register differences for LLM self-correction prompts.
+- Created `tools/test_ai_matcher.py` unit test suite and integrated it into `tools/test_pipeline.py`.
+
 ## [0.67.0]
 ### Added
 - Expanded `tools/mparty_cli.py` with multi-title targeting (`--game` / `-g` for `mp1`, `mp2`, `mp3`).
