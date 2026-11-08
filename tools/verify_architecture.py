@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "splat.mp1.yaml",
     "splat.mp2.yaml",
     "splat.mp3.yaml",
+    "splat.mp4.yaml",
     "tools/generate_splat.py",
     "tools/disassemble.py",
     "tools/c_stubber.js",

@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.74.0]
+### Added
+- Expanded `tools/generate_splat.py` with `mp4` profile support for Mario Party 4 (GameCube DOL/FST segment structure).
+- Generated baseline `splat.mp4.yaml` configuration targeting GameCube memory layouts (`0x80003100` main DOL, `0x80200000` overlays).
+- Added `splat.mp4.yaml` to `Makefile` `splat-configs` target and registered in `tools/verify_architecture.py`.
+- Expanded unit tests in `tools/test_generate_splat.py` to validate `mp4` profile resolution and root configuration presence.
+
 ## [0.73.0]
 ### Added
 - Added title profile cycling (`cycle_target_game`) in `tools/mparty_cli.py` to rotate between `mp1` -> `mp2` -> `mp3` -> `mp1`.

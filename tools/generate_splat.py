@@ -73,6 +73,16 @@ GAME_PROFILES = {
         "non_matchings_path": "asm/nonmatchings/mp3",
         "vram_main": "0x80000400",
         "vram_overlay": "0x80140000"
+    },
+    "mp4": {
+        "name": "mario_party_4",
+        "basename": "mario_party_4",
+        "asm_path": "asm/mp4",
+        "src_path": "src/mp4",
+        "asset_path": "assets/mp4",
+        "non_matchings_path": "asm/nonmatchings/mp4",
+        "vram_main": "0x80003100",
+        "vram_overlay": "0x80200000"
     }
 }
 
@@ -87,6 +97,8 @@ def detect_game_profile(rom_path, requested_game=None):
         return GAME_PROFILES["mp2"]
     if "mp3" in lower_name or "mario_party_3" in lower_name or "marioparty3" in lower_name:
         return GAME_PROFILES["mp3"]
+    if "mp4" in lower_name or "mario_party_4" in lower_name or "marioparty4" in lower_name:
+        return GAME_PROFILES["mp4"]
 
     basename = os.path.basename(rom_path).replace('.z64', '').replace('.v64', '').replace('.n64', '')
     if not basename:
@@ -157,7 +169,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate splat.yaml and prototype headers for an N64 ROM.")
     parser.add_argument("rom_path", help="Path to the N64 ROM file.")
     parser.add_argument("--out", "-o", default="splat.yaml", help="Output yaml path.")
-    parser.add_argument("--game", "-g", choices=["mp1", "mp2", "mp3"], default=None, help="Target game profile (mp1, mp2, mp3).")
+    parser.add_argument("--game", "-g", choices=["mp1", "mp2", "mp3", "mp4"], default=None, help="Target game profile (mp1, mp2, mp3, mp4).")
 
     args = parser.parse_args()
     generate_yaml(args.rom_path, args.out, args.game)

@@ -35,6 +35,9 @@ class TestGenerateSplat(unittest.TestCase):
         p3 = detect_game_profile("roms/marioparty3.n64")
         self.assertEqual(p3["name"], "mario_party_3")
 
+        p4 = detect_game_profile("roms/marioparty4.iso")
+        self.assertEqual(p4["name"], "mario_party_4")
+
         p_default = detect_game_profile("roms/unknown_game.z64")
         self.assertEqual(p_default["name"], "unknown_game")
         self.assertEqual(p_default["asm_path"], "asm")
@@ -45,7 +48,7 @@ class TestGenerateSplat(unittest.TestCase):
             with open(dummy_rom, "wb") as f:
                 f.write(b'\x80\x37\x12\x40' + b'\x00' * 60)
 
-            for game in ["mp1", "mp2", "mp3"]:
+            for game in ["mp1", "mp2", "mp3", "mp4"]:
                 out_yaml = os.path.join(tmpdir, f"splat.{game}.yaml")
                 generate_yaml(dummy_rom, output_path=out_yaml, game=game)
 
@@ -60,9 +63,9 @@ class TestGenerateSplat(unittest.TestCase):
                 self.assertIn(f"non_matchings_path: {expected_profile['non_matchings_path']}", content)
 
     def test_repo_root_configurations(self):
-        """Verifies baseline splat.mp1.yaml, splat.mp2.yaml, and splat.mp3.yaml match expected segments."""
+        """Verifies baseline splat.mp1.yaml, splat.mp2.yaml, splat.mp3.yaml, and splat.mp4.yaml match expected segments."""
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        for game in ["mp1", "mp2", "mp3"]:
+        for game in ["mp1", "mp2", "mp3", "mp4"]:
             yaml_path = os.path.join(root_dir, f"splat.{game}.yaml")
             self.assertTrue(os.path.exists(yaml_path), f"Baseline config {yaml_path} should exist")
             with open(yaml_path, "r") as f:

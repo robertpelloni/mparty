@@ -351,3 +351,10 @@
 
 - [x] Implement `cycle_target_game` and status parameter overrides in `tools/mparty_cli.py`.
 - [x] Add unit tests in `tools/test_mparty_cli.py`.
+
+## Mario Party 4 GameCube Decompilation Scaffolding (v0.74.0)
+
+- [x] Add `mp4` profile to `tools/generate_splat.py`.
+- [x] Generate baseline `splat.mp4.yaml`.
+- [x] Register in `Makefile` and `tools/verify_architecture.py`.
+- [x] Add unit tests in `tools/test_generate_splat.py`.

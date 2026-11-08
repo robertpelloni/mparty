@@ -37,11 +37,12 @@ O_FILES   := $(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/src/%.o) \
 
 all: $(TARGET)
 
-# Generate splat configurations for Mario Party 1, 2, and 3
+# Generate splat configurations for Mario Party 1, 2, 3, and 4
 splat-configs:
 	python3 tools/generate_splat.py baserom.mp1.z64 --game mp1 --out splat.mp1.yaml
 	python3 tools/generate_splat.py baserom.mp2.z64 --game mp2 --out splat.mp2.yaml
 	python3 tools/generate_splat.py baserom.mp3.z64 --game mp3 --out splat.mp3.yaml
+	python3 tools/generate_splat.py baserom.mp4.iso --game mp4 --out splat.mp4.yaml
 	python3 tools/generate_splat.py baserom.z64 --game mp1 --out splat.yaml
 
 # Extract ROM and setup directories using tools
