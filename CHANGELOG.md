@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.67.0]
+### Added
+- Expanded `tools/mparty_cli.py` with multi-title targeting (`--game` / `-g` for `mp1`, `mp2`, `mp3`).
+- Added title-aware interactive dashboard header displaying active profile details.
+- Added unit test suite `tools/test_mparty_cli.py` and integrated into `tools/test_pipeline.py`.
+
 ## [0.66.0]
 ### Added
 - Added multi-title Mario Party target selector (`mp1`, `mp2`, `mp3`) to `web/src/components/DecompilationStatus.tsx` dynamically updating build targets, non-matching function counts, and logs.

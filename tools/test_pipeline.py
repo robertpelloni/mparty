@@ -40,7 +40,10 @@ def main():
     # 5. Multi-title Splat Generation Tests
     run_step("Test Splat Multi-Title Generation", "python3 tools/test_generate_splat.py")
 
-    # 6. Generate Mock ROM
+    # 6. Centralized CLI Tests
+    run_step("Test Centralized CLI", "python3 tools/test_mparty_cli.py")
+
+    # 7. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
     # 6. Generate Splat Yaml & Function Prototypes

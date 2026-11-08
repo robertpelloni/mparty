@@ -310,3 +310,9 @@
 - [x] Add game target selector (MP1, MP2, MP3) in `DecompilationStatus.tsx`.
 - [x] Connect target game selection to `/api/ai` and configure `--nonmatchings-dir`.
 - [x] Update Playwright tests in `decompilation_status.spec.ts`.
+
+## Multi-Title Targeting in Centralized CLI (v0.67.0)
+
+- [x] Add `--game` / `-g` argument in `tools/mparty_cli.py`.
+- [x] Render target title in interactive terminal dashboard header.
+- [x] Create `tools/test_mparty_cli.py` and integrate into `tools/test_pipeline.py`.
