@@ -373,3 +373,8 @@
 
 - [x] Support configurable `nonmatchingsPrefix` and `--nonmatchings-prefix` in `tools/c_stubber.js`.
 - [x] Add Unit Test 18 in `tools/test_c_stubber.js`.
+
+## Validation Layer Splat Config Failure Testing (v0.78.0)
+
+- [x] Add missing splat configuration failure tests in `tools/test_validation_layer.py`.
+- [x] Assert 6/6 failure mode coverage in `tools/test_pipeline.py`.

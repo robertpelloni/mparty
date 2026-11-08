@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.78.0]
+### Added
+- Expanded `tools/test_validation_layer.py` with failure mode test coverage for missing baseline splat configurations (`splat.yaml`).
+
 ## [0.77.0]
 ### Added
 - Added configurable `nonmatchingsPrefix` support and `--nonmatchings-prefix` CLI option to `tools/c_stubber.js` for multi-title modular `#pragma GLOBAL_ASM` generation.

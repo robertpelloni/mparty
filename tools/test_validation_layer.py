@@ -46,6 +46,12 @@ def teardown_missing_multiple_files():
     if os.path.exists("VISION.md.bak"): os.rename("VISION.md.bak", "VISION.md")
     if os.path.exists("ROADMAP.md.bak"): os.rename("ROADMAP.md.bak", "ROADMAP.md")
 
+def setup_missing_splat_config():
+    if os.path.exists("splat.yaml"): os.rename("splat.yaml", "splat.yaml.bak")
+
+def teardown_missing_splat_config():
+    if os.path.exists("splat.yaml.bak"): os.rename("splat.yaml.bak", "splat.yaml")
+
 def setup_empty_file():
     if os.path.exists("VISION.md"): os.rename("VISION.md", "VISION.md.bak")
     with open("VISION.md", "w") as f:
@@ -99,6 +105,7 @@ def main():
 
     tests = [
         ("Missing Multiple Files", setup_missing_multiple_files, teardown_missing_multiple_files, "python3 tools/verify_architecture.py", 1, "Missing required file: VISION.md", None),
+        ("Missing Splat Baseline Config", setup_missing_splat_config, teardown_missing_splat_config, "python3 tools/verify_architecture.py", 1, "Missing required file: splat.yaml", None),
         ("Empty File Handling", setup_empty_file, teardown_empty_file, "python3 tools/verify_architecture.py", 1, "File is empty: VISION.md", None),
         ("Unreadable File Handling", setup_unreadable_file, teardown_unreadable_file, "python3 tools/verify_architecture.py", 1, "File is unreadable: VISION.md", None),
         ("Directory as File Handling", setup_directory_as_file, teardown_directory_as_file, "python3 tools/verify_architecture.py", 1, "Expected file, found directory: VISION.md", None),
