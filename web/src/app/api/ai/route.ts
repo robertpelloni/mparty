@@ -2,21 +2,35 @@ import { NextResponse } from 'next/server';
 import { spawn } from 'child_process';
 import path from 'path';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    let game = 'mp1';
+    try {
+        const body = await request.json();
+        if (body && typeof body.game === 'string') {
+            game = body.game.toLowerCase();
+        }
+    } catch {
+        // Fallback to default game if no JSON body provided
+    }
+
     // Determine the root path to the tools directory
     // This assumes the Next.js app is in the 'web' folder
     const toolsDir = path.resolve(process.cwd(), '../tools');
     const aiLoopPath = path.join(toolsDir, 'ai_loop.py');
 
+    const args = [aiLoopPath];
+    if (['mp1', 'mp2', 'mp3'].includes(game)) {
+        args.push('--nonmatchings-dir', `asm/nonmatchings/${game}`);
+    }
+
     // Run the ai_loop python script
-    // Note: We use "mock_src" just so it doesn't fail immediately,
-    // or we can pass an env var LLM_API_KEY="MOCK_KEY"
-    const pythonProcess = spawn('python3', [aiLoopPath], {
+    // Note: We pass an env var LLM_API_KEY="MOCK_KEY" for safe autonomous execution
+    const pythonProcess = spawn('python3', args, {
         cwd: path.resolve(process.cwd(), '../'),
         env: {
             ...process.env,
-            LLM_API_KEY: "MOCK_KEY"
+            LLM_API_KEY: process.env.LLM_API_KEY || "MOCK_KEY"
         }
     });
 

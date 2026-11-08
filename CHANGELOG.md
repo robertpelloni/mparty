@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.66.0]
+### Added
+- Added multi-title Mario Party target selector (`mp1`, `mp2`, `mp3`) to `web/src/components/DecompilationStatus.tsx` dynamically updating build targets, non-matching function counts, and logs.
+- Expanded `web/src/app/api/ai/route.ts` to parse target game requests and forward `--nonmatchings-dir` configuration to `ai_loop.py`.
+- Updated Playwright integration tests in `web/tests/decompilation_status.spec.ts` verifying multi-title selection and metrics.
+
 ## [0.65.0]
 ### Added
 - Enhanced `tools/ai_loop.py` with `locate_target_asm` and `locate_target_bin` supporting recursive assembly and binary resolution across modular `asm/nonmatchings/` and `build/expected/` directories.

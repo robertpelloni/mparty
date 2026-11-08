@@ -6,13 +6,16 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.65.0 (tracked in `VERSION.md`)
+- **Version:** v0.66.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **AI Loop Non-Matching Target Resolution (`tools/ai_loop.py` & `tools/test_ai_loop.py`):**
+1. **Multi-Title Decompilation Target Selection (`DecompilationStatus.tsx` & `/api/ai`):**
+   - Added game selector dropdown in `DecompilationStatus.tsx` supporting MP1, MP2, and MP3, updating function counts and build target names dynamically.
+   - Connected `/api/ai` endpoint to pass the selected target game's nonmatching directory (`--nonmatchings-dir asm/nonmatchings/<game>`) to `ai_loop.py`.
+   - Verified via Playwright tests in `web/tests/decompilation_status.spec.ts`.
+2. **AI Loop Non-Matching Target Resolution (`tools/ai_loop.py` & `tools/test_ai_loop.py`):**
    - Implemented `locate_target_asm` and `locate_target_bin` in `tools/ai_loop.py` to recursively discover target assembly and expected binary files across modular `asm/nonmatchings/` and `build/expected/` directories.
    - Added `--nonmatchings-dir` CLI option.
-   - Verified by unit tests in `tools/test_ai_loop.py` (7/7 tests passing).
 2. **Modular Non-Matching Extraction & Granular Stubbing (`tools/disassemble.py` & `tools/c_stubber.js`):**
    - Enhanced `tools/disassemble.py` to recursively scan subdirectories under `asm/` and extract non-matching functions into `asm/nonmatchings/`.
    - Added `--process-nonmatchings` flag in `tools/c_stubber.js` for modular per-function stub generation.
@@ -73,4 +76,4 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 - `python3 tools/test_generate_splat.py`: **PASS** (all 3 multi-title test suites pass)
 - `node tools/test_c_stubber.js`: **PASS** (all 15 pattern recognition, recursive non-matching stubbing, gp relocations, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 7 tests pass)
-- `cd web && npx playwright test`: **PASS** (all 32 E2E and unit tests pass)
+- Next.js build & Playwright integration suites: **PASS**

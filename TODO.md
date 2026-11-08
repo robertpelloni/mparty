@@ -304,3 +304,9 @@
 - [x] Add `locate_target_asm` and `locate_target_bin` in `tools/ai_loop.py` to resolve target assembly and binaries across `asm/nonmatchings/` and `build/expected/`.
 - [x] Add `--nonmatchings-dir` CLI parameter to `tools/ai_loop.py`.
 - [x] Add unit test in `tools/test_ai_loop.py` verifying non-matching directory target resolution.
+
+## Multi-Title Decompilation Dashboard Target Selection (v0.66.0)
+
+- [x] Add game target selector (MP1, MP2, MP3) in `DecompilationStatus.tsx`.
+- [x] Connect target game selection to `/api/ai` and configure `--nonmatchings-dir`.
+- [x] Update Playwright tests in `decompilation_status.spec.ts`.
