@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.76.0 (tracked in `VERSION.md`)
+- **Version:** v0.77.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Frontend UI Refinements & Formatting (`web/src/components/NetworkControl.tsx`):**
+1. **Multi-Title Non-Matching Prefixes in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Added configurable `nonmatchingsPrefix` support and `--nonmatchings-prefix` CLI option to `tools/c_stubber.js`.
+   - Verified custom non-matching path routing in `#pragma GLOBAL_ASM` output via Test 18 in `tools/test_c_stubber.js`.
+2. **Frontend UI Refinements & Formatting (`web/src/components/NetworkControl.tsx`):**
    - Cleaned up JSX formatting and handler indentation in `web/src/components/NetworkControl.tsx`.
    - Verified Next.js build compilation and Playwright E2E browser tests pass cleanly.
 2. **Documentation Governance & README Consolidation (`README.md`):**

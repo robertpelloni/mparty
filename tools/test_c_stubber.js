@@ -310,4 +310,10 @@ assert(res17.params.includes('u8* a1'), 'Expected u8* a1 for byte dereference');
 assert(res17.params.includes('u16* a2'), 'Expected u16* a2 for halfword dereference');
 console.log('[OK] Test 17: Subword memory type inferencing and volatile MMIO qualifiers passed.');
 
+// Test 18: Custom non-matching prefix for multi-title global asm stubbing
+const customPrefixStub = generateCStub('func_title_specific', res1, 'engine', true, 'asm/nonmatchings/mp2');
+assert(customPrefixStub.includes('#pragma GLOBAL_ASM("asm/nonmatchings/mp2/engine/func_title_specific.s")'),
+    'Expected custom nonmatching prefix in #pragma GLOBAL_ASM');
+console.log('[OK] Test 18: Custom nonmatchingsPrefix in generateCStub passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

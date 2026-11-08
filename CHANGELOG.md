@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.77.0]
+### Added
+- Added configurable `nonmatchingsPrefix` support and `--nonmatchings-prefix` CLI option to `tools/c_stubber.js` for multi-title modular `#pragma GLOBAL_ASM` generation.
+- Added Unit Test 18 in `tools/test_c_stubber.js` verifying custom non-matching prefix routing in generated C stubs (18/18 tests passing).
+
 ## [0.76.0]
 ### Refactored
 - Cleaned up formatting and indentation in `web/src/components/NetworkControl.tsx` around rollback handlers and JSX input/tooltip elements.

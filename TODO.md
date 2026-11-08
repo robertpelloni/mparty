@@ -368,3 +368,8 @@
 
 - [x] Clean up JSX formatting and handler indentation in `web/src/components/NetworkControl.tsx`.
 - [x] Validate Next.js production build and Playwright test suites.
+
+## Multi-Title Non-Matching Prefixes in C Stubber (v0.77.0)
+
+- [x] Support configurable `nonmatchingsPrefix` and `--nonmatchings-prefix` in `tools/c_stubber.js`.
+- [x] Add Unit Test 18 in `tools/test_c_stubber.js`.

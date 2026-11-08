@@ -457,7 +457,7 @@ function extractFunctionsFromAsm(code) {
 /**
  * Formats a C stub with optional #pragma GLOBAL_ASM fallback for non-matching functions.
  */
-function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm = true) {
+function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm = true, nonmatchingsPrefix = null) {
     let out = `/*\n`;
     out += ` * Function: ${funcName}\n`;
     out += ` * Frame: ${analysis.isLeaf ? 'Leaf' : 'Non-leaf'}, Stack: 0x${(analysis.stackSize || 0).toString(16)}\n`;
@@ -494,6 +494,7 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     out += ` */\n`;
 
     if (useGlobalAsm) {
+        const prefix = nonmatchingsPrefix || 'asm/nonmatchings';
         out += `#ifdef NON_MATCHING\n`;
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
         if (analysis.returnType === 's64') {
@@ -509,7 +510,7 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
         }
         out += `}\n`;
         out += `#else\n`;
-        out += `#pragma GLOBAL_ASM("asm/nonmatchings/${moduleName}/${funcName}.s")\n`;
+        out += `#pragma GLOBAL_ASM("${prefix}/${moduleName}/${funcName}.s")\n`;
         out += `#endif\n\n`;
     } else {
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
@@ -530,7 +531,7 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     return out;
 }
 
-function processAsmFile(asmFilePath, srcDir, stats = null) {
+function processAsmFile(asmFilePath, srcDir, stats = null, nonmatchingsPrefix = null) {
     let code;
     try {
         code = fs.readFileSync(asmFilePath, 'utf8');
@@ -560,7 +561,7 @@ function processAsmFile(asmFilePath, srcDir, stats = null) {
             if (stats) stats.warningsCount += analysis.parseErrors.length;
         }
         if (stats) stats.totalFunctions++;
-        cContent += generateCStub(fn.name, analysis, baseName, true);
+        cContent += generateCStub(fn.name, analysis, baseName, true, nonmatchingsPrefix);
     });
 
     fs.writeFileSync(cFilePath, cContent);
@@ -572,7 +573,7 @@ function processAsmFile(asmFilePath, srcDir, stats = null) {
     return cFilePath;
 }
 
-function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = false) {
+function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = false, nonmatchingsPrefix = null) {
     const isRootCall = !stats;
     const currentStats = stats || {
         totalFunctions: 0,
@@ -594,10 +595,10 @@ function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = fa
 
         if (stat.isDirectory()) {
             if (file !== 'nonmatchings' || processNonmatchings) {
-                processDirectory(fullPath, path.join(srcDir, file), currentStats, processNonmatchings);
+                processDirectory(fullPath, path.join(srcDir, file), currentStats, processNonmatchings, nonmatchingsPrefix);
             }
         } else if (file.endsWith('.s')) {
-            processAsmFile(fullPath, srcDir, currentStats);
+            processAsmFile(fullPath, srcDir, currentStats, nonmatchingsPrefix);
         }
     });
 
@@ -623,11 +624,15 @@ function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = fa
 function main() {
     const args = process.argv.slice(2);
     let processNonmatchings = false;
+    let nonmatchingsPrefix = null;
     const positional = [];
 
-    for (const arg of args) {
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
         if (arg === '--process-nonmatchings') {
             processNonmatchings = true;
+        } else if (arg === '--nonmatchings-prefix' && i + 1 < args.length) {
+            nonmatchingsPrefix = args[++i];
         } else {
             positional.push(arg);
         }
@@ -642,7 +647,7 @@ function main() {
     }
 
     console.log(`Stubbing C files from ${asmDir} into ${srcDir}...`);
-    processDirectory(asmDir, srcDir, null, processNonmatchings);
+    processDirectory(asmDir, srcDir, null, processNonmatchings, nonmatchingsPrefix);
     console.log("C stubbing complete.");
 }
 
