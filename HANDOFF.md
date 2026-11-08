@@ -6,10 +6,12 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.74.0 (tracked in `VERSION.md`)
+- **Version:** v0.75.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Mario Party 4 GameCube Decompilation Scaffolding (`tools/generate_splat.py` & `splat.mp4.yaml`):**
+1. **Documentation Governance & README Consolidation (`README.md`):**
+   - Cleaned up `README.md` into a production-ready architectural guide covering the full decompilation toolchain, 4-tier single-page web hypervisor frontend, system tray daemon management, and quickstart commands.
+2. **Mario Party 4 GameCube Decompilation Scaffolding (`tools/generate_splat.py` & `splat.mp4.yaml`):**
    - Added `mp4` profile for Mario Party 4 with GameCube DOL memory configurations (`0x80003100` main DOL, `0x80200000` overlays).
    - Generated baseline `splat.mp4.yaml` and registered it in `tools/verify_architecture.py` and `Makefile`.
    - Expanded unit tests in `tools/test_generate_splat.py` to validate `mp4` configuration and auto-detection.

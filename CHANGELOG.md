@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.75.0]
+### Refactored
+- Cleaned up `README.md` into a production-ready architectural guide covering the full decompilation toolchain, 4-tier single-page web hypervisor frontend, system tray daemon management, and quickstart commands.
+
 ## [0.74.0]
 ### Added
 - Expanded `tools/generate_splat.py` with `mp4` profile support for Mario Party 4 (GameCube DOL/FST segment structure).

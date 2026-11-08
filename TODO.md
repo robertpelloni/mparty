@@ -358,3 +358,8 @@
 - [x] Generate baseline `splat.mp4.yaml`.
 - [x] Register in `Makefile` and `tools/verify_architecture.py`.
 - [x] Add unit tests in `tools/test_generate_splat.py`.
+
+## Documentation Governance & README Consolidation (v0.75.0)
+
+- [x] Consolidate `README.md` into production-ready architectural guide.
+- [x] Verify architecture requirements against all core documentation.
