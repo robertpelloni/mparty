@@ -328,3 +328,10 @@
 - [x] Add toolchain scripts and test suites to `REQUIRED_FILES` in `tools/verify_architecture.py`.
 - [x] Add `web`, `web/src`, and `web/tests` to `REQUIRED_DIRECTORIES`.
 - [x] Verify validation layer failure modes in `tools/test_validation_layer.py`.
+
+## Baseline Splat Configurations for Mario Party 1-3 (v0.70.0)
+
+- [x] Generate baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations.
+- [x] Add `splat-configs` target in `Makefile`.
+- [x] Assert presence in `tools/verify_architecture.py`.
+- [x] Add structure tests in `tools/test_generate_splat.py`.

@@ -6,10 +6,15 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.69.0 (tracked in `VERSION.md`)
+- **Version:** v0.70.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Architecture Verification Expansion (`tools/verify_architecture.py` & `tools/test_validation_layer.py`):**
+1. **Baseline Splat Configurations for Mario Party 1-3 (`splat.*.yaml` & `Makefile`):**
+   - Generated baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations targeting Mario Party 1, 2, and 3.
+   - Added `splat-configs` target in `Makefile` to batch generate all splat configurations.
+   - Registered splat configurations in `tools/verify_architecture.py`.
+   - Added baseline configuration structure assertions in `tools/test_generate_splat.py`.
+2. **Architecture Verification Expansion (`tools/verify_architecture.py` & `tools/test_validation_layer.py`):**
    - Expanded `tools/verify_architecture.py` assertions across all toolchain scripts (`ai_matcher.py`, `ai_loop.py`, `mparty_cli.py`), test harness suites (`test_ai_matcher.py`, `test_generate_splat.py`, `test_mparty_cli.py`, `test_pipeline.py`), and web directory scaffolding (`web`, `web/src`, `web/tests`).
    - Verified architecture and validation layer tests (5/5 tests passing).
 2. **AI Matcher Assembly Normalization (`tools/ai_matcher.py` & `tools/test_ai_matcher.py`):**

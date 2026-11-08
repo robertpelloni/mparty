@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.70.0]
+### Added
+- Generated baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations for Mario Party 1, 2, and 3 targeting respective assembly, source, asset, and overlay segment boundaries.
+- Added `splat-configs` target in `Makefile` to batch generate splat configurations across all three titles.
+- Updated `tools/verify_architecture.py` to assert the presence of baseline configurations `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml`.
+- Added `test_repo_root_configurations` in `tools/test_generate_splat.py` to validate baseline configuration structure and segment paths.
+
 ## [0.69.0]
 ### Added
 - Expanded `tools/verify_architecture.py` to assert the existence and integrity of all project toolchain scripts (`ai_matcher.py`, `ai_loop.py`, `mparty_cli.py`), test harness suites (`test_ai_matcher.py`, `test_generate_splat.py`, `test_mparty_cli.py`, `test_pipeline.py`), and web directory scaffolding (`web`, `web/src`, `web/tests`).

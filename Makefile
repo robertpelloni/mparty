@@ -33,9 +33,16 @@ ASM_FILES := $(shell find $(ASM_DIR) -type f -name '*.s' 2>/dev/null)
 O_FILES   := $(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/src/%.o) \
              $(ASM_FILES:$(ASM_DIR)/%.s=$(BUILD_DIR)/asm/%.o)
 
-.PHONY: all clean extract setup
+.PHONY: all clean extract setup splat-configs
 
 all: $(TARGET)
+
+# Generate splat configurations for Mario Party 1, 2, and 3
+splat-configs:
+	python3 tools/generate_splat.py baserom.mp1.z64 --game mp1 --out splat.mp1.yaml
+	python3 tools/generate_splat.py baserom.mp2.z64 --game mp2 --out splat.mp2.yaml
+	python3 tools/generate_splat.py baserom.mp3.z64 --game mp3 --out splat.mp3.yaml
+	python3 tools/generate_splat.py baserom.z64 --game mp1 --out splat.yaml
 
 # Extract ROM and setup directories using tools
 extract: setup

@@ -59,5 +59,19 @@ class TestGenerateSplat(unittest.TestCase):
                 self.assertIn(f"src_path: {expected_profile['src_path']}", content)
                 self.assertIn(f"non_matchings_path: {expected_profile['non_matchings_path']}", content)
 
+    def test_repo_root_configurations(self):
+        """Verifies baseline splat.mp1.yaml, splat.mp2.yaml, and splat.mp3.yaml match expected segments."""
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        for game in ["mp1", "mp2", "mp3"]:
+            yaml_path = os.path.join(root_dir, f"splat.{game}.yaml")
+            self.assertTrue(os.path.exists(yaml_path), f"Baseline config {yaml_path} should exist")
+            with open(yaml_path, "r") as f:
+                content = f.read()
+            expected = GAME_PROFILES[game]
+            self.assertIn(f"name: {expected['name']}", content)
+            self.assertIn(f"asm_path: {expected['asm_path']}", content)
+            self.assertIn(f"src_path: {expected['src_path']}", content)
+            self.assertIn(f"non_matchings_path: {expected['non_matchings_path']}", content)
+
 if __name__ == "__main__":
     unittest.main()
