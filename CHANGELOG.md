@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [0.76.0]
+### Refactored
+- Cleaned up formatting and indentation in `web/src/components/NetworkControl.tsx` around rollback handlers and JSX input/tooltip elements.
+
 ## [0.75.0]
 ### Refactored
 - Cleaned up `README.md` into a production-ready architectural guide covering the full decompilation toolchain, 4-tier single-page web hypervisor frontend, system tray daemon management, and quickstart commands.

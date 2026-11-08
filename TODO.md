@@ -363,3 +363,8 @@
 
 - [x] Consolidate `README.md` into production-ready architectural guide.
 - [x] Verify architecture requirements against all core documentation.
+
+## Frontend UI Refinements & Formatting (v0.76.0)
+
+- [x] Clean up JSX formatting and handler indentation in `web/src/components/NetworkControl.tsx`.
+- [x] Validate Next.js production build and Playwright test suites.
