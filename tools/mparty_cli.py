@@ -47,10 +47,11 @@ def run_dev_server():
 GAME_NAMES = {
     "mp1": "Mario Party 1 (N64)",
     "mp2": "Mario Party 2 (N64)",
-    "mp3": "Mario Party 3 (N64)"
+    "mp3": "Mario Party 3 (N64)",
+    "mp4": "Mario Party 4 (GameCube)"
 }
 
-GAME_CYCLE = ["mp1", "mp2", "mp3"]
+GAME_CYCLE = ["mp1", "mp2", "mp3", "mp4"]
 
 def cycle_target_game(current_game="mp1"):
     """Cycles sequentially between supported titles: mp1 -> mp2 -> mp3 -> mp1."""
@@ -91,7 +92,7 @@ def run_interactive_dashboard(game="mp1", max_iterations=None):
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Mario Party Decompilation Orchestrator")
-    parser.add_argument("--game", "-g", choices=["mp1", "mp2", "mp3"], default="mp1", help="Target Mario Party title (mp1, mp2, mp3)")
+    parser.add_argument("--game", "-g", choices=["mp1", "mp2", "mp3", "mp4"], default="mp1", help="Target Mario Party title (mp1, mp2, mp3, mp4)")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # test command

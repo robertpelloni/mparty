@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.81.0]
+### Added
+- Added Mario Party 4 (`mp4`) support to `tools/mparty_cli.py` across title names, parser choices, and cyclic dashboard rotations.
+- Expanded unit tests in `tools/test_mparty_cli.py` covering `mp4` parsing and cycling (5/5 tests passing).
+
 ## [0.80.0]
 ### Added
 - Added Mario Party 4 (`mp4`) target selection to `web/src/components/DecompilationStatus.tsx`, displaying GameCube build targets and metrics (`24,500` non-matching units).

@@ -389,3 +389,8 @@
 
 - [x] Add `mp4` to `DecompilationStatus.tsx` target selector and `/api/ai`.
 - [x] Add Playwright test in `web/tests/decompilation_status.spec.ts`.
+
+## Centralized CLI Mario Party 4 Integration (v0.81.0)
+
+- [x] Add `mp4` to `tools/mparty_cli.py` title parser, cycle sequence, and status formatting.
+- [x] Expand unit tests in `tools/test_mparty_cli.py`.

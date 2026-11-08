@@ -22,7 +22,7 @@ class TestMPartyCli(unittest.TestCase):
 
     def test_explicit_game_arguments(self):
         parser = create_parser()
-        for game in ["mp1", "mp2", "mp3"]:
+        for game in ["mp1", "mp2", "mp3", "mp4"]:
             args = parser.parse_args(["--game", game, "run"])
             self.assertEqual(args.game, game)
             self.assertEqual(args.command, "run")
@@ -37,7 +37,8 @@ class TestMPartyCli(unittest.TestCase):
     def test_cycle_target_game(self):
         self.assertEqual(cycle_target_game("mp1"), "mp2")
         self.assertEqual(cycle_target_game("mp2"), "mp3")
-        self.assertEqual(cycle_target_game("mp3"), "mp1")
+        self.assertEqual(cycle_target_game("mp3"), "mp4")
+        self.assertEqual(cycle_target_game("mp4"), "mp1")
         self.assertEqual(cycle_target_game("unknown"), "mp1")
 
     def test_render_dashboard_header_custom_statuses(self):
