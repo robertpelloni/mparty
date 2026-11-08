@@ -131,6 +131,7 @@ function analyzeAsmBody(body) {
     const mmioAccesses = new Set();
     const rodataSymbols = new Set();
     const rodataFloats = new Set();
+    const calledFunctions = new Set();
     const globalDataReads = new Set();
     const globalDataWrites = new Set();
     const registerUpperConstants = new Map(); // reg -> 0xXXXX
@@ -231,6 +232,24 @@ function analyzeAsmBody(body) {
             } else if (LOAD_OPCODES.has(opcode)) {
                 globalDataReads.add(sym);
             }
+        }
+
+        // Detect %got(symbol) references for PIC Global Offset Table entries
+        const gotMatch = line.match(/%got\(([a-zA-Z0-9_]+)\)/);
+        if (gotMatch) {
+            const sym = gotMatch[1];
+            rodataSymbols.add(sym);
+            if (STORE_OPCODES.has(opcode)) {
+                globalDataWrites.add(sym);
+            } else if (LOAD_OPCODES.has(opcode)) {
+                globalDataReads.add(sym);
+            }
+        }
+
+        // Detect %call16(symbol) references for PIC external calls
+        const call16Match = line.match(/%call16\(([a-zA-Z0-9_]+)\)/);
+        if (call16Match) {
+            calledFunctions.add(call16Match[1]);
         }
 
         // Detect %gp_rel(symbol) references for small data/BSS
@@ -433,6 +452,7 @@ function analyzeAsmBody(body) {
         cop0Registers: Array.from(cop0Registers).sort(),
         rodataSymbols: Array.from(rodataSymbols).filter(sym => !globalDataWrites.has(sym)).sort(),
         rodataFloats: Array.from(rodataFloats).sort(),
+        calledFunctions: Array.from(calledFunctions).sort(),
         globalDataReads: Array.from(globalDataReads).sort(),
         globalDataWrites: Array.from(globalDataWrites).sort(),
         savedRegisters: Array.from(savedRegisters).sort(),
@@ -500,6 +520,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.rodataFloats && analysis.rodataFloats.length > 0) {
         out += ` * Rodata Floats: ${analysis.rodataFloats.join(', ')}\n`;
+    }
+    if (analysis.calledFunctions && analysis.calledFunctions.length > 0) {
+        out += ` * External Calls: ${analysis.calledFunctions.join(', ')}\n`;
     }
     if (analysis.globalDataReads && analysis.globalDataReads.length > 0) {
         out += ` * Global Reads: ${analysis.globalDataReads.join(', ')}\n`;

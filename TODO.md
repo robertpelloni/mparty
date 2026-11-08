@@ -406,3 +406,9 @@
 - [x] Add `--asm-dir` and `--nonmatchings-dir` to `tools/disassemble.py`.
 - [x] Create `tools/test_disassemble.py` unit test suite.
 - [x] Integrate into `tools/test_pipeline.py` and `tools/verify_architecture.py`.
+
+## Position-Independent Code (PIC) Relocations in C Stubber (v0.84.0)
+
+- [x] Add `%got` and `%call16` pattern parsing in `tools/c_stubber.js`.
+- [x] Annotate `External Calls` in generated C stub comments.
+- [x] Add Unit Test 21 in `tools/test_c_stubber.js`.

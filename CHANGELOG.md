@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.84.0]
+### Added
+- Added `%got(symbol)` and `%call16(symbol)` position-independent code (PIC) relocation recognition to `tools/c_stubber.js`.
+- Added `calledFunctions` tracking to document `External Calls: ...` in generated C stub comments.
+- Added Unit Test 21 in `tools/test_c_stubber.js` (21/21 tests passing).
+
 ## [0.83.0]
 ### Added
 - Enhanced `tools/disassemble.py` with configurable `--asm-dir` and `--nonmatchings-dir` options for multi-title modular disassembly.

@@ -354,4 +354,22 @@ const stub20 = generateCStub('load_rodata_float', res20, 'math', false);
 assert(stub20.includes('Rodata Floats: D_80085000'), 'Expected Rodata Floats in generated comments');
 console.log('[OK] Test 20: Rodata float constant recognition and clean isolation passed.');
 
+// Test 21: PIC relocations (%got and %call16) and External Calls tracking
+const picAsm = `
+    lw $t0, %got(g_BoardContext)($gp)
+    lw $t9, %call16(board_init_step)($gp)
+    jalr $t9
+    nop
+    jr $ra
+    nop
+`;
+
+const res21 = analyzeAsmBody(picAsm);
+assert(res21.globalDataReads.includes('g_BoardContext'), 'Expected g_BoardContext in globalDataReads via %got');
+assert(res21.calledFunctions.includes('board_init_step'), 'Expected board_init_step in calledFunctions via %call16');
+
+const stub21 = generateCStub('board_dispatch', res21, 'board', false);
+assert(stub21.includes('External Calls: board_init_step'), 'Expected External Calls in generated stub comments');
+console.log('[OK] Test 21: PIC relocations (%got and %call16) and External Calls tracking passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');
