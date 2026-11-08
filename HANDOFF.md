@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.71.0 (tracked in `VERSION.md`)
+- **Version:** v0.72.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **COP0 Register Recognition & Subword MMIO Typing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Toolchain Resolution & Pipeline Normalization (`tools/ai_matcher.py` & `tools/test_pipeline.py`):**
+   - Replaced subshell toolchain binary checks (`os.system("which ...")`) in `tools/ai_matcher.py` with standard Python `shutil.which` for compiler (`mips-linux-gnu-gcc`), objcopy, and objdump resolution.
+   - Cleaned up and normalized step numbering comments in `tools/test_pipeline.py` sequentially (Steps 1 through 11).
+2. **COP0 Register Recognition & Subword MMIO Typing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Implemented MIPS System Control Coprocessor 0 (COP0) register tracking (`Status`, `Cause`, `Count`, `Compare`, `EPC`, etc.) via `mfc0`/`mtc0` opcodes.
    - Added fine-grained subword pointer type inferencing (`u8*`, `s8*`, `u16*`, `s16*`) based on byte/halfword memory operations.
    - Added volatile pointer qualifiers (`volatile u32*`) when base pointer registers map to hardware MMIO address ranges.

@@ -341,3 +341,8 @@
 - [x] Add COP0 coprocessor register detection (`Status`, `Cause`, `Count`, etc.) in `tools/c_stubber.js`.
 - [x] Infer subword pointer types (`u8*`, `s8*`, `u16*`, `s16*`) and volatile MMIO qualifiers (`volatile u32*`).
 - [x] Expand unit tests in `tools/test_c_stubber.js` (17 tests total).
+
+## Toolchain Resolution & Pipeline Normalization (v0.72.0)
+
+- [x] Refactor toolchain lookup (`compiler`, `objcopy`, `objdump`) in `tools/ai_matcher.py` with `shutil.which`.
+- [x] Normalize sequential step comments in `tools/test_pipeline.py`.

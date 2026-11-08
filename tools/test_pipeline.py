@@ -37,19 +37,19 @@ def main():
     # 4. AI Matcher Harness Tests
     run_step("Test AI Matcher", "python3 tools/test_ai_matcher.py")
 
-    # 4. Intelligent C Stubber Pattern Tests
+    # 5. Intelligent C Stubber Pattern Tests
     run_step("Test C Stubber", "node tools/test_c_stubber.js")
 
-    # 5. Multi-title Splat Generation Tests
+    # 6. Multi-title Splat Generation Tests
     run_step("Test Splat Multi-Title Generation", "python3 tools/test_generate_splat.py")
 
-    # 6. Centralized CLI Tests
+    # 7. Centralized CLI Tests
     run_step("Test Centralized CLI", "python3 tools/test_mparty_cli.py")
 
-    # 7. Generate Mock ROM
+    # 8. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
-    # 6. Generate Splat Yaml & Function Prototypes
+    # 9. Generate Splat Yaml & Function Prototypes
     run_step("Generate Splat config", "python3 tools/generate_splat.py test_baserom.z64 --out test_splat.yaml")
 
     # Check if yaml and include/functions.h were created
@@ -61,11 +61,11 @@ def main():
         print("[ERROR] include/functions.h prototype header not found!")
         sys.exit(1)
 
-    # 7. Disassembly & Stubbing Verification
+    # 10. Disassembly & Stubbing Verification
     run_step("Check c_stubber syntax", "node -c tools/c_stubber.js")
     run_step("Check disassemble syntax", "python3 -m py_compile tools/disassemble.py")
 
-    # 8. End-to-End Mock Disassembly & Intelligent Stub Generation
+    # 11. End-to-End Mock Disassembly & Intelligent Stub Generation
     print("--- Running End-to-End Disassembly and Intelligent Stubbing ---")
     os.makedirs("asm/test_module", exist_ok=True)
     with open("asm/test_module/mock_code.s", "w") as f:

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.72.0]
+### Refactored
+- Replaced subshell toolchain binary checks (`os.system("which ...")`) in `tools/ai_matcher.py` with standard Python `shutil.which` for compiler (`mips-linux-gnu-gcc`), objcopy, and objdump resolution.
+- Cleaned up and normalized step numbering comments in `tools/test_pipeline.py` sequentially (Steps 1 through 11).
+
 ## [0.71.0]
 ### Added
 - Expanded `tools/c_stubber.js` with MIPS System Control Coprocessor 0 (COP0) register recognition (`mfc0`/`mtc0` for `$12/Status`, `$13/Cause`, `$14/EPC`, `$9/Count`, `$11/Compare`, etc.), annotating them under `System Control COP0: ...` in generated C stub comments.

@@ -16,6 +16,7 @@ import hashlib
 import argparse
 import difflib
 import re
+import shutil
 
 def get_file_hash(filepath):
     """Calculates the SHA256 hash of a file."""
@@ -31,7 +32,7 @@ def compile_c_file(c_file, obj_file, compiler="mips-linux-gnu-gcc", opt_flag="-O
     print(f"Compiling: {' '.join(cmd)}")
 
     # Mock compilation if mips-linux-gnu-gcc is not present for test environments
-    if not os.system(f"which {compiler} > /dev/null 2>&1") == 0:
+    if not shutil.which(compiler):
         print(f"Compiler '{compiler}' not found. Mocking compilation.")
         with open(obj_file, 'w') as f:
             f.write("mock obj file")
@@ -52,7 +53,7 @@ def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
     cmd = [objcopy, "-O", "binary", "-j", ".text", obj_file, text_bin]
 
     # Mock objcopy if mips-linux-gnu-objcopy is not present
-    if not os.system(f"which {objcopy} > /dev/null 2>&1") == 0:
+    if not shutil.which(objcopy):
         print(f"Objcopy '{objcopy}' not found. Mocking objcopy.")
         # Check source content if present in obj_file mock or inspect environment
         with open(obj_file, 'r') as f:
@@ -98,7 +99,7 @@ def normalize_instruction(line):
 def disassemble_obj(obj_file, objdump="mips-linux-gnu-objdump"):
     """Disassembles the .text section of an object file to MIPS assembly lines."""
     cmd = [objdump, "-d", "-j", ".text", obj_file]
-    if not os.system(f"which {objdump} > /dev/null 2>&1") == 0:
+    if not shutil.which(objdump):
         return ["mock_instruction_compiled $v0, 0\n"]
 
     try:
