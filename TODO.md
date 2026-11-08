@@ -335,3 +335,9 @@
 - [x] Add `splat-configs` target in `Makefile`.
 - [x] Assert presence in `tools/verify_architecture.py`.
 - [x] Add structure tests in `tools/test_generate_splat.py`.
+
+## COP0 Register Recognition & Subword MMIO Typing (v0.71.0)
+
+- [x] Add COP0 coprocessor register detection (`Status`, `Cause`, `Count`, etc.) in `tools/c_stubber.js`.
+- [x] Infer subword pointer types (`u8*`, `s8*`, `u16*`, `s16*`) and volatile MMIO qualifiers (`volatile u32*`).
+- [x] Expand unit tests in `tools/test_c_stubber.js` (17 tests total).

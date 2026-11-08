@@ -276,4 +276,38 @@ glabel minigame_tick
     fs.rmSync(tempNonmatchSrcDir, { recursive: true, force: true });
 }
 
+// Test 16: COP0 register detection (Status, Cause, Count)
+const cop0Asm = `
+    mfc0 $t0, $12
+    mfc0 $t1, $13
+    mtc0 $a0, $9
+    jr $ra
+    nop
+`;
+
+const res16 = analyzeAsmBody(cop0Asm);
+assert(res16.cop0Registers.includes('Status'), 'Expected Status COP0 register');
+assert(res16.cop0Registers.includes('Cause'), 'Expected Cause COP0 register');
+assert(res16.cop0Registers.includes('Count'), 'Expected Count COP0 register');
+
+const stub16 = generateCStub('handle_interrupt', res16, 'os', false);
+assert(stub16.includes('System Control COP0: Cause, Count, Status'), 'Expected COP0 comment in generated stub');
+console.log('[OK] Test 16: COP0 register recognition and comment generation passed.');
+
+// Test 17: Subword memory type inferencing and volatile MMIO qualifiers
+const subwordMmioAsm = `
+    lui $a0, 0xA440
+    lw $t0, 0($a0)
+    lbu $t1, 0($a1)
+    lhu $t2, 0($a2)
+    jr $ra
+    nop
+`;
+
+const res17 = analyzeAsmBody(subwordMmioAsm);
+assert(res17.params.includes('volatile u32* a0'), 'Expected volatile u32* a0 for MMIO pointer');
+assert(res17.params.includes('u8* a1'), 'Expected u8* a1 for byte dereference');
+assert(res17.params.includes('u16* a2'), 'Expected u16* a2 for halfword dereference');
+console.log('[OK] Test 17: Subword memory type inferencing and volatile MMIO qualifiers passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

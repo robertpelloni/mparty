@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.71.0]
+### Added
+- Expanded `tools/c_stubber.js` with MIPS System Control Coprocessor 0 (COP0) register recognition (`mfc0`/`mtc0` for `$12/Status`, `$13/Cause`, `$14/EPC`, `$9/Count`, `$11/Compare`, etc.), annotating them under `System Control COP0: ...` in generated C stub comments.
+- Added subword memory access pointer typing (`u8*`, `s8*`, `u16*`, `s16*`) for byte and halfword load/store instructions (`lbu`, `sb`, `lhu`, `sh`).
+- Added volatile MMIO base pointer inferencing (`volatile u32*`) when registers access hardware registers.
+- Added Unit Tests 16 and 17 in `tools/test_c_stubber.js` validating COP0 recognition and subword/volatile MMIO type inferencing (17/17 passing).
+
 ## [0.70.0]
 ### Added
 - Generated baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations for Mario Party 1, 2, and 3 targeting respective assembly, source, asset, and overlay segment boundaries.

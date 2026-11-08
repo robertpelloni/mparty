@@ -40,6 +40,31 @@ const MMIO_REGISTER_MAP = {
     '0xA4800000': 'SI_DRAM_ADDR_REG'
 };
 
+// Known MIPS System Control Coprocessor (COP0) registers
+const COP0_REGISTER_MAP = {
+    '$0': 'Index',
+    '$1': 'Random',
+    '$2': 'EntryLo0',
+    '$3': 'EntryLo1',
+    '$4': 'Context',
+    '$5': 'PageMask',
+    '$6': 'Wired',
+    '$8': 'BadVAddr',
+    '$9': 'Count',
+    '$10': 'EntryHi',
+    '$11': 'Compare',
+    '$12': 'Status',
+    '$13': 'Cause',
+    '$14': 'EPC',
+    '$15': 'PRId',
+    '$16': 'Config',
+    '$18': 'WatchLo',
+    '$19': 'WatchHi',
+    '$28': 'TagLo',
+    '$29': 'TagHi',
+    '$30': 'ErrorEPC'
+};
+
 /**
  * Analyzes assembly instructions within a function body to infer:
  * 1. Argument types (pointers vs struct pointers vs scalars, float vs double vs integer)
@@ -86,6 +111,9 @@ function analyzeAsmBody(body) {
     const argRegisters = new Set();
     const unsignedArgs = new Set();
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
+    const pointerSubwordTypes = new Map(); // reg -> 'u8' | 's8' | 'u16' | 's16'
+    const volatileMmioArgs = new Set(); // reg accessed with hardware MMIO base
+    const cop0Registers = new Set();
     const savedRegisters = new Set();
     const writtenRegisters = new Set();
     const mmioAccesses = new Set();
@@ -116,6 +144,15 @@ function analyzeAsmBody(body) {
         // Detect function calls
         if (opcode === 'jal' || opcode === 'jalr') {
             hasJal = true;
+        }
+
+        // Detect COP0 coprocessor register instructions (mfc0 $rt, $rd or mtc0 $rt, $rd)
+        if (opcode === 'mfc0' || opcode === 'mtc0') {
+            const cop0Reg = tokens[2];
+            if (cop0Reg) {
+                const regName = COP0_REGISTER_MAP[cop0Reg] || cop0Reg;
+                cop0Registers.add(regName);
+            }
         }
 
         // Detect indirect branch/jump table (jr $tX where not $ra)
@@ -202,6 +239,9 @@ function analyzeAsmBody(body) {
                 } else if ((upperHex & 0xFFF00000) === 0xA4000000 || (upperHex & 0xFFF00000) === 0x04000000) {
                     mmioAccesses.add(`MMIO_${formattedAddr}`);
                 }
+                if (['$a0', '$a1', '$a2', '$a3'].includes(reg)) {
+                    volatileMmioArgs.add(reg);
+                }
             }
         }
 
@@ -234,6 +274,17 @@ function analyzeAsmBody(body) {
                     pointerOffsets.set(baseReg, new Set());
                 }
                 pointerOffsets.get(baseReg).add(offsetVal);
+
+                // Track subword load/store type granularity
+                if (opcode === 'lbu' || opcode === 'sb') {
+                    pointerSubwordTypes.set(baseReg, 'u8');
+                } else if (opcode === 'lb') {
+                    if (!pointerSubwordTypes.has(baseReg)) pointerSubwordTypes.set(baseReg, 's8');
+                } else if (opcode === 'lhu' || opcode === 'sh') {
+                    if (!pointerSubwordTypes.has(baseReg)) pointerSubwordTypes.set(baseReg, 'u16');
+                } else if (opcode === 'lh') {
+                    if (!pointerSubwordTypes.has(baseReg)) pointerSubwordTypes.set(baseReg, 's16');
+                }
             }
 
             // Detect stack argument loading (N64 standard ABI: arguments beyond 4th passed at caller $sp offsets: 0x10, 0x14, etc.)
@@ -268,7 +319,7 @@ function analyzeAsmBody(body) {
             for (let i = 1; i < tokens.length; i++) {
                 const reg = tokens[i];
                 if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
-                    if (!writtenRegisters.has(reg)) {
+                    if (!writtenRegisters.has(reg) || volatileMmioArgs.has(reg)) {
                         argRegisters.add(reg);
                     }
                 }
@@ -277,12 +328,12 @@ function analyzeAsmBody(body) {
             for (let i = 2; i < tokens.length; i++) {
                 const reg = tokens[i];
                 if (['$a0', '$a1', '$a2', '$a3', '$f12', '$f14'].includes(reg)) {
-                    if (!writtenRegisters.has(reg)) {
+                    if (!writtenRegisters.has(reg) || volatileMmioArgs.has(reg)) {
                         argRegisters.add(reg);
                     }
                 }
             }
-            if (tokens[1] && tokens[1].startsWith('$')) {
+            if (tokens[1] && tokens[1].startsWith('$') && !volatileMmioArgs.has(tokens[1])) {
                 writtenRegisters.add(tokens[1]);
             }
         }
@@ -325,8 +376,13 @@ function analyzeAsmBody(body) {
                     }
                 } else if (pointerOffsets.has(reg)) {
                     const offsets = pointerOffsets.get(reg);
-                    if (offsets.size > 1) {
+                    const subType = pointerSubwordTypes.get(reg);
+                    if (volatileMmioArgs.has(reg)) {
+                        params.push(`volatile u32* ${name}`);
+                    } else if (offsets.size > 1) {
                         params.push(`void* ${name} /* struct */`);
+                    } else if (subType) {
+                        params.push(`${subType}* ${name}`);
                     } else if (unsignedArgs.has(reg)) {
                         params.push(`u8* ${name}`);
                     } else {
@@ -350,6 +406,7 @@ function analyzeAsmBody(body) {
         hasLoop,
         isBooleanV0,
         mmioAccesses: Array.from(mmioAccesses).sort(),
+        cop0Registers: Array.from(cop0Registers).sort(),
         rodataSymbols: Array.from(rodataSymbols).sort(),
         globalDataReads: Array.from(globalDataReads).sort(),
         globalDataWrites: Array.from(globalDataWrites).sort(),
@@ -409,6 +466,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.mmioAccesses && analysis.mmioAccesses.length > 0) {
         out += ` * Hardware MMIO: ${analysis.mmioAccesses.join(', ')}\n`;
+    }
+    if (analysis.cop0Registers && analysis.cop0Registers.length > 0) {
+        out += ` * System Control COP0: ${analysis.cop0Registers.join(', ')}\n`;
     }
     if (analysis.rodataSymbols && analysis.rodataSymbols.length > 0) {
         out += ` * Rodata Symbols: ${analysis.rodataSymbols.join(', ')}\n`;

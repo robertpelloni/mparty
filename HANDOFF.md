@@ -6,10 +6,15 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.70.0 (tracked in `VERSION.md`)
+- **Version:** v0.71.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Baseline Splat Configurations for Mario Party 1-3 (`splat.*.yaml` & `Makefile`):**
+1. **COP0 Register Recognition & Subword MMIO Typing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Implemented MIPS System Control Coprocessor 0 (COP0) register tracking (`Status`, `Cause`, `Count`, `Compare`, `EPC`, etc.) via `mfc0`/`mtc0` opcodes.
+   - Added fine-grained subword pointer type inferencing (`u8*`, `s8*`, `u16*`, `s16*`) based on byte/halfword memory operations.
+   - Added volatile pointer qualifiers (`volatile u32*`) when base pointer registers map to hardware MMIO address ranges.
+   - Expanded unit tests in `tools/test_c_stubber.js` to 17 tests (all passing).
+2. **Baseline Splat Configurations for Mario Party 1-3 (`splat.*.yaml` & `Makefile`):**
    - Generated baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations targeting Mario Party 1, 2, and 3.
    - Added `splat-configs` target in `Makefile` to batch generate all splat configurations.
    - Registered splat configurations in `tools/verify_architecture.py`.
