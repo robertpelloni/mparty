@@ -34,10 +34,22 @@ const MMIO_REGISTER_MAP = {
     '0xA4200000': 'DPS_TBIST_REG',
     '0xA4300000': 'MI_INTR_REG',
     '0xA4400000': 'VI_CONTROL_REG',
+    '0xA4400004': 'VI_ORIGIN_REG',
+    '0xA4400008': 'VI_WIDTH_REG',
+    '0xA440000C': 'VI_INTR_REG',
+    '0xA4400010': 'VI_V_CURRENT_LINE_REG',
     '0xA4500000': 'AI_DRAM_ADDR_REG',
+    '0xA4500004': 'AI_LEN_REG',
+    '0xA4500008': 'AI_CONTROL_REG',
+    '0xA450000C': 'AI_STATUS_REG',
+    '0xA4500010': 'AI_DACRATE_REG',
+    '0xA4500014': 'AI_BITRATE_REG',
     '0xA4600000': 'PI_DRAM_ADDR_REG',
     '0xA4700000': 'RI_MODE_REG',
-    '0xA4800000': 'SI_DRAM_ADDR_REG'
+    '0xA4800000': 'SI_DRAM_ADDR_REG',
+    '0xA4800004': 'SI_PIF_ADDR_RD64B_REG',
+    '0xA4800010': 'SI_PIF_ADDR_WR64B_REG',
+    '0xA4800018': 'SI_STATUS_REG'
 };
 
 // Known MIPS System Control Coprocessor (COP0) registers
@@ -231,12 +243,20 @@ function analyzeAsmBody(body) {
 
         // Detect MMIO accesses (e.g., lw $t1, 0($t0) where $t0 loaded with 0xA430 / 0x0430)
         for (const [reg, upper] of registerUpperConstants.entries()) {
-            if (line.includes(`(${reg})`)) {
-                const upperHex = ((upper & 0xFFFF) << 16) >>> 0;
-                const formattedAddr = '0x' + upperHex.toString(16).toUpperCase().padStart(8, '0');
+            const regMemMatch = line.match(new RegExp(`(-?[0-9a-fA-Fx]*)\\(\\${reg}\\)`));
+            if (regMemMatch) {
+                const rawOffset = regMemMatch[1] || '0';
+                const offsetVal = rawOffset.startsWith('0x') || rawOffset.startsWith('-0x')
+                    ? parseInt(rawOffset, 16)
+                    : parseInt(rawOffset, 10) || 0;
+
+                const baseAddr = ((upper & 0xFFFF) << 16) >>> 0;
+                const fullAddr = (baseAddr + offsetVal) >>> 0;
+                const formattedAddr = '0x' + fullAddr.toString(16).toUpperCase().padStart(8, '0');
+
                 if (MMIO_REGISTER_MAP[formattedAddr]) {
                     mmioAccesses.add(MMIO_REGISTER_MAP[formattedAddr]);
-                } else if ((upperHex & 0xFFF00000) === 0xA4000000 || (upperHex & 0xFFF00000) === 0x04000000) {
+                } else if ((fullAddr & 0xFFF00000) === 0xA4000000 || (fullAddr & 0xFFF00000) === 0x04000000) {
                     mmioAccesses.add(`MMIO_${formattedAddr}`);
                 }
                 if (['$a0', '$a1', '$a2', '$a3'].includes(reg)) {

@@ -378,3 +378,9 @@
 
 - [x] Add missing splat configuration failure tests in `tools/test_validation_layer.py`.
 - [x] Assert 6/6 failure mode coverage in `tools/test_pipeline.py`.
+
+## Granular MMIO Sub-Register Mapping (v0.79.0)
+
+- [x] Add Audio, Video, and Serial Interface sub-registers to `tools/c_stubber.js`.
+- [x] Implement immediate memory offset addition for base pointer MMIO detection.
+- [x] Add Unit Test 19 in `tools/test_c_stubber.js`.

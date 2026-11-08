@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.78.0 (tracked in `VERSION.md`)
+- **Version:** v0.79.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Validation Layer Splat Config Failure Testing (`tools/test_validation_layer.py`):**
+1. **Granular MMIO Sub-Register Mapping (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Expanded `MMIO_REGISTER_MAP` with sub-registers for Audio (`AI_LEN_REG`, `AI_STATUS_REG`, `AI_DACRATE_REG`, `AI_BITRATE_REG`), Video (`VI_ORIGIN_REG`, `VI_WIDTH_REG`, `VI_INTR_REG`), and Serial (`SI_PIF_ADDR_RD64B_REG`, `SI_STATUS_REG`) hardware interfaces.
+   - Added immediate offset resolution in `analyzeAsmBody` to detect sub-registers accessed via non-zero offsets from base register pointers.
+   - Added Unit Test 19 in `tools/test_c_stubber.js` validating sub-register resolution.
+2. **Validation Layer Splat Config Failure Testing (`tools/test_validation_layer.py`):**
    - Added `setup_missing_splat_config()` and `teardown_missing_splat_config()` in `tools/test_validation_layer.py`.
    - Verified that `tools/verify_architecture.py` detects missing baseline configurations (`splat.yaml`) with code 1.
 2. **Multi-Title Non-Matching Prefixes in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**

@@ -316,4 +316,21 @@ assert(customPrefixStub.includes('#pragma GLOBAL_ASM("asm/nonmatchings/mp2/engin
     'Expected custom nonmatching prefix in #pragma GLOBAL_ASM');
 console.log('[OK] Test 18: Custom nonmatchingsPrefix in generateCStub passed.');
 
+// Test 19: Granular MMIO sub-register mapping with non-zero offsets
+const subMmioAsm = `
+    lui $t0, 0xA450
+    sw $a0, 0x0004($t0)
+    lw $v0, 0x000C($t0)
+    lui $t1, 0xA440
+    sw $a1, 0x0008($t1)
+    jr $ra
+    nop
+`;
+
+const res19 = analyzeAsmBody(subMmioAsm);
+assert(res19.mmioAccesses.includes('AI_LEN_REG'), 'Expected AI_LEN_REG (0xA4500004)');
+assert(res19.mmioAccesses.includes('AI_STATUS_REG'), 'Expected AI_STATUS_REG (0xA450000C)');
+assert(res19.mmioAccesses.includes('VI_WIDTH_REG'), 'Expected VI_WIDTH_REG (0xA4400008)');
+console.log('[OK] Test 19: Granular MMIO sub-register mapping with non-zero offsets passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

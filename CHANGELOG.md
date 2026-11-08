@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.79.0]
+### Added
+- Expanded hardware MMIO register mapping in `tools/c_stubber.js` with sub-registers for Audio (`AI_LEN_REG`, `AI_STATUS_REG`, `AI_DACRATE_REG`, `AI_BITRATE_REG`), Video (`VI_ORIGIN_REG`, `VI_WIDTH_REG`, `VI_INTR_REG`), and Serial (`SI_PIF_ADDR_RD64B_REG`, `SI_STATUS_REG`) interfaces.
+- Added immediate offset resolution in `analyzeAsmBody` to detect sub-registers accessed via non-zero offsets from base register pointers.
+- Added Unit Test 19 in `tools/test_c_stubber.js` validating sub-register resolution (19/19 tests passing).
+
 ## [0.78.0]
 ### Added
 - Expanded `tools/test_validation_layer.py` with failure mode test coverage for missing baseline splat configurations (`splat.yaml`).
