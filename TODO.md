@@ -322,3 +322,9 @@
 - [x] Add `normalize_instruction` in `tools/ai_matcher.py` to strip addresses and comments from disassembly.
 - [x] Support normalized diff output in `generate_assembly_diff`.
 - [x] Create `tools/test_ai_matcher.py` unit test suite and integrate into `tools/test_pipeline.py`.
+
+## Architecture Verification Expansion (v0.69.0)
+
+- [x] Add toolchain scripts and test suites to `REQUIRED_FILES` in `tools/verify_architecture.py`.
+- [x] Add `web`, `web/src`, and `web/tests` to `REQUIRED_DIRECTORIES`.
+- [x] Verify validation layer failure modes in `tools/test_validation_layer.py`.

@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.68.0 (tracked in `VERSION.md`)
+- **Version:** v0.69.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **AI Matcher Assembly Normalization (`tools/ai_matcher.py` & `tools/test_ai_matcher.py`):**
+1. **Architecture Verification Expansion (`tools/verify_architecture.py` & `tools/test_validation_layer.py`):**
+   - Expanded `tools/verify_architecture.py` assertions across all toolchain scripts (`ai_matcher.py`, `ai_loop.py`, `mparty_cli.py`), test harness suites (`test_ai_matcher.py`, `test_generate_splat.py`, `test_mparty_cli.py`, `test_pipeline.py`), and web directory scaffolding (`web`, `web/src`, `web/tests`).
+   - Verified architecture and validation layer tests (5/5 tests passing).
+2. **AI Matcher Assembly Normalization (`tools/ai_matcher.py` & `tools/test_ai_matcher.py`):**
    - Implemented `normalize_instruction` in `tools/ai_matcher.py` to strip variable addresses, hexadecimal opcode dumps, and comments from objdump disassembly output.
    - Enhanced `generate_assembly_diff` to highlight true MIPS instruction differences in LLM feedback loops.
    - Created `tools/test_ai_matcher.py` and integrated into `tools/test_pipeline.py`.
@@ -79,7 +82,8 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
    - Tier 4: Decompilation Studio & Assets (`DecompilationStatus`, `AssetGallery`).
 
 ### Verification Status
-- `python3 tools/verify_architecture.py`: **PASS**
+- `python3 tools/verify_architecture.py`: **PASS** (all 17 required files and 4 directories verified)
+- `python3 tools/test_validation_layer.py`: **PASS** (5/5 tests pass)
 - `python3 tools/test_pipeline.py`: **PASS** (all 11 integration steps: architecture, validation layers, AI loop, AI matcher, C stubber unit tests, multi-title splat tests, centralized CLI tests, prototype header assertions, and live mock disassembly/stubbing pass)
 - `python3 tools/test_ai_matcher.py`: **PASS** (all 3 unit tests pass)
 - `python3 tools/test_generate_splat.py`: **PASS** (all 3 multi-title test suites pass)

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.69.0]
+### Added
+- Expanded `tools/verify_architecture.py` to assert the existence and integrity of all project toolchain scripts (`ai_matcher.py`, `ai_loop.py`, `mparty_cli.py`), test harness suites (`test_ai_matcher.py`, `test_generate_splat.py`, `test_mparty_cli.py`, `test_pipeline.py`), and web directory scaffolding (`web`, `web/src`, `web/tests`).
+- Verified failure modes in `tools/test_validation_layer.py`.
+
 ## [0.68.0]
 ### Added
 - Enhanced `tools/ai_matcher.py` with `normalize_instruction` to strip machine memory offsets, address hex tags, and formatting discrepancies from disassembly output.
