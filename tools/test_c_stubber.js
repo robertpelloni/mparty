@@ -372,4 +372,21 @@ const stub21 = generateCStub('board_dispatch', res21, 'board', false);
 assert(stub21.includes('External Calls: board_init_step'), 'Expected External Calls in generated stub comments');
 console.log('[OK] Test 21: PIC relocations (%got and %call16) and External Calls tracking passed.');
 
+// Test 22: Unaligned memory access instructions (lwl, lwr, swl, swr)
+const unalignedAsm = `
+    lwl $t0, 0($a0)
+    lwr $t0, 3($a0)
+    swl $t0, 0($a1)
+    swr $t0, 3($a1)
+    jr $ra
+    nop
+`;
+
+const res22 = analyzeAsmBody(unalignedAsm);
+assert(res22.hasUnalignedAccess, 'Expected hasUnalignedAccess true');
+const stub22 = generateCStub('copy_unaligned_word', res22, 'memory', false);
+assert(stub22.includes('Features: Unaligned Memory Access (lwl/lwr/swl/swr)'),
+    'Expected Unaligned Memory Access annotation in comments');
+console.log('[OK] Test 22: Unaligned memory access instructions and annotation passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.85.0]
+### Added
+- Added unaligned memory access instruction detection (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`) to `tools/c_stubber.js`.
+- Implemented `hasUnalignedAccess` tracking and added `Features: Unaligned Memory Access (lwl/lwr/swl/swr)` comment annotations to generated C stubs.
+- Added Unit Test 22 in `tools/test_c_stubber.js` validating unaligned instruction parsing and comment generation (22/22 unit tests passing).
+
 ## [0.84.0]
 ### Added
 - Added `%got(symbol)` and `%call16(symbol)` position-independent code (PIC) relocation recognition to `tools/c_stubber.js`.

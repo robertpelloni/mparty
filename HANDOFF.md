@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.84.0 (tracked in `VERSION.md`)
+- **Version:** v0.85.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Position-Independent Code (PIC) Relocations in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Unaligned Memory Access Handling in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Added recognition for MIPS unaligned memory access instructions (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`).
+   - Implemented `hasUnalignedAccess` tracking to document `Features: Unaligned Memory Access (lwl/lwr/swl/swr)` in generated C stub comments.
+   - Added Unit Test 22 in `tools/test_c_stubber.js` (22/22 tests passing).
+2. **Position-Independent Code (PIC) Relocations in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Implemented `%got(symbol)` and `%call16(symbol)` pattern parsing in `tools/c_stubber.js`.
    - Added `calledFunctions` tracking to emit `External Calls: ...` annotations in generated C stub comments.
    - Added Unit Test 21 in `tools/test_c_stubber.js`.

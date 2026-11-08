@@ -18,8 +18,9 @@ const path = require('path');
 // Regex to identify function definitions in MIPS assembly (e.g., glabel func_80000000)
 const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
 
-const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1']);
-const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1']);
+const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1', 'swl', 'swr', 'sdl', 'sdr']);
+const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1', 'lwl', 'lwr', 'ldl', 'ldr']);
+const UNALIGNED_OPCODES = new Set(['lwl', 'lwr', 'ldl', 'ldr', 'swl', 'swr', 'sdl', 'sdr']);
 // Explicit unsigned operations (excluding addu which is GCC MIPS standard for signed add without integer overflow trap)
 const UNSIGNED_OPS = new Set(['lbu', 'lhu', 'sltu', 'sltiu', 'divu', 'multu']);
 const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
@@ -114,6 +115,7 @@ function analyzeAsmBody(body) {
     let hasJal = false;
     let hasJumpTable = false;
     let hasLoop = false;
+    let hasUnalignedAccess = false;
     let stackSize = 0;
 
     let f12IsDouble = false;
@@ -154,6 +156,11 @@ function analyzeAsmBody(body) {
         if (tokens.length === 0) continue;
 
         const opcode = tokens[0];
+
+        // Detect unaligned memory operations
+        if (UNALIGNED_OPCODES.has(opcode)) {
+            hasUnalignedAccess = true;
+        }
 
         // Detect function calls
         if (opcode === 'jal' || opcode === 'jalr') {
@@ -447,6 +454,7 @@ function analyzeAsmBody(body) {
         isLeaf: !hasJal,
         hasJumpTable,
         hasLoop,
+        hasUnalignedAccess,
         isBooleanV0,
         mmioAccesses: Array.from(mmioAccesses).sort(),
         cop0Registers: Array.from(cop0Registers).sort(),
@@ -538,6 +546,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.hasJumpTable) {
         out += ` * Features: Indirect Jump Table (Switch Statement)\n`;
+    }
+    if (analysis.hasUnalignedAccess) {
+        out += ` * Features: Unaligned Memory Access (lwl/lwr/swl/swr)\n`;
     }
     if (analysis.parseErrors && analysis.parseErrors.length > 0) {
         out += ` * Parse Warnings: ${analysis.parseErrors.join('; ')}\n`;

@@ -412,3 +412,9 @@
 - [x] Add `%got` and `%call16` pattern parsing in `tools/c_stubber.js`.
 - [x] Annotate `External Calls` in generated C stub comments.
 - [x] Add Unit Test 21 in `tools/test_c_stubber.js`.
+
+## Unaligned Memory Access Handling in C Stubber (v0.85.0)
+
+- [x] Detect unaligned load/store instructions (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`) in `tools/c_stubber.js`.
+- [x] Add `hasUnalignedAccess` tracking and comment annotations (`Features: Unaligned Memory Access (lwl/lwr/swl/swr)`).
+- [x] Add Unit Test 22 in `tools/test_c_stubber.js` (22/22 unit tests passing).
