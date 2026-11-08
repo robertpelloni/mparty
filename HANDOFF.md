@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.79.0 (tracked in `VERSION.md`)
+- **Version:** v0.80.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Granular MMIO Sub-Register Mapping (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Decompilation Studio Mario Party 4 Target Selection (`DecompilationStatus.tsx` & `/api/ai`):**
+   - Added `mp4` to `DecompilationStatus.tsx` target selector, rendering GameCube build target and metrics.
+   - Updated `web/src/app/api/ai/route.ts` to allow `mp4` title parameter forwarding to `ai_loop.py`.
+   - Added Playwright test in `web/tests/decompilation_status.spec.ts` asserting MP4 target switching.
+2. **Granular MMIO Sub-Register Mapping (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Expanded `MMIO_REGISTER_MAP` with sub-registers for Audio (`AI_LEN_REG`, `AI_STATUS_REG`, `AI_DACRATE_REG`, `AI_BITRATE_REG`), Video (`VI_ORIGIN_REG`, `VI_WIDTH_REG`, `VI_INTR_REG`), and Serial (`SI_PIF_ADDR_RD64B_REG`, `SI_STATUS_REG`) hardware interfaces.
    - Added immediate offset resolution in `analyzeAsmBody` to detect sub-registers accessed via non-zero offsets from base register pointers.
    - Added Unit Test 19 in `tools/test_c_stubber.js` validating sub-register resolution.

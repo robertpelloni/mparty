@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.80.0]
+### Added
+- Added Mario Party 4 (`mp4`) target selection to `web/src/components/DecompilationStatus.tsx`, displaying GameCube build targets and metrics (`24,500` non-matching units).
+- Updated `web/src/app/api/ai/route.ts` to allow `mp4` in target game parameter parsing.
+- Added automated Playwright test in `web/tests/decompilation_status.spec.ts` asserting MP4 target switching and unit count rendering.
+
 ## [0.79.0]
 ### Added
 - Expanded hardware MMIO register mapping in `tools/c_stubber.js` with sub-registers for Audio (`AI_LEN_REG`, `AI_STATUS_REG`, `AI_DACRATE_REG`, `AI_BITRATE_REG`), Video (`VI_ORIGIN_REG`, `VI_WIDTH_REG`, `VI_INTR_REG`), and Serial (`SI_PIF_ADDR_RD64B_REG`, `SI_STATUS_REG`) interfaces.

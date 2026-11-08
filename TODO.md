@@ -384,3 +384,8 @@
 - [x] Add Audio, Video, and Serial Interface sub-registers to `tools/c_stubber.js`.
 - [x] Implement immediate memory offset addition for base pointer MMIO detection.
 - [x] Add Unit Test 19 in `tools/test_c_stubber.js`.
+
+## Decompilation Studio Mario Party 4 Target Selection (v0.80.0)
+
+- [x] Add `mp4` to `DecompilationStatus.tsx` target selector and `/api/ai`.
+- [x] Add Playwright test in `web/tests/decompilation_status.spec.ts`.

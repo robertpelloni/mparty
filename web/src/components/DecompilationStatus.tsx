@@ -13,18 +13,20 @@ export default function DecompilationStatus() {
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showStubViewer, setShowStubViewer] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<'mp1' | 'mp2' | 'mp3'>('mp1');
-  const [nonMatchingCounts, setNonMatchingCounts] = useState<{ mp1: number; mp2: number; mp3: number }>({
+  const [selectedGame, setSelectedGame] = useState<'mp1' | 'mp2' | 'mp3' | 'mp4'>('mp1');
+  const [nonMatchingCounts, setNonMatchingCounts] = useState<{ mp1: number; mp2: number; mp3: number; mp4: number }>({
       mp1: 12408,
       mp2: 15220,
-      mp3: 18650
+      mp3: 18650,
+      mp4: 24500
   });
   const [matchedCount, setMatchedCount] = useState(0);
 
-  const gameTitles: Record<'mp1' | 'mp2' | 'mp3', string> = {
+  const gameTitles: Record<'mp1' | 'mp2' | 'mp3' | 'mp4', string> = {
       mp1: 'Mario Party 1 (N64)',
       mp2: 'Mario Party 2 (N64)',
-      mp3: 'Mario Party 3 (N64)'
+      mp3: 'Mario Party 3 (N64)',
+      mp4: 'Mario Party 4 (GameCube)'
   };
 
   const sampleStub = `// Automatically generated typed stub for core_engine.s
@@ -98,15 +100,16 @@ s32 func_80045A10(void* a0, s32 a1) {
           Decompilation Pipeline & Stub Generator
         </h2>
         <div className="flex gap-2 items-center">
-            <Tooltip content="Select target Mario Party N64 game disassembly profile (MP1, MP2, MP3).">
+            <Tooltip content="Select target Mario Party game disassembly profile (MP1-MP3 N64, MP4 GameCube).">
               <select
                   value={selectedGame}
-                  onChange={(e) => setSelectedGame(e.target.value as 'mp1' | 'mp2' | 'mp3')}
+                  onChange={(e) => setSelectedGame(e.target.value as 'mp1' | 'mp2' | 'mp3' | 'mp4')}
                   className="px-2.5 py-1 bg-zinc-800 text-zinc-200 border border-zinc-700 rounded text-sm focus:outline-none focus:border-blue-500"
               >
                   <option value="mp1">MP1 (N64)</option>
                   <option value="mp2">MP2 (N64)</option>
                   <option value="mp3">MP3 (N64)</option>
+                  <option value="mp4">MP4 (GameCube)</option>
               </select>
             </Tooltip>
 

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const aiLoopPath = path.join(toolsDir, 'ai_loop.py');
 
     const args = [aiLoopPath];
-    if (['mp1', 'mp2', 'mp3'].includes(game)) {
+    if (['mp1', 'mp2', 'mp3', 'mp4'].includes(game)) {
         args.push('--nonmatchings-dir', `asm/nonmatchings/${game}`);
     }
 

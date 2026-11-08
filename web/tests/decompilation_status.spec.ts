@@ -16,6 +16,15 @@ test.describe('Decompilation Status & Stub Viewer', () => {
         await select.selectOption('mp2');
         await expect(page.getByText('Mario Party 2 (N64)')).toBeVisible();
 
+        // Select MP4 GameCube target option
+        await select.selectOption('mp4');
+        await expect(page.getByText('Mario Party 4 (GameCube)')).toBeVisible();
+        await expect(page.getByText('24,500')).toBeVisible();
+
+        // Switch back to MP2 for remaining interaction steps
+        await select.selectOption('mp2');
+        await expect(page.getByText('Mario Party 2 (N64)')).toBeVisible();
+
         // Click Process Nonmatchings
         const processBtn = page.getByRole('button', { name: 'Process Nonmatchings' });
         await expect(processBtn).toBeVisible();
