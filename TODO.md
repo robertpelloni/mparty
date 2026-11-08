@@ -400,3 +400,9 @@
 - [x] Differentiate read-only rodata from mutable global data in `tools/c_stubber.js`.
 - [x] Add `rodataFloats` recognition and annotation.
 - [x] Add Unit Test 20 in `tools/test_c_stubber.js`.
+
+## Disassembly Directory Customization & Unit Testing (v0.83.0)
+
+- [x] Add `--asm-dir` and `--nonmatchings-dir` to `tools/disassemble.py`.
+- [x] Create `tools/test_disassemble.py` unit test suite.
+- [x] Integrate into `tools/test_pipeline.py` and `tools/verify_architecture.py`.

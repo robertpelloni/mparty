@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.82.0 (tracked in `VERSION.md`)
+- **Version:** v0.83.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Rodata Relocation Refinement & Float Constant Recognition (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Disassembly Directory Customization & Unit Testing (`tools/disassemble.py` & `tools/test_disassemble.py`):**
+   - Added `--asm-dir` and `--nonmatchings-dir` arguments to `tools/disassemble.py`.
+   - Created `tools/test_disassemble.py` verifying multi-function modular extraction.
+   - Integrated into `tools/test_pipeline.py` and registered in `tools/verify_architecture.py`.
+2. **Rodata Relocation Refinement & Float Constant Recognition (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Implemented `rodataFloats` tracking to detect floating-point constants loaded via `lwc1`/`ldc1` from `%lo(symbol)`.
    - Filtered out symbols with store operations from `rodataSymbols` to strictly isolate read-only memory from mutable global data.
    - Added Unit Test 20 in `tools/test_c_stubber.js`.

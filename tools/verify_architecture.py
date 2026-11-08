@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "tools/test_ai_loop.py",
     "tools/test_ai_matcher.py",
     "tools/test_generate_splat.py",
+    "tools/test_disassemble.py",
     "tools/test_mparty_cli.py",
     "tools/test_pipeline.py",
     "tools/test_validation_layer.py"

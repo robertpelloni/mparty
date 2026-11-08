@@ -43,13 +43,16 @@ def main():
     # 6. Multi-title Splat Generation Tests
     run_step("Test Splat Multi-Title Generation", "python3 tools/test_generate_splat.py")
 
-    # 7. Centralized CLI Tests
+    # 7. Disassembly Unit Tests
+    run_step("Test Disassembly Logic", "python3 tools/test_disassemble.py")
+
+    # 8. Centralized CLI Tests
     run_step("Test Centralized CLI", "python3 tools/test_mparty_cli.py")
 
-    # 8. Generate Mock ROM
+    # 9. Generate Mock ROM
     run_step("Generate Mock ROM", "python3 tools/generate_advanced_mock_rom.py --out test_baserom.z64 --size 1")
 
-    # 9. Generate Splat Yaml & Function Prototypes
+    # 10. Generate Splat Yaml & Function Prototypes
     run_step("Generate Splat config", "python3 tools/generate_splat.py test_baserom.z64 --out test_splat.yaml")
 
     # Check if yaml and include/functions.h were created
@@ -61,11 +64,11 @@ def main():
         print("[ERROR] include/functions.h prototype header not found!")
         sys.exit(1)
 
-    # 10. Disassembly & Stubbing Verification
+    # 11. Disassembly & Stubbing Verification
     run_step("Check c_stubber syntax", "node -c tools/c_stubber.js")
     run_step("Check disassemble syntax", "python3 -m py_compile tools/disassemble.py")
 
-    # 11. End-to-End Mock Disassembly & Intelligent Stub Generation
+    # 12. End-to-End Mock Disassembly & Intelligent Stub Generation
     print("--- Running End-to-End Disassembly and Intelligent Stubbing ---")
     os.makedirs("asm/test_module", exist_ok=True)
     with open("asm/test_module/mock_code.s", "w") as f:

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.83.0]
+### Added
+- Enhanced `tools/disassemble.py` with configurable `--asm-dir` and `--nonmatchings-dir` options for multi-title modular disassembly.
+- Created `tools/test_disassemble.py` unit test suite verifying modular function extraction and isolation.
+- Integrated disassembly unit testing into `tools/test_pipeline.py` and registered in `tools/verify_architecture.py`.
+
 ## [0.82.0]
 ### Added
 - Refined `.rodata` relocation tracking in `tools/c_stubber.js` by recognizing floating-point constant loads (`lwc1`, `ldc1`) and annotating them as `Rodata Floats: ...`.

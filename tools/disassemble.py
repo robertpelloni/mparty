@@ -71,7 +71,7 @@ def extract_nonmatchings_from_file(asm_file, nonmatchings_root):
         print(f"Extracted {len(functions)} non-matching functions into {module_dir}")
     return functions
 
-def run_splat(yaml_config):
+def run_splat(yaml_config, asm_dir="asm", nonmatchings_dir=None):
     """Executes splat64 to split the ROM using the provided configuration."""
     if not os.path.exists(yaml_config):
         print(f"Error: Config file '{yaml_config}' not found.")
@@ -86,29 +86,32 @@ def run_splat(yaml_config):
         print("Splat execution unavailable or failed. Scaffolding non-matching directory layout.")
         create_directories()
 
-    # Process all root and subdirectory .s assembly files into modular asm/nonmatchings/
-    asm_dir = "asm"
-    nonmatchings_dir = os.path.join(asm_dir, "nonmatchings")
+    # Process all root and subdirectory .s assembly files into modular nonmatchings directory
+    nm_dir = nonmatchings_dir or os.path.join(asm_dir, "nonmatchings")
+    os.makedirs(nm_dir, exist_ok=True)
+
     if os.path.exists(asm_dir):
         for root, dirs, files in os.walk(asm_dir):
             # Do not extract already extracted nonmatchings files
-            if os.path.abspath(root).startswith(os.path.abspath(nonmatchings_dir)):
+            if os.path.abspath(root).startswith(os.path.abspath(nm_dir)):
                 continue
             for file in files:
                 if file.endswith('.s'):
                     full_path = os.path.join(root, file)
                     rel_dir = os.path.relpath(root, asm_dir)
-                    target_root = nonmatchings_dir if rel_dir == '.' else os.path.join(nonmatchings_dir, rel_dir)
+                    target_root = nm_dir if rel_dir == '.' else os.path.join(nm_dir, rel_dir)
                     extract_nonmatchings_from_file(full_path, target_root)
 
 def main():
     parser = argparse.ArgumentParser(description="Orchestrate ROM disassembly using splat.")
     parser.add_argument("yaml_config", nargs='?', default="splat.yaml", help="Path to splat.yaml config.")
+    parser.add_argument("--asm-dir", default="asm", help="Root directory containing disassembled assembly.")
+    parser.add_argument("--nonmatchings-dir", default=None, help="Root directory for extracted non-matching functions.")
 
     args = parser.parse_args()
 
     create_directories()
-    run_splat(args.yaml_config)
+    run_splat(args.yaml_config, asm_dir=args.asm_dir, nonmatchings_dir=args.nonmatchings_dir)
 
 if __name__ == "__main__":
     main()
