@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.72.0 (tracked in `VERSION.md`)
+- **Version:** v0.73.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Toolchain Resolution & Pipeline Normalization (`tools/ai_matcher.py` & `tools/test_pipeline.py`):**
+1. **CLI Dashboard Dynamic Cycling & Status Overrides (`tools/mparty_cli.py` & `tools/test_mparty_cli.py`):**
+   - Added title profile cycling (`cycle_target_game`) in `tools/mparty_cli.py` to rotate between `mp1` -> `mp2` -> `mp3` -> `mp1`.
+   - Enhanced `render_dashboard_header` with configurable service status parameter overrides (`decomp`, `web`, `netplay`).
+   - Added Unit Tests in `tools/test_mparty_cli.py` (`test_cycle_target_game`, `test_render_dashboard_header_custom_statuses`).
+2. **Toolchain Resolution & Pipeline Normalization (`tools/ai_matcher.py` & `tools/test_pipeline.py`):**
    - Replaced subshell toolchain binary checks (`os.system("which ...")`) in `tools/ai_matcher.py` with standard Python `shutil.which` for compiler (`mips-linux-gnu-gcc`), objcopy, and objdump resolution.
    - Cleaned up and normalized step numbering comments in `tools/test_pipeline.py` sequentially (Steps 1 through 11).
 2. **COP0 Register Recognition & Subword MMIO Typing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**

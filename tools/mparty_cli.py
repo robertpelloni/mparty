@@ -50,26 +50,42 @@ GAME_NAMES = {
     "mp3": "Mario Party 3 (N64)"
 }
 
-def render_dashboard_header(game="mp1"):
+GAME_CYCLE = ["mp1", "mp2", "mp3"]
+
+def cycle_target_game(current_game="mp1"):
+    """Cycles sequentially between supported titles: mp1 -> mp2 -> mp3 -> mp1."""
+    if current_game not in GAME_CYCLE:
+        return "mp1"
+    idx = GAME_CYCLE.index(current_game)
+    return GAME_CYCLE[(idx + 1) % len(GAME_CYCLE)]
+
+def render_dashboard_header(game="mp1", services_status=None):
     title = GAME_NAMES.get(game, "Mario Party 1 (N64)")
+    statuses = services_status or {
+        "decomp": "IDLE",
+        "web": "OFFLINE",
+        "netplay": "LISTENING (Port 8080)"
+    }
     header = "=" * 60 + "\n"
     header += "   Mario Party Engine - Interactive CLI Dashboard\n"
     header += f"   Target Title: {title}\n"
     header += "=" * 60 + "\n"
-    header += "[1] AI Decompilation Pipeline : IDLE\n"
-    header += "[2] Next.js Web Frontend      : OFFLINE\n"
-    header += "[3] Netplay Sync Server       : LISTENING (Port 8080)\n"
+    header += f"[1] AI Decompilation Pipeline : {statuses.get('decomp', 'IDLE')}\n"
+    header += f"[2] Next.js Web Frontend      : {statuses.get('web', 'OFFLINE')}\n"
+    header += f"[3] Netplay Sync Server       : {statuses.get('netplay', 'LISTENING')}\n"
     header += "-" * 60
     return header
 
-def run_interactive_dashboard(game="mp1"):
+def run_interactive_dashboard(game="mp1", max_iterations=None):
     """Renders an interactive terminal dashboard with target title context."""
     print("\033[2J\033[H", end="") # Clear screen
     print(render_dashboard_header(game))
     print("Press Ctrl+C to exit dashboard mode.")
+    iterations = 0
     try:
-        while True:
+        while max_iterations is None or iterations < max_iterations:
             time.sleep(1)
+            iterations += 1
     except KeyboardInterrupt:
         print("\nExiting dashboard.")
 

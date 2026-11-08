@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.73.0]
+### Added
+- Added title profile cycling (`cycle_target_game`) in `tools/mparty_cli.py` to rotate between `mp1` -> `mp2` -> `mp3` -> `mp1`.
+- Enhanced `render_dashboard_header` with configurable service status parameter overrides (`decomp`, `web`, `netplay`).
+- Added Unit Tests in `tools/test_mparty_cli.py` (`test_cycle_target_game`, `test_render_dashboard_header_custom_statuses`).
+
 ## [0.72.0]
 ### Refactored
 - Replaced subshell toolchain binary checks (`os.system("which ...")`) in `tools/ai_matcher.py` with standard Python `shutil.which` for compiler (`mips-linux-gnu-gcc`), objcopy, and objdump resolution.

@@ -346,3 +346,8 @@
 
 - [x] Refactor toolchain lookup (`compiler`, `objcopy`, `objdump`) in `tools/ai_matcher.py` with `shutil.which`.
 - [x] Normalize sequential step comments in `tools/test_pipeline.py`.
+
+## CLI Dashboard Dynamic Cycling & Status Overrides (v0.73.0)
+
+- [x] Implement `cycle_target_game` and status parameter overrides in `tools/mparty_cli.py`.
+- [x] Add unit tests in `tools/test_mparty_cli.py`.
