@@ -683,4 +683,26 @@ assert(stub35.includes('Hardware MMIO: SP_DMA_BUSY_REG, SP_DRAM_ADDR_REG, SP_RD_
     'Expected SP hardware registers in stub comments');
 console.log('[OK] Test 35: Signal Processor (SP) hardware registers passed.');
 
+// Test 36: Display Processor Span (DPS) hardware registers
+const dpsTestAsm = `
+    lui $t0, 0xA420
+    lw $v0, 0x0000($t0)
+    sw $a0, 0x0004($t0)
+    sw $a1, 0x0008($t0)
+    sw $a2, 0x000C($t0)
+    jr $ra
+    nop
+`;
+
+const res36 = analyzeAsmBody(dpsTestAsm);
+assert(res36.mmioAccesses.includes('DPS_TBIST_REG'), 'Expected DPS_TBIST_REG (0xA4200000)');
+assert(res36.mmioAccesses.includes('DPS_TEST_MODE_REG'), 'Expected DPS_TEST_MODE_REG (0xA4200004)');
+assert(res36.mmioAccesses.includes('DPS_BUFTEST_ADDR_REG'), 'Expected DPS_BUFTEST_ADDR_REG (0xA4200008)');
+assert(res36.mmioAccesses.includes('DPS_BUFTEST_DATA_REG'), 'Expected DPS_BUFTEST_DATA_REG (0xA420000C)');
+
+const stub36 = generateCStub('dps_bist_test', res36, 'rdp', false);
+assert(stub36.includes('Hardware MMIO: DPS_BUFTEST_ADDR_REG, DPS_BUFTEST_DATA_REG, DPS_TBIST_REG, DPS_TEST_MODE_REG'),
+    'Expected DPS hardware registers in stub comments');
+console.log('[OK] Test 36: Display Processor Span (DPS) hardware registers passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.0.0]
+### Added
+- Expanded Display Processor Span (DPS) hardware register mappings in `tools/c_stubber.js` (`DPS_TEST_MODE_REG`, `DPS_BUFTEST_ADDR_REG`, `DPS_BUFTEST_DATA_REG`).
+- Added Unit Test 36 in `tools/test_c_stubber.js` (36/36 tests passing).
+- Milestone v1.0.0 release: full hardware MMIO register coverage across SP, DPC, DPS, MI, VI, AI, PI, RI, and SI interfaces, combined with complete multi-title splat profiles, modular assembly disassembly, LLM-driven AI matching, and single-page consolidated web dashboard with system tray management.
+
 ## [0.99.0]
 ### Added
 - Expanded Signal Processor (SP) interface hardware MMIO registers in `tools/c_stubber.js` (`SP_DRAM_ADDR_REG`, `SP_RD_LEN_REG`, `SP_WR_LEN_REG`, `SP_DMA_FULL_REG`, `SP_DMA_BUSY_REG`, `SP_SEMAPHORE_REG`, `SP_IBIST_REG`).

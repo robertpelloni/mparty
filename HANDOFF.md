@@ -188,11 +188,12 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 
 ### Verification Status
 - `python3 tools/verify_architecture.py`: **PASS** (all 17 required files and 4 directories verified)
-- `python3 tools/test_validation_layer.py`: **PASS** (5/5 tests pass)
-- `python3 tools/test_pipeline.py`: **PASS** (all 11 integration steps: architecture, validation layers, AI loop, AI matcher, C stubber unit tests, multi-title splat tests, centralized CLI tests, prototype header assertions, and live mock disassembly/stubbing pass)
+- `python3 tools/test_validation_layer.py`: **PASS** (6/6 tests pass)
+- `python3 tools/test_pipeline.py`: **PASS** (all 12 integration steps: architecture, validation layers, AI loop, AI matcher, C stubber unit tests, multi-title splat tests, centralized CLI tests, prototype header assertions, and live mock disassembly/stubbing pass)
 - `python3 tools/test_ai_matcher.py`: **PASS** (all 3 unit tests pass)
-- `python3 tools/test_generate_splat.py`: **PASS** (all 3 multi-title test suites pass)
-- `python3 tools/test_mparty_cli.py`: **PASS** (all 3 CLI test suites pass)
-- `node tools/test_c_stubber.js`: **PASS** (all 15 pattern recognition, recursive non-matching stubbing, gp relocations, batch statistics, stack args, unsigned types, struct inference, float64, MMIO, and GLOBAL_ASM tests pass)
+- `python3 tools/test_generate_splat.py`: **PASS** (all 4 multi-title test suites pass)
+- `python3 tools/test_disassemble.py`: **PASS** (all 6 disassembly test suites pass)
+- `python3 tools/test_mparty_cli.py`: **PASS** (all 5 CLI test suites pass)
+- `node tools/test_c_stubber.js`: **PASS** (all 36 pattern recognition, recursive non-matching stubbing, gp/TLS/PIC relocations, batch statistics, stack args, unsigned types, struct/float pointer inference, const qualifiers, unaligned memory access, leaf synthesis, COP0 registers, and comprehensive MMIO SP/DPC/DPS/MI/VI/AI/PI/RI/SI tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 7 tests pass)
-- Next.js build & Playwright integration suites: **PASS**
+- Next.js build & Playwright integration suites: **PASS** (32/32 tests pass)

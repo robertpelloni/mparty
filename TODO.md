@@ -492,3 +492,9 @@
 
 - [x] Add Signal Processor (SP) DMA and status register mappings in `tools/c_stubber.js`.
 - [x] Add Unit Test 35 in `tools/test_c_stubber.js` (35/35 unit tests passing).
+
+## DPS Hardware MMIO Register Expansion (v1.0.0)
+
+- [x] Add Display Processor Span (DPS) register mappings in `tools/c_stubber.js` (`DPS_TEST_MODE_REG`, `DPS_BUFTEST_ADDR_REG`, `DPS_BUFTEST_DATA_REG`).
+- [x] Add Unit Test 36 in `tools/test_c_stubber.js` (36/36 unit tests passing).
+- [x] Milestone v1.0.0 completion: comprehensive hardware register mapping, full test coverage across Python/Node/Playwright, complete multi-title profiles, and single-page web dashboard.
