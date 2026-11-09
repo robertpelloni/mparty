@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [1.0.1]
+### Added
+- Added extraction summary metrics to `run_splat` in `tools/disassemble.py` reporting total functions split into `asm/nonmatchings`.
+- Added `--extract-file` standalone CLI flag to `tools/disassemble.py` allowing targeted non-matching splitting from single assembly files.
+- Added `test_run_splat_extract_nonmatchings_statistics` in `tools/test_disassemble.py` (7/7 unit tests passing).
+
 ## [1.0.0]
 ### Added
 - Expanded Display Processor Span (DPS) hardware register mappings in `tools/c_stubber.js` (`DPS_TEST_MODE_REG`, `DPS_BUFTEST_ADDR_REG`, `DPS_BUFTEST_DATA_REG`).

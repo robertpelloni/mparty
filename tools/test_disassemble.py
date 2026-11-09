@@ -134,5 +134,29 @@ options:
         self.assertIn(".end func_with_end", content)
         self.assertNotIn("0xCAFEBABE", content)
 
+    def test_run_splat_extract_nonmatchings_statistics(self):
+        from disassemble import run_splat
+        asm_dir = os.path.join(self.tmpdir, "asm")
+        os.makedirs(asm_dir, exist_ok=True)
+        sample_asm = os.path.join(asm_dir, "sample.s")
+        with open(sample_asm, "w") as f:
+            f.write("""glabel sample_fn1
+    jr $ra
+    nop
+
+glabel sample_fn2
+    jr $ra
+    nop
+""")
+        fake_yaml = os.path.join(self.tmpdir, "splat.yaml")
+        with open(fake_yaml, "w") as f:
+            f.write("name: test\n")
+
+        nm_dir = os.path.join(self.tmpdir, "nonmatchings")
+        total = run_splat(fake_yaml, asm_dir=asm_dir, nonmatchings_dir=nm_dir)
+        self.assertEqual(total, 2)
+        self.assertTrue(os.path.exists(os.path.join(nm_dir, "sample", "sample_fn1.s")))
+        self.assertTrue(os.path.exists(os.path.join(nm_dir, "sample", "sample_fn2.s")))
+
 if __name__ == "__main__":
     unittest.main()

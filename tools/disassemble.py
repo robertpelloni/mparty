@@ -129,6 +129,7 @@ def run_splat(yaml_config, asm_dir=None, nonmatchings_dir=None):
     os.makedirs(nm_dir, exist_ok=True)
     asm_dir = effective_asm_dir
 
+    total_extracted = 0
     if os.path.exists(asm_dir):
         for root, dirs, files in os.walk(asm_dir):
             # Do not extract already extracted nonmatchings files
@@ -139,15 +140,26 @@ def run_splat(yaml_config, asm_dir=None, nonmatchings_dir=None):
                     full_path = os.path.join(root, file)
                     rel_dir = os.path.relpath(root, asm_dir)
                     target_root = nm_dir if rel_dir == '.' else os.path.join(nm_dir, rel_dir)
-                    extract_nonmatchings_from_file(full_path, target_root)
+                    extracted = extract_nonmatchings_from_file(full_path, target_root)
+                    total_extracted += len(extracted)
+
+    print(f"Non-matching extraction complete: {total_extracted} functions split into {nm_dir}")
+    return total_extracted
 
 def main():
     parser = argparse.ArgumentParser(description="Orchestrate ROM disassembly using splat.")
     parser.add_argument("yaml_config", nargs='?', default="splat.yaml", help="Path to splat.yaml config.")
     parser.add_argument("--asm-dir", default=None, help="Root directory containing disassembled assembly.")
     parser.add_argument("--nonmatchings-dir", default=None, help="Root directory for extracted non-matching functions.")
+    parser.add_argument("--extract-file", default=None, help="Directly extract nonmatching functions from a single assembly file.")
 
     args = parser.parse_args()
+
+    if args.extract_file:
+        target_dir = args.nonmatchings_dir or "asm/nonmatchings"
+        extracted = extract_nonmatchings_from_file(args.extract_file, target_dir)
+        print(f"Extracted {len(extracted)} functions from {args.extract_file}")
+        return
 
     create_directories()
     run_splat(args.yaml_config, asm_dir=args.asm_dir, nonmatchings_dir=args.nonmatchings_dir)

@@ -498,3 +498,9 @@
 - [x] Add Display Processor Span (DPS) register mappings in `tools/c_stubber.js` (`DPS_TEST_MODE_REG`, `DPS_BUFTEST_ADDR_REG`, `DPS_BUFTEST_DATA_REG`).
 - [x] Add Unit Test 36 in `tools/test_c_stubber.js` (36/36 unit tests passing).
 - [x] Milestone v1.0.0 completion: comprehensive hardware register mapping, full test coverage across Python/Node/Playwright, complete multi-title profiles, and single-page web dashboard.
+
+## Disassembly Non-matching Extraction Metrics & CLI (v1.0.1)
+
+- [x] Add extraction count summary metrics to `run_splat` in `tools/disassemble.py`.
+- [x] Add `--extract-file` CLI option to `tools/disassemble.py` for standalone function splitting.
+- [x] Add `test_run_splat_extract_nonmatchings_statistics` in `tools/test_disassemble.py` (7/7 tests passing).
