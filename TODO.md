@@ -472,3 +472,8 @@
 
 - [x] Synthesize floating-point trivial returns in `tools/c_stubber.js` (`return f12;`, `return 0.0f;`).
 - [x] Add Unit Test 31 in `tools/test_c_stubber.js` (31/31 unit tests passing).
+
+## Bitwise & Shift Trivial Leaf Return Synthesis (v0.96.0)
+
+- [x] Synthesize bitwise/shift trivial returns in `tools/c_stubber.js` (`return a0 & 0xFF;`, `return a0 << 2;`).
+- [x] Add Unit Test 32 in `tools/test_c_stubber.js` (32/32 unit tests passing).

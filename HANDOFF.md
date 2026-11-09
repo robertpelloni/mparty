@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.95.0 (tracked in `VERSION.md`)
+- **Version:** v0.96.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Floating-Point Trivial Leaf Return Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Bitwise & Shift Trivial Leaf Return Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Added bitwise and shift trivial leaf return expression synthesis (`andi`, `ori`, `xori`, `sll`, `sra`, `srl`) in `tools/c_stubber.js` (e.g. `return a0 & 0xFF;`, `return a0 << 2;`).
+   - Added Unit Test 32 in `tools/test_c_stubber.js` (32/32 tests passing).
+2. **Floating-Point Trivial Leaf Return Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Added floating-point return expression synthesis (`return f12;`, `return 0.0f;`, `return 0.0;`) for trivial float and double leaf functions in `tools/c_stubber.js`.
    - Added Unit Test 31 in `tools/test_c_stubber.js` (31/31 tests passing).
 2. **Function Closing Directive Recognition (`tools/disassemble.py` & `tools/c_stubber.js`):**

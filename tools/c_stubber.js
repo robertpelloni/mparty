@@ -329,6 +329,21 @@ function analyzeAsmBody(body) {
                     }
                 } else if (opcode === 'li') {
                     trivialReturnExpr = tokens[2];
+                } else if (opcode === 'andi' && tokens[2] && tokens[3]) {
+                    const srcArg = tokens[2].replace('$', '');
+                    trivialReturnExpr = `${srcArg} & ${tokens[3]}`;
+                } else if (opcode === 'ori' && tokens[2] && tokens[3]) {
+                    const srcArg = tokens[2].replace('$', '');
+                    trivialReturnExpr = `${srcArg} | ${tokens[3]}`;
+                } else if (opcode === 'xori' && tokens[2] && tokens[3]) {
+                    const srcArg = tokens[2].replace('$', '');
+                    trivialReturnExpr = `${srcArg} ^ ${tokens[3]}`;
+                } else if (opcode === 'sll' && tokens[2] && tokens[3]) {
+                    const srcArg = tokens[2].replace('$', '');
+                    trivialReturnExpr = `${srcArg} << ${tokens[3]}`;
+                } else if ((opcode === 'sra' || opcode === 'srl') && tokens[2] && tokens[3]) {
+                    const srcArg = tokens[2].replace('$', '');
+                    trivialReturnExpr = `${srcArg} >> ${tokens[3]}`;
                 }
                 // Check if $v0 is loaded/moved from a pointer parameter or symbol offset
                 if (opcode === 'move' && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {

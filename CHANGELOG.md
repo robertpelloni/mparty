@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.96.0]
+### Added
+- Added bitwise and shift trivial leaf return expression synthesis (`andi`, `ori`, `xori`, `sll`, `sra`, `srl`) in `tools/c_stubber.js` (e.g. `return a0 & 0xFF;`, `return a0 << 2;`).
+- Added Unit Test 32 in `tools/test_c_stubber.js` (32/32 tests passing).
+
 ## [0.95.0]
 ### Added
 - Added floating-point return expression synthesis (`return f12;`, `return 0.0f;`, `return 0.0;`) for trivial float and double leaf functions in `tools/c_stubber.js`.

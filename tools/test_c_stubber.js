@@ -589,4 +589,29 @@ const stub31Double = generateCStub('double_identity', res31Double, 'math', true)
 assert(stub31Double.includes('return f12;'), 'Expected direct return f12; body in generated double stub');
 console.log('[OK] Test 31: Floating-point trivial leaf return expression synthesis passed.');
 
+// Test 32: Bitwise and shift trivial leaf return expression synthesis
+const bitwiseAndAsm = `
+    andi $v0, $a0, 0xFF
+    jr $ra
+    nop
+`;
+
+const res32And = analyzeAsmBody(bitwiseAndAsm);
+assert.strictEqual(res32And.isTrivialLeaf, true, 'Expected isTrivialLeaf true');
+assert.strictEqual(res32And.trivialReturnExpr, 'a0 & 0xFF', 'Expected trivialReturnExpr a0 & 0xFF');
+const stub32And = generateCStub('mask_low_byte', res32And, 'util', true);
+assert(stub32And.includes('return a0 & 0xFF;'), 'Expected direct return a0 & 0xFF; in generated stub');
+
+const shiftLeftAsm = `
+    sll $v0, $a0, 2
+    jr $ra
+    nop
+`;
+
+const res32Shift = analyzeAsmBody(shiftLeftAsm);
+assert.strictEqual(res32Shift.trivialReturnExpr, 'a0 << 2', 'Expected trivialReturnExpr a0 << 2');
+const stub32Shift = generateCStub('shift_words', res32Shift, 'util', true);
+assert(stub32Shift.includes('return a0 << 2;'), 'Expected direct return a0 << 2; in generated stub');
+console.log('[OK] Test 32: Bitwise and shift trivial leaf return expression synthesis passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');
