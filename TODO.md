@@ -418,3 +418,9 @@
 - [x] Detect unaligned load/store instructions (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`) in `tools/c_stubber.js`.
 - [x] Add `hasUnalignedAccess` tracking and comment annotations (`Features: Unaligned Memory Access (lwl/lwr/swl/swr)`).
 - [x] Add Unit Test 22 in `tools/test_c_stubber.js` (22/22 unit tests passing).
+
+## Resilient Non-Matching Error Handling & Diagnostics (v0.86.0)
+
+- [x] Add function-level try-catch error recovery in `tools/c_stubber.js`.
+- [x] Track detailed warnings (`stats.warnings`) and preserve `#pragma GLOBAL_ASM` generation.
+- [x] Add Unit Test 23 in `tools/test_c_stubber.js` (23/23 unit tests passing).

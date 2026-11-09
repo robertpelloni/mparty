@@ -389,4 +389,38 @@ assert(stub22.includes('Features: Unaligned Memory Access (lwl/lwr/swl/swr)'),
     'Expected Unaligned Memory Access annotation in comments');
 console.log('[OK] Test 22: Unaligned memory access instructions and annotation passed.');
 
+// Test 23: Resilient error reporting and #pragma GLOBAL_ASM generation during malformed/edge-case stubs
+const tempErrAsmDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_err_asm_'));
+const tempErrSrcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_err_src_'));
+
+try {
+    const errAsmFile = path.join(tempErrAsmDir, 'malformed.s');
+    fs.writeFileSync(errAsmFile, `
+glabel func_empty_body
+
+glabel func_edge_case
+    addiu $sp, $sp, -0x10
+    jr $ra
+    nop
+`);
+
+    const stats = processDirectory(tempErrAsmDir, tempErrSrcDir);
+    assert.strictEqual(stats.processedFiles.length, 1, 'Expected 1 processed file');
+    assert.strictEqual(stats.totalFunctions, 2, 'Expected 2 functions parsed');
+    assert(stats.warningsCount > 0, 'Expected warnings from empty body function');
+    assert(stats.warnings && stats.warnings.length > 0, 'Expected detailed warnings list');
+
+    const generatedC = fs.readFileSync(path.join(tempErrSrcDir, 'malformed.c'), 'utf8');
+    assert(generatedC.includes('#pragma GLOBAL_ASM("asm/nonmatchings/malformed/func_empty_body.s")'),
+        'Expected GLOBAL_ASM fallback for func_empty_body despite empty body');
+    assert(generatedC.includes('#pragma GLOBAL_ASM("asm/nonmatchings/malformed/func_edge_case.s")'),
+        'Expected GLOBAL_ASM fallback for func_edge_case');
+    assert(generatedC.includes('Parse Warnings: Empty or invalid assembly body provided'),
+        'Expected parse warning annotation in comment');
+    console.log('[OK] Test 23: Resilient error reporting and #pragma GLOBAL_ASM generation passed.');
+} finally {
+    fs.rmSync(tempErrAsmDir, { recursive: true, force: true });
+    fs.rmSync(tempErrSrcDir, { recursive: true, force: true });
+}
+
 console.log('\nAll c_stubber tests passed successfully!');

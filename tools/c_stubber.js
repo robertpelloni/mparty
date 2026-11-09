@@ -617,10 +617,40 @@ function processAsmFile(asmFilePath, srcDir, stats = null, nonmatchingsPrefix = 
 
     let fileHasWarnings = false;
     functions.forEach(fn => {
-        const analysis = analyzeAsmBody(fn.body);
+        let analysis;
+        try {
+            analysis = analyzeAsmBody(fn.body);
+        } catch (err) {
+            analysis = {
+                returnType: 'void',
+                params: 'void',
+                isLeaf: false,
+                hasJumpTable: false,
+                hasLoop: false,
+                hasUnalignedAccess: false,
+                isBooleanV0: false,
+                mmioAccesses: [],
+                cop0Registers: [],
+                rodataSymbols: [],
+                rodataFloats: [],
+                calledFunctions: [],
+                globalDataReads: [],
+                globalDataWrites: [],
+                savedRegisters: [],
+                stackSize: 0,
+                parseErrors: [`Function ${fn.name}: Unexpected analysis failure: ${err.message}`]
+            };
+        }
+
         if (analysis.parseErrors && analysis.parseErrors.length > 0) {
             fileHasWarnings = true;
-            if (stats) stats.warningsCount += analysis.parseErrors.length;
+            if (stats) {
+                stats.warningsCount += analysis.parseErrors.length;
+                if (!stats.warnings) stats.warnings = [];
+                analysis.parseErrors.forEach(msg => {
+                    stats.warnings.push(`${path.basename(asmFilePath)}:${fn.name}: ${msg}`);
+                });
+            }
         }
         if (stats) stats.totalFunctions++;
         cContent += generateCStub(fn.name, analysis, baseName, true, nonmatchingsPrefix);
@@ -643,6 +673,7 @@ function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = fa
         skippedFiles: [],
         filesWithWarnings: 0,
         warningsCount: 0,
+        warnings: [],
         errors: []
     };
 

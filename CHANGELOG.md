@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.86.0]
+### Added
+- Enhanced `tools/c_stubber.js` with resilient function-level try-catch error recovery for non-matching assembly stubs.
+- Added detailed warning tracking (`stats.warnings`) and parse warning comment annotations (`Parse Warnings: ...`) in generated C stubs, ensuring uninterrupted `#pragma GLOBAL_ASM` generation even on malformed or edge-case assembly input.
+- Added Unit Test 23 in `tools/test_c_stubber.js` validating resilient warning reporting and `#pragma GLOBAL_ASM` output (23/23 tests passing).
+
 ## [0.85.0]
 ### Added
 - Added unaligned memory access instruction detection (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`) to `tools/c_stubber.js`.
