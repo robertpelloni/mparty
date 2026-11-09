@@ -429,3 +429,8 @@
 
 - [x] Infer `f32*` and `f64*` pointer argument types in `tools/c_stubber.js` based on `lwc1`/`swc1` and `ldc1`/`sdc1` memory operations.
 - [x] Add Unit Test 24 in `tools/test_c_stubber.js` (24/24 unit tests passing).
+
+## Const Qualifier Inferencing on Read-Only Pointers (v0.88.0)
+
+- [x] Infer `const` qualifiers for pointer parameters without memory store instructions in `tools/c_stubber.js`.
+- [x] Add Unit Test 25 in `tools/test_c_stubber.js` (25/25 unit tests passing).

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.88.0]
+### Added
+- Added `const` qualifier inferencing on read-only pointer parameters in `tools/c_stubber.js`, distinguishing read-only memory references (`const void*`, `const u8*`, `const f32*`, `const void* /* struct */`) from mutable stored pointer targets.
+- Added Unit Test 25 in `tools/test_c_stubber.js` validating `const` qualifier inference (25/25 tests passing).
+
 ## [0.87.0]
 ### Added
 - Refined float and double pointer parameter inferencing (`f32*`, `f64*`) in `tools/c_stubber.js` based on single- and double-precision floating-point memory operations (`lwc1`/`swc1` and `ldc1`/`sdc1`).

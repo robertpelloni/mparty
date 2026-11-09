@@ -83,7 +83,7 @@ assert.strictEqual(extracted[0].name, 'func_one');
 assert.strictEqual(extracted[1].name, 'func_two');
 console.log('[OK] Test 4: Multiple function extraction passed.');
 
-// Test 5: Pointer parameter inference from memory loads/stores
+// Test 5: Pointer parameter inference from memory loads/stores (read-only const vs mutable)
 const pointerAsm = `
     lw $t0, 0($a0)
     sw $t0, 4($a1)
@@ -93,7 +93,7 @@ const pointerAsm = `
 
 const res5 = analyzeAsmBody(pointerAsm);
 assert.strictEqual(res5.returnType, 'void');
-assert.strictEqual(res5.params, 'void* a0, void* a1', 'Expected pointer args void* a0, void* a1');
+assert.strictEqual(res5.params, 'const void* a0, void* a1', 'Expected pointer args const void* a0, void* a1');
 console.log('[OK] Test 5: Pointer parameter inference passed.');
 
 // Test 6: 64-bit integer return ($v0, $v1) and indirect jump table (switch)
@@ -434,10 +434,27 @@ const floatPtrAsm = `
 `;
 
 const res24 = analyzeAsmBody(floatPtrAsm);
-assert(res24.params.includes('f32* a0'), 'Expected f32* a0 parameter');
-assert(res24.params.includes('f64* a1'), 'Expected f64* a1 parameter');
-assert(res24.params.includes('f32* a2'), 'Expected f32* a2 parameter');
-assert(res24.params.includes('f64* a3'), 'Expected f64* a3 parameter');
+assert(res24.params.includes('const f32* a0'), 'Expected const f32* a0 parameter');
+assert(res24.params.includes('const f64* a1'), 'Expected const f64* a1 parameter');
+assert(res24.params.includes('f32* a2'), 'Expected mutable f32* a2 parameter');
+assert(res24.params.includes('f64* a3'), 'Expected mutable f64* a3 parameter');
 console.log('[OK] Test 24: Float and double pointer parameter inferencing passed.');
+
+// Test 25: Const qualifier inferencing on read-only pointer parameters
+const constPointerAsm = `
+    lw $t0, 0x0($a0)
+    lw $t1, 0x4($a0)
+    lbu $t2, 0($a1)
+    sw $t0, 0($a2)
+    jr $ra
+    nop
+`;
+
+const res25 = analyzeAsmBody(constPointerAsm);
+assert(res25.params.includes('const void* a0 /* struct */'), 'Expected const struct pointer for read-only multi-offset accesses');
+assert(res25.params.includes('const u8* a1'), 'Expected const u8* for read-only byte accesses');
+assert(res25.params.includes('void* a2'), 'Expected mutable void* for stored pointer target');
+assert(!res25.params.includes('const void* a2'), 'Stored pointer target a2 must not be const');
+console.log('[OK] Test 25: Const qualifier inferencing on read-only pointer parameters passed.');
 
 console.log('\nAll c_stubber tests passed successfully!');

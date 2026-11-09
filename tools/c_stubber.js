@@ -127,6 +127,7 @@ function analyzeAsmBody(body) {
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
     const pointerSubwordTypes = new Map(); // reg -> 'u8' | 's8' | 'u16' | 's16'
     const pointerFloatTypes = new Map(); // reg -> 'f32' | 'f64'
+    const pointerHasStores = new Set(); // reg -> accessed via store instruction
     const volatileMmioArgs = new Set(); // reg accessed with hardware MMIO base
     const cop0Registers = new Set();
     const savedRegisters = new Set();
@@ -326,6 +327,10 @@ function analyzeAsmBody(body) {
                 }
                 pointerOffsets.get(baseReg).add(offsetVal);
 
+                if (STORE_OPCODES.has(opcode)) {
+                    pointerHasStores.add(baseReg);
+                }
+
                 // Track subword load/store type granularity
                 if (opcode === 'lbu' || opcode === 'sb') {
                     pointerSubwordTypes.set(baseReg, 'u8');
@@ -436,18 +441,21 @@ function analyzeAsmBody(body) {
                     const offsets = pointerOffsets.get(reg);
                     const subType = pointerSubwordTypes.get(reg);
                     const floatType = pointerFloatTypes.get(reg);
+                    const isConst = !pointerHasStores.has(reg) && !volatileMmioArgs.has(reg);
+                    const constPrefix = isConst ? 'const ' : '';
+
                     if (volatileMmioArgs.has(reg)) {
                         params.push(`volatile u32* ${name}`);
                     } else if (offsets.size > 1) {
-                        params.push(`void* ${name} /* struct */`);
+                        params.push(`${constPrefix}void* ${name} /* struct */`);
                     } else if (subType) {
-                        params.push(`${subType}* ${name}`);
+                        params.push(`${constPrefix}${subType}* ${name}`);
                     } else if (floatType) {
-                        params.push(`${floatType}* ${name}`);
+                        params.push(`${constPrefix}${floatType}* ${name}`);
                     } else if (unsignedArgs.has(reg)) {
-                        params.push(`u8* ${name}`);
+                        params.push(`${constPrefix}u8* ${name}`);
                     } else {
-                        params.push(`void* ${name}`);
+                        params.push(`${constPrefix}void* ${name}`);
                     }
                 } else {
                     params.push(`${typeName} ${name}`);
