@@ -563,4 +563,30 @@ assert(!res30[0].body.includes('.data'), 'Body must not contain trailing data di
 assert(!res30[0].body.includes('0x12345678'), 'Body must not contain trailing data after .end');
 console.log('[OK] Test 30: Function boundary termination on .end / glabel_end passed.');
 
+// Test 31: Floating-point trivial leaf return expression synthesis
+const floatIdentityAsm = `
+    mov.s $f0, $f12
+    jr $ra
+    nop
+`;
+
+const res31 = analyzeAsmBody(floatIdentityAsm);
+assert.strictEqual(res31.returnType, 'f32', 'Expected returnType f32');
+assert.strictEqual(res31.trivialReturnExpr, 'f12', 'Expected trivialReturnExpr f12');
+const stub31 = generateCStub('float_identity', res31, 'math', true);
+assert(stub31.includes('return f12;'), 'Expected direct return f12; body in generated stub');
+
+const doubleIdentityAsm = `
+    mov.d $f0, $f12
+    jr $ra
+    nop
+`;
+
+const res31Double = analyzeAsmBody(doubleIdentityAsm);
+assert.strictEqual(res31Double.returnType, 'f64', 'Expected returnType f64');
+assert.strictEqual(res31Double.trivialReturnExpr, 'f12', 'Expected trivialReturnExpr f12 for double');
+const stub31Double = generateCStub('double_identity', res31Double, 'math', true);
+assert(stub31Double.includes('return f12;'), 'Expected direct return f12; body in generated double stub');
+console.log('[OK] Test 31: Floating-point trivial leaf return expression synthesis passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

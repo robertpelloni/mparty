@@ -348,7 +348,17 @@ function analyzeAsmBody(body) {
             if (tokens[1] === '$v1') usesV1 = true;
             if (tokens[1] === '$f0') {
                 usesF0 = true;
-                if (opcode.endsWith('.d')) usesDoubleF0 = true;
+                if (opcode.endsWith('.d')) {
+                    usesDoubleF0 = true;
+                }
+                // Check if $f0 is moved from $f12 or zeroed
+                if (opcode === 'mov.s' || opcode === 'mov.d') {
+                    if (tokens[2] === '$f12') {
+                        trivialReturnExpr = 'f12';
+                    }
+                } else if (opcode === 'mtc1' && tokens[2] === '$zero') {
+                    trivialReturnExpr = opcode.endsWith('.d') ? '0.0' : '0.0f';
+                }
             }
         }
 

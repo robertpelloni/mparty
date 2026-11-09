@@ -467,3 +467,8 @@
 
 - [x] Support `.end` and `glabel_end` directives in `tools/disassemble.py` and `tools/c_stubber.js`.
 - [x] Add Unit Test 30 in `tools/test_c_stubber.js` and test in `tools/test_disassemble.py`.
+
+## Floating-Point Trivial Leaf Return Synthesis (v0.95.0)
+
+- [x] Synthesize floating-point trivial returns in `tools/c_stubber.js` (`return f12;`, `return 0.0f;`).
+- [x] Add Unit Test 31 in `tools/test_c_stubber.js` (31/31 unit tests passing).

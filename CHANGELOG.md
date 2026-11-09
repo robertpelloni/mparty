@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.95.0]
+### Added
+- Added floating-point return expression synthesis (`return f12;`, `return 0.0f;`, `return 0.0;`) for trivial float and double leaf functions in `tools/c_stubber.js`.
+- Added Unit Test 31 in `tools/test_c_stubber.js` (31/31 tests passing).
+
 ## [0.94.0]
 ### Added
 - Added function closing directive recognition (`.end <func>`, `glabel_end <func>`) to `tools/disassemble.py` and `tools/c_stubber.js`, ensuring clean function boundary termination and preventing trailing module data/directives from bleeding into function bodies.

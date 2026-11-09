@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.94.0 (tracked in `VERSION.md`)
+- **Version:** v0.95.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Function Closing Directive Recognition (`tools/disassemble.py` & `tools/c_stubber.js`):**
+1. **Floating-Point Trivial Leaf Return Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Added floating-point return expression synthesis (`return f12;`, `return 0.0f;`, `return 0.0;`) for trivial float and double leaf functions in `tools/c_stubber.js`.
+   - Added Unit Test 31 in `tools/test_c_stubber.js` (31/31 tests passing).
+2. **Function Closing Directive Recognition (`tools/disassemble.py` & `tools/c_stubber.js`):**
    - Added support for `.end <func>` and `glabel_end <func>` closing directives in `tools/disassemble.py` and `tools/c_stubber.js`.
    - Prevents non-code trailing module data/directives from bleeding into function bodies during non-matching function splitting.
    - Added Unit Test 30 in `tools/test_c_stubber.js` and test in `tools/test_disassemble.py` (all tests passing).
