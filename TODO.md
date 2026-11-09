@@ -445,3 +445,9 @@
 - [x] Infer `void*` return types in `tools/c_stubber.js` when `$v0` holds pointer addresses.
 - [x] Emit `return NULL;` fallback stubs in non-matching C files.
 - [x] Add Unit Test 27 in `tools/test_c_stubber.js` (27/27 unit tests passing).
+
+## Trivial Leaf Function Synthesis (v0.91.0)
+
+- [x] Detect trivial return expressions in `tools/c_stubber.js` (`isTrivialLeaf`, `trivialReturnExpr`).
+- [x] Synthesize direct `return <expr>;` statements in C stubs.
+- [x] Add Unit Test 28 in `tools/test_c_stubber.js` (28/28 unit tests passing).

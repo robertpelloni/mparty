@@ -498,4 +498,29 @@ assert(stub27.includes('void* get_struct_subfield('), 'Expected void* return sig
 assert(stub27.includes('return NULL;'), 'Expected return NULL; fallback in C stub');
 console.log('[OK] Test 27: Pointer return type inference and return NULL; stub generation passed.');
 
+// Test 28: Trivial leaf function detection and direct return synthesis
+const trivialGetterAsm = `
+    move $v0, $a0
+    jr $ra
+    nop
+`;
+
+const res28 = analyzeAsmBody(trivialGetterAsm);
+assert.strictEqual(res28.isTrivialLeaf, true, 'Expected isTrivialLeaf true');
+assert.strictEqual(res28.trivialReturnExpr, 'a0', 'Expected trivialReturnExpr a0');
+const stub28 = generateCStub('trivial_identity', res28, 'core', true);
+assert(stub28.includes('return a0;'), 'Expected direct return a0; body in generated stub');
+
+const trivialConstAsm = `
+    li $v0, 42
+    jr $ra
+    nop
+`;
+
+const res28Const = analyzeAsmBody(trivialConstAsm);
+assert.strictEqual(res28Const.trivialReturnExpr, '42', 'Expected trivialReturnExpr 42');
+const stub28Const = generateCStub('get_constant_val', res28Const, 'core', true);
+assert(stub28Const.includes('return 42;'), 'Expected direct return 42; body in generated stub');
+console.log('[OK] Test 28: Trivial leaf function detection and direct return synthesis passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

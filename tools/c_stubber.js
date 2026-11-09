@@ -119,6 +119,7 @@ function analyzeAsmBody(body) {
     let hasLoop = false;
     let hasUnalignedAccess = false;
     let stackSize = 0;
+    let trivialReturnExpr = null; // e.g. "a0", "0", "NULL"
 
     let f12IsDouble = false;
     let f14IsDouble = false;
@@ -306,6 +307,16 @@ function analyzeAsmBody(body) {
                 if (['slt', 'slti', 'sltu', 'sltiu'].includes(opcode)) {
                     isBooleanV0 = true;
                 }
+                // Check if $v0 is loaded/moved from a parameter or zero
+                if (opcode === 'move' || opcode === 'or' || opcode === 'addu') {
+                    if (tokens[2] === '$zero' || tokens[3] === '$zero') {
+                        trivialReturnExpr = '0';
+                    } else if (['$a0', '$a1', '$a2', '$a3'].includes(tokens[2])) {
+                        trivialReturnExpr = tokens[2].replace('$', '');
+                    }
+                } else if (opcode === 'li') {
+                    trivialReturnExpr = tokens[2];
+                }
                 // Check if $v0 is loaded/moved from a pointer parameter or symbol offset
                 if (opcode === 'move' && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {
                     if (pointerOffsets.has(tokens[2])) {
@@ -487,10 +498,14 @@ function analyzeAsmBody(body) {
         }
     }
 
+    const isTrivialLeaf = !hasJal && stackSize === 0 && !hasLoop && !hasJumpTable && savedRegisters.size === 0;
+
     return {
         returnType,
         params: params.join(', '),
         isLeaf: !hasJal,
+        isTrivialLeaf,
+        trivialReturnExpr: isTrivialLeaf ? trivialReturnExpr : null,
         hasJumpTable,
         hasLoop,
         hasUnalignedAccess,
@@ -598,7 +613,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
         const prefix = nonmatchingsPrefix || 'asm/nonmatchings';
         out += `#ifdef NON_MATCHING\n`;
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
-        if (analysis.returnType === 's64') {
+        if (analysis.trivialReturnExpr !== null && analysis.trivialReturnExpr !== undefined) {
+            out += `    return ${analysis.trivialReturnExpr};\n`;
+        } else if (analysis.returnType === 's64') {
             out += `    return 0LL;\n`;
         } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
             out += `    return 0;\n`;
@@ -617,7 +634,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
         out += `#endif\n\n`;
     } else {
         out += `${analysis.returnType} ${funcName}(${analysis.params}) {\n`;
-        if (analysis.returnType === 's64') {
+        if (analysis.trivialReturnExpr !== null && analysis.trivialReturnExpr !== undefined) {
+            out += `    return ${analysis.trivialReturnExpr};\n`;
+        } else if (analysis.returnType === 's64') {
             out += `    return 0LL;\n`;
         } else if (analysis.returnType === 's32' || analysis.returnType === 'u32') {
             out += `    return 0;\n`;

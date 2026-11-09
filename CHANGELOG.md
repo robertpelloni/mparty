@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.91.0]
+### Added
+- Implemented trivial leaf function detection and direct C stub body synthesis in `tools/c_stubber.js` (e.g. `return a0;`, `return 42;`, `return 0;`).
+- Added Unit Test 28 in `tools/test_c_stubber.js` (28/28 tests passing).
+
 ## [0.90.0]
 ### Added
 - Added pointer return type inferencing (`void*`) in `tools/c_stubber.js` when `$v0` is loaded or calculated from pointer arguments or symbol addresses.

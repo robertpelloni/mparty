@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.90.0 (tracked in `VERSION.md`)
+- **Version:** v0.91.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Pointer Return Type Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Trivial Leaf Function Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Implemented trivial leaf function detection and direct C stub body synthesis in `tools/c_stubber.js` (e.g. `return a0;`, `return 42;`, `return 0;`).
+   - Added Unit Test 28 in `tools/test_c_stubber.js` (28/28 tests passing).
+2. **Pointer Return Type Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Implemented pointer return type inference (`void*`) in `tools/c_stubber.js` when `$v0` is loaded or calculated from pointer arguments or symbol addresses.
    - Added `return NULL;` fallback code generation for pointer return signatures in `#ifdef NON_MATCHING` C stubs.
    - Added Unit Test 27 in `tools/test_c_stubber.js` (27/27 tests passing).
