@@ -483,4 +483,19 @@ assert.strictEqual(extractedDirectives[1].name, 'func_ent');
 assert.strictEqual(extractedDirectives[2].name, 'func_glabel');
 console.log('[OK] Test 26: Function symbol directives (.globl, .global, .ent, glabel) passed.');
 
+// Test 27: Pointer return type inference and return NULL; stub generation
+const ptrReturnAsm = `
+    lw $t0, 0($a0)
+    addiu $v0, $a0, 0x10
+    jr $ra
+    nop
+`;
+
+const res27 = analyzeAsmBody(ptrReturnAsm);
+assert.strictEqual(res27.returnType, 'void*', 'Expected returnType void*');
+const stub27 = generateCStub('get_struct_subfield', res27, 'core', true);
+assert(stub27.includes('void* get_struct_subfield('), 'Expected void* return signature');
+assert(stub27.includes('return NULL;'), 'Expected return NULL; fallback in C stub');
+console.log('[OK] Test 27: Pointer return type inference and return NULL; stub generation passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

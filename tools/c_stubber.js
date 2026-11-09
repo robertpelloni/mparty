@@ -111,6 +111,8 @@ function analyzeAsmBody(body) {
     let usesF0 = false;
     let usesDoubleF0 = false;
     let isBooleanV0 = false;
+    let isPointerV0 = false;
+    let pointerV0Type = 'void*';
     let isUnsignedV0 = false;
     let hasJal = false;
     let hasJumpTable = false;
@@ -304,6 +306,20 @@ function analyzeAsmBody(body) {
                 if (['slt', 'slti', 'sltu', 'sltiu'].includes(opcode)) {
                     isBooleanV0 = true;
                 }
+                // Check if $v0 is loaded/moved from a pointer parameter or symbol offset
+                if (opcode === 'move' && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {
+                    if (pointerOffsets.has(tokens[2])) {
+                        isPointerV0 = true;
+                    }
+                }
+                if ((opcode === 'addiu' || opcode === 'addu') && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {
+                    if (pointerOffsets.has(tokens[2])) {
+                        isPointerV0 = true;
+                    }
+                }
+                if (opcode === 'la' || (opcode === 'addiu' && line.includes('%lo('))) {
+                    isPointerV0 = true;
+                }
             }
             if (tokens[1] === '$v1') usesV1 = true;
             if (tokens[1] === '$f0') {
@@ -411,7 +427,11 @@ function analyzeAsmBody(body) {
     } else if (usesV0 && usesV1) {
         returnType = 's64';
     } else if (usesV0) {
-        returnType = isUnsignedV0 ? 'u32' : 's32';
+        if (isPointerV0) {
+            returnType = pointerV0Type;
+        } else {
+            returnType = isUnsignedV0 ? 'u32' : 's32';
+        }
     }
 
     // Determine parameter list with struct and float precision analysis
@@ -586,6 +606,8 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
             out += `    return 0.0;\n`;
         } else if (analysis.returnType === 'f32') {
             out += `    return 0.0f;\n`;
+        } else if (analysis.returnType.endsWith('*')) {
+            out += `    return NULL;\n`;
         } else {
             out += `    // TODO: implement\n`;
         }
@@ -603,6 +625,8 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
             out += `    return 0.0;\n`;
         } else if (analysis.returnType === 'f32') {
             out += `    return 0.0f;\n`;
+        } else if (analysis.returnType.endsWith('*')) {
+            out += `    return NULL;\n`;
         } else {
             out += `    // TODO: implement\n`;
         }

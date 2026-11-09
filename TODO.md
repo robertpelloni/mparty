@@ -439,3 +439,9 @@
 
 - [x] Support `.globl` and `.ent` symbol directives in `tools/c_stubber.js` and `tools/disassemble.py`.
 - [x] Add Unit Test 26 in `tools/test_c_stubber.js` and update `tools/test_disassemble.py`.
+
+## Pointer Return Type Inferencing (v0.90.0)
+
+- [x] Infer `void*` return types in `tools/c_stubber.js` when `$v0` holds pointer addresses.
+- [x] Emit `return NULL;` fallback stubs in non-matching C files.
+- [x] Add Unit Test 27 in `tools/test_c_stubber.js` (27/27 unit tests passing).

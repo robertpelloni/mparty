@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.90.0]
+### Added
+- Added pointer return type inferencing (`void*`) in `tools/c_stubber.js` when `$v0` is loaded or calculated from pointer arguments or symbol addresses.
+- Added `return NULL;` fallback code generation for pointer return signatures in `#ifdef NON_MATCHING` C stubs.
+- Added Unit Test 27 in `tools/test_c_stubber.js` (27/27 tests passing).
+
 ## [0.89.0]
 ### Added
 - Expanded function symbol directive recognition in `tools/c_stubber.js` and `tools/disassemble.py` to support `.globl` and `.ent` in addition to `.global` and `glabel`.
