@@ -29,8 +29,15 @@ const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'b
 // Known N64 hardware MMIO register address ranges and names (0x04000000 physical / 0xA4000000 uncached)
 const MMIO_REGISTER_MAP = {
     '0xA4000000': 'SP_MEM_ADDR_REG',
+    '0xA4000004': 'SP_DRAM_ADDR_REG',
+    '0xA4000008': 'SP_RD_LEN_REG',
+    '0xA400000C': 'SP_WR_LEN_REG',
     '0xA4040000': 'SP_STATUS_REG',
+    '0xA4040004': 'SP_DMA_FULL_REG',
+    '0xA4040008': 'SP_DMA_BUSY_REG',
+    '0xA404000C': 'SP_SEMAPHORE_REG',
     '0xA4080000': 'SP_PC_REG',
+    '0xA4080004': 'SP_IBIST_REG',
     '0xA4100000': 'DPC_START_REG',
     '0xA4100004': 'DPC_END_REG',
     '0xA4100008': 'DPC_CURRENT_REG',

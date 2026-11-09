@@ -487,3 +487,8 @@
 
 - [x] Add RDRAM Interface and Display Processor Command register mappings in `tools/c_stubber.js`.
 - [x] Add Unit Test 34 in `tools/test_c_stubber.js` (34/34 unit tests passing).
+
+## SP Hardware MMIO Register Expansion (v0.99.0)
+
+- [x] Add Signal Processor (SP) DMA and status register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 35 in `tools/test_c_stubber.js` (35/35 unit tests passing).

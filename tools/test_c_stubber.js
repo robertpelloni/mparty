@@ -660,4 +660,27 @@ assert(stub34.includes('Hardware MMIO: DPC_END_REG, DPC_STATUS_REG, RI_REFRESH_R
     'Expected RI and DPC registers in stub comments');
 console.log('[OK] Test 34: RDRAM Interface (RI) and Display Processor Command (DPC) registers passed.');
 
+// Test 35: Signal Processor (SP) hardware registers
+const spDmaAsm = `
+    lui $t0, 0xA400
+    sw $a0, 0x0004($t0)
+    sw $a1, 0x0008($t0)
+    lui $t1, 0xA404
+    lw $v0, 0x0008($t1)
+    sw $zero, 0x000C($t1)
+    jr $ra
+    nop
+`;
+
+const res35 = analyzeAsmBody(spDmaAsm);
+assert(res35.mmioAccesses.includes('SP_DRAM_ADDR_REG'), 'Expected SP_DRAM_ADDR_REG (0xA4000004)');
+assert(res35.mmioAccesses.includes('SP_RD_LEN_REG'), 'Expected SP_RD_LEN_REG (0xA4000008)');
+assert(res35.mmioAccesses.includes('SP_DMA_BUSY_REG'), 'Expected SP_DMA_BUSY_REG (0xA4040008)');
+assert(res35.mmioAccesses.includes('SP_SEMAPHORE_REG'), 'Expected SP_SEMAPHORE_REG (0xA404000C)');
+
+const stub35 = generateCStub('sp_dma_exec', res35, 'rsp', false);
+assert(stub35.includes('Hardware MMIO: SP_DMA_BUSY_REG, SP_DRAM_ADDR_REG, SP_RD_LEN_REG, SP_SEMAPHORE_REG'),
+    'Expected SP hardware registers in stub comments');
+console.log('[OK] Test 35: Signal Processor (SP) hardware registers passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

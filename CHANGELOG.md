@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.99.0]
+### Added
+- Expanded Signal Processor (SP) interface hardware MMIO registers in `tools/c_stubber.js` (`SP_DRAM_ADDR_REG`, `SP_RD_LEN_REG`, `SP_WR_LEN_REG`, `SP_DMA_FULL_REG`, `SP_DMA_BUSY_REG`, `SP_SEMAPHORE_REG`, `SP_IBIST_REG`).
+- Added Unit Test 35 in `tools/test_c_stubber.js` (35/35 tests passing).
+
 ## [0.98.0]
 ### Added
 - Expanded RDRAM Interface (RI) and Display Processor Command (DPC) hardware register mappings in `tools/c_stubber.js` (`RI_CONFIG_REG`, `RI_CURRENT_LOAD_REG`, `RI_SELECT_REG`, `RI_REFRESH_REG`, `RI_LATENCY_REG`, `RI_RERROR_REG`, `RI_WERROR_REG`, `DPC_END_REG`, `DPC_CURRENT_REG`, `DPC_STATUS_REG`, `DPC_CLOCK_REG`, `DPC_BUFBUSY_REG`, `DPC_PIPEBUSY_REG`, `DPC_TMEM_REG`).
