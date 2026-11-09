@@ -6,10 +6,14 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.93.0 (tracked in `VERSION.md`)
+- **Version:** v0.94.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **TLS Relocation Recognition in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Function Closing Directive Recognition (`tools/disassemble.py` & `tools/c_stubber.js`):**
+   - Added support for `.end <func>` and `glabel_end <func>` closing directives in `tools/disassemble.py` and `tools/c_stubber.js`.
+   - Prevents non-code trailing module data/directives from bleeding into function bodies during non-matching function splitting.
+   - Added Unit Test 30 in `tools/test_c_stubber.js` and test in `tools/test_disassemble.py` (all tests passing).
+2. **TLS Relocation Recognition in C Stubber (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Added recognition for MIPS TLS relocations (`%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo`) in `tools/c_stubber.js`.
    - Implemented `tlsSymbols` tracking and `Thread-Local Symbols: ...` comment annotation in generated C stubs.
    - Added Unit Test 29 in `tools/test_c_stubber.js` (29/29 tests passing).

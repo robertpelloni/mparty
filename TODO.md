@@ -462,3 +462,8 @@
 - [x] Support `%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo` in `tools/c_stubber.js`.
 - [x] Track `tlsSymbols` and emit comment annotations.
 - [x] Add Unit Test 29 in `tools/test_c_stubber.js` (29/29 unit tests passing).
+
+## Function Closing Directive Recognition (v0.94.0)
+
+- [x] Support `.end` and `glabel_end` directives in `tools/disassemble.py` and `tools/c_stubber.js`.
+- [x] Add Unit Test 30 in `tools/test_c_stubber.js` and test in `tools/test_disassemble.py`.

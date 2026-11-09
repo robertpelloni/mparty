@@ -49,15 +49,25 @@ def extract_nonmatchings_from_file(asm_file, nonmatchings_root):
     current_lines = []
 
     for line in lines:
-        match = re.match(r'^(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)', line.strip())
-        if match:
+        start_match = re.match(r'^(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)', line.strip())
+        end_match = re.match(r'^(?:\.end|glabel_end)\s+([a-zA-Z0-9_]+)', line.strip())
+
+        if start_match:
             if current_func:
                 func_path = os.path.join(module_dir, f"{current_func}.s")
                 with open(func_path, 'w') as out:
                     out.writelines(current_lines)
                 functions.append(func_path)
-            current_func = match.group(1)
+            current_func = start_match.group(1)
             current_lines = [line]
+        elif end_match and current_func:
+            current_lines.append(line)
+            func_path = os.path.join(module_dir, f"{current_func}.s")
+            with open(func_path, 'w') as out:
+                out.writelines(current_lines)
+            functions.append(func_path)
+            current_func = None
+            current_lines = []
         elif current_func:
             current_lines.append(line)
 

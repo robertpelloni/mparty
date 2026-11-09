@@ -106,5 +106,33 @@ options:
         self.assertIsNone(asm_path)
         self.assertIsNone(nm_path)
 
+    def test_extract_nonmatchings_end_directive(self):
+        asm_content = """.ent func_with_end
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+.end func_with_end
+
+# Non-function data trailing in file
+.section .rodata
+.word 0xCAFEBABE
+"""
+        asm_path = os.path.join(self.tmpdir, "end_directive_code.s")
+        with open(asm_path, "w") as f:
+            f.write(asm_content)
+
+        nm_dir = os.path.join(self.tmpdir, "nonmatchings")
+        extracted = extract_nonmatchings_from_file(asm_path, nm_dir)
+
+        self.assertEqual(len(extracted), 1)
+        func_file = os.path.join(nm_dir, "end_directive_code", "func_with_end.s")
+        self.assertTrue(os.path.exists(func_file))
+
+        with open(func_file, "r") as f:
+            content = f.read()
+        self.assertIn(".ent func_with_end", content)
+        self.assertIn(".end func_with_end", content)
+        self.assertNotIn("0xCAFEBABE", content)
+
 if __name__ == "__main__":
     unittest.main()

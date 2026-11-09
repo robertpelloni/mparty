@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.94.0]
+### Added
+- Added function closing directive recognition (`.end <func>`, `glabel_end <func>`) to `tools/disassemble.py` and `tools/c_stubber.js`, ensuring clean function boundary termination and preventing trailing module data/directives from bleeding into function bodies.
+- Added Unit Test 30 in `tools/test_c_stubber.js` (30/30 tests passing) and unit test in `tools/test_disassemble.py` (6/6 tests passing).
+
 ## [0.93.0]
 ### Added
 - Added TLS thread-local relocation recognition (`%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo`) in `tools/c_stubber.js`.

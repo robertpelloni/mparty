@@ -549,16 +549,24 @@ function extractFunctionsFromAsm(code) {
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const match = /(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)/.exec(line);
+        const startMatch = /(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)/.exec(line);
+        const endMatch = /(?:\.end|glabel_end)\s+([a-zA-Z0-9_]+)/.exec(line);
 
-        if (match) {
+        if (startMatch) {
             if (currentFunc) {
                 functions.push({
                     name: currentFunc,
                     body: currentBody.join('\n')
                 });
             }
-            currentFunc = match[1];
+            currentFunc = startMatch[1];
+            currentBody = [];
+        } else if (endMatch && currentFunc) {
+            functions.push({
+                name: currentFunc,
+                body: currentBody.join('\n')
+            });
+            currentFunc = null;
             currentBody = [];
         } else if (currentFunc) {
             currentBody.push(line);

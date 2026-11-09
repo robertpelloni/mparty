@@ -543,4 +543,24 @@ const stub29 = generateCStub('sync_thread_context', res29, 'os', false);
 assert(stub29.includes('Thread-Local Symbols: g_CurrentThreadId, g_ThreadErrno'), 'Expected Thread-Local Symbols in comment');
 console.log('[OK] Test 29: TLS thread-local relocations and annotations passed.');
 
+// Test 30: Function boundary termination on .end / glabel_end directives
+const funcWithEndAsm = `
+.ent func_ended
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+.end func_ended
+
+# Trailing module data that must not leak into func_ended
+.data
+.word 0x12345678
+`;
+
+const res30 = extractFunctionsFromAsm(funcWithEndAsm);
+assert.strictEqual(res30.length, 1, 'Expected 1 extracted function');
+assert.strictEqual(res30[0].name, 'func_ended');
+assert(!res30[0].body.includes('.data'), 'Body must not contain trailing data directives after .end');
+assert(!res30[0].body.includes('0x12345678'), 'Body must not contain trailing data after .end');
+console.log('[OK] Test 30: Function boundary termination on .end / glabel_end passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');
