@@ -477,3 +477,8 @@
 
 - [x] Synthesize bitwise/shift trivial returns in `tools/c_stubber.js` (`return a0 & 0xFF;`, `return a0 << 2;`).
 - [x] Add Unit Test 32 in `tools/test_c_stubber.js` (32/32 unit tests passing).
+
+## PI/MI Hardware MMIO Register Expansion (v0.97.0)
+
+- [x] Add PI Cartridge DMA and MI Interrupt Mask register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 33 in `tools/test_c_stubber.js` (33/33 unit tests passing).

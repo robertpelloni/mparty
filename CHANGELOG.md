@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.97.0]
+### Added
+- Expanded Peripheral Interface (PI) and MIPS Interface (MI) hardware registers in `tools/c_stubber.js` (`PI_CART_ADDR_REG`, `PI_RD_LEN_REG`, `PI_WR_LEN_REG`, `PI_STATUS_REG`, `PI_BSD_DOM1_LAT_REG`, `PI_BSD_DOM1_PWD_REG`, `PI_BSD_DOM1_PGS_REG`, `PI_BSD_DOM1_RLS_REG`, `MI_VERSION_REG`, `MI_INTR_MASK_REG`).
+- Added Unit Test 33 in `tools/test_c_stubber.js` (33/33 tests passing).
+
 ## [0.96.0]
 ### Added
 - Added bitwise and shift trivial leaf return expression synthesis (`andi`, `ori`, `xori`, `sll`, `sra`, `srl`) in `tools/c_stubber.js` (e.g. `return a0 & 0xFF;`, `return a0 << 2;`).

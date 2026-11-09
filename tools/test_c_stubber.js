@@ -614,4 +614,27 @@ const stub32Shift = generateCStub('shift_words', res32Shift, 'util', true);
 assert(stub32Shift.includes('return a0 << 2;'), 'Expected direct return a0 << 2; in generated stub');
 console.log('[OK] Test 32: Bitwise and shift trivial leaf return expression synthesis passed.');
 
+// Test 33: Peripheral Interface (PI) and MIPS Interface (MI) hardware registers
+const piMiAsm = `
+    lui $t0, 0xA460
+    sw $a0, 0x0004($t0)
+    sw $a1, 0x000C($t0)
+    lw $v0, 0x0010($t0)
+    lui $t1, 0xA430
+    sw $zero, 0x000C($t1)
+    jr $ra
+    nop
+`;
+
+const res33 = analyzeAsmBody(piMiAsm);
+assert(res33.mmioAccesses.includes('PI_CART_ADDR_REG'), 'Expected PI_CART_ADDR_REG (0xA4600004)');
+assert(res33.mmioAccesses.includes('PI_WR_LEN_REG'), 'Expected PI_WR_LEN_REG (0xA460000C)');
+assert(res33.mmioAccesses.includes('PI_STATUS_REG'), 'Expected PI_STATUS_REG (0xA4600010)');
+assert(res33.mmioAccesses.includes('MI_INTR_MASK_REG'), 'Expected MI_INTR_MASK_REG (0xA430000C)');
+
+const stub33 = generateCStub('dma_read_cart', res33, 'dma', false);
+assert(stub33.includes('Hardware MMIO: MI_INTR_MASK_REG, PI_CART_ADDR_REG, PI_STATUS_REG, PI_WR_LEN_REG'),
+    'Expected PI and MI registers in stub comments');
+console.log('[OK] Test 33: Peripheral Interface (PI) and MIPS Interface (MI) hardware registers passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');
