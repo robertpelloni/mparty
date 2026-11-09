@@ -451,3 +451,8 @@
 - [x] Detect trivial return expressions in `tools/c_stubber.js` (`isTrivialLeaf`, `trivialReturnExpr`).
 - [x] Synthesize direct `return <expr>;` statements in C stubs.
 - [x] Add Unit Test 28 in `tools/test_c_stubber.js` (28/28 unit tests passing).
+
+## Automated Splat Option Parsing in Disassembler (v0.92.0)
+
+- [x] Parse `asm_path` and `non_matchings_path` directly from splat YAML in `tools/disassemble.py`.
+- [x] Add unit tests in `tools/test_disassemble.py` (5/5 tests passing).

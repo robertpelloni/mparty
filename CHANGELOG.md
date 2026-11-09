@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.92.0]
+### Added
+- Automated `asm_path` and `non_matchings_path` option parsing directly from splat YAML configs in `tools/disassemble.py`, removing manual path overrides across multi-title profiles.
+- Added unit tests `test_parse_splat_options` and `test_parse_splat_options_missing` in `tools/test_disassemble.py` (5/5 tests passing).
+
 ## [0.91.0]
 ### Added
 - Implemented trivial leaf function detection and direct C stub body synthesis in `tools/c_stubber.js` (e.g. `return a0;`, `return 42;`, `return 0;`).

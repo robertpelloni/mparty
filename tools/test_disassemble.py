@@ -13,7 +13,7 @@ import shutil
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from disassemble import extract_nonmatchings_from_file
+from disassemble import extract_nonmatchings_from_file, parse_splat_options
 
 class TestDisassemble(unittest.TestCase):
     def setUp(self):
@@ -86,6 +86,25 @@ class TestDisassemble(unittest.TestCase):
         nm_dir = os.path.join(self.tmpdir, "nonmatchings")
         extracted = extract_nonmatchings_from_file(os.path.join(self.tmpdir, "nonexistent.s"), nm_dir)
         self.assertEqual(extracted, [])
+
+    def test_parse_splat_options(self):
+        yaml_content = """name: test_game
+options:
+  asm_path: "asm/custom"
+  non_matchings_path: 'asm/custom_nonmatchings'
+"""
+        yaml_path = os.path.join(self.tmpdir, "test_splat.yaml")
+        with open(yaml_path, "w") as f:
+            f.write(yaml_content)
+
+        asm_path, nm_path = parse_splat_options(yaml_path)
+        self.assertEqual(asm_path, "asm/custom")
+        self.assertEqual(nm_path, "asm/custom_nonmatchings")
+
+    def test_parse_splat_options_missing(self):
+        asm_path, nm_path = parse_splat_options(os.path.join(self.tmpdir, "nonexistent.yaml"))
+        self.assertIsNone(asm_path)
+        self.assertIsNone(nm_path)
 
 if __name__ == "__main__":
     unittest.main()
