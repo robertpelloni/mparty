@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.89.0]
+### Added
+- Expanded function symbol directive recognition in `tools/c_stubber.js` and `tools/disassemble.py` to support `.globl` and `.ent` in addition to `.global` and `glabel`.
+- Added Unit Test 26 in `tools/test_c_stubber.js` (26/26 tests passing) and unit test in `tools/test_disassemble.py` validating modular function extraction across directives.
+
 ## [0.88.0]
 ### Added
 - Added `const` qualifier inferencing on read-only pointer parameters in `tools/c_stubber.js`, distinguishing read-only memory references (`const void*`, `const u8*`, `const f32*`, `const void* /* struct */`) from mutable stored pointer targets.

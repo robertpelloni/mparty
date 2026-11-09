@@ -58,6 +58,30 @@ class TestDisassemble(unittest.TestCase):
         self.assertIn(".global func_loop", c2)
         self.assertNotIn("func_init", c2)
 
+    def test_extract_nonmatchings_globl_and_ent_directives(self):
+        asm_content = """.globl func_globl_test
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+
+.ent func_ent_test
+    subu $v0, $a0, $a1
+    jr $ra
+    nop
+"""
+        asm_path = os.path.join(self.tmpdir, "directives_code.s")
+        with open(asm_path, "w") as f:
+            f.write(asm_content)
+
+        nm_dir = os.path.join(self.tmpdir, "nonmatchings")
+        extracted = extract_nonmatchings_from_file(asm_path, nm_dir)
+
+        self.assertEqual(len(extracted), 2)
+        func1 = os.path.join(nm_dir, "directives_code", "func_globl_test.s")
+        func2 = os.path.join(nm_dir, "directives_code", "func_ent_test.s")
+        self.assertTrue(os.path.exists(func1))
+        self.assertTrue(os.path.exists(func2))
+
     def test_extract_nonmatchings_empty_or_missing(self):
         nm_dir = os.path.join(self.tmpdir, "nonmatchings")
         extracted = extract_nonmatchings_from_file(os.path.join(self.tmpdir, "nonexistent.s"), nm_dir)

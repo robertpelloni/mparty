@@ -457,4 +457,30 @@ assert(res25.params.includes('void* a2'), 'Expected mutable void* for stored poi
 assert(!res25.params.includes('const void* a2'), 'Stored pointer target a2 must not be const');
 console.log('[OK] Test 25: Const qualifier inferencing on read-only pointer parameters passed.');
 
+// Test 26: Function symbol directives (.globl, .global, .ent, glabel)
+const multiDirectiveAsm = `
+.globl func_globl
+    addu $v0, $a0, $a1
+    jr $ra
+    nop
+
+.ent func_ent
+    subu $v0, $a0, $a1
+    jr $ra
+    nop
+
+glabel func_glabel
+    mult $a0, $a1
+    mflo $v0
+    jr $ra
+    nop
+`;
+
+const extractedDirectives = extractFunctionsFromAsm(multiDirectiveAsm);
+assert.strictEqual(extractedDirectives.length, 3, 'Expected 3 extracted functions across directives');
+assert.strictEqual(extractedDirectives[0].name, 'func_globl');
+assert.strictEqual(extractedDirectives[1].name, 'func_ent');
+assert.strictEqual(extractedDirectives[2].name, 'func_glabel');
+console.log('[OK] Test 26: Function symbol directives (.globl, .global, .ent, glabel) passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

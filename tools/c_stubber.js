@@ -15,8 +15,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Regex to identify function definitions in MIPS assembly (e.g., glabel func_80000000)
-const FUNC_LABEL_REGEX = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/g;
+// Regex to identify function definitions in MIPS assembly (e.g., glabel func_80000000 or .globl/.ent func_80000000)
+const FUNC_LABEL_REGEX = /(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)/g;
 
 const STORE_OPCODES = new Set(['sw', 'sh', 'sb', 'sd', 'swc1', 'sdc1', 'swl', 'swr', 'sdl', 'sdr']);
 const LOAD_OPCODES = new Set(['lw', 'lh', 'lhu', 'lb', 'lbu', 'ld', 'lwc1', 'ldc1', 'lwl', 'lwr', 'ldl', 'ldr']);
@@ -500,7 +500,7 @@ function extractFunctionsFromAsm(code) {
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const match = /(?:glabel|\.global)\s+([a-zA-Z0-9_]+)/.exec(line);
+        const match = /(?:glabel|\.global|\.globl|\.ent)\s+([a-zA-Z0-9_]+)/.exec(line);
 
         if (match) {
             if (currentFunc) {

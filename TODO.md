@@ -434,3 +434,8 @@
 
 - [x] Infer `const` qualifiers for pointer parameters without memory store instructions in `tools/c_stubber.js`.
 - [x] Add Unit Test 25 in `tools/test_c_stubber.js` (25/25 unit tests passing).
+
+## Function Symbol Directive Recognition (v0.89.0)
+
+- [x] Support `.globl` and `.ent` symbol directives in `tools/c_stubber.js` and `tools/disassemble.py`.
+- [x] Add Unit Test 26 in `tools/test_c_stubber.js` and update `tools/test_disassemble.py`.

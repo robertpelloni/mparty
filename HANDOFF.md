@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.88.0 (tracked in `VERSION.md`)
+- **Version:** v0.89.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Const Qualifier Inferencing on Read-Only Pointers (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Function Symbol Directive Recognition (`tools/c_stubber.js` & `tools/disassemble.py`):**
+   - Expanded function symbol scanning to support `.globl` and `.ent` directives in addition to `.global` and `glabel`.
+   - Added Unit Test 26 in `tools/test_c_stubber.js` and updated `tools/test_disassemble.py` (all tests passing).
+2. **Const Qualifier Inferencing on Read-Only Pointers (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Implemented `const` qualifier inferencing on pointer parameters in `tools/c_stubber.js`, qualifying read-only memory references (`const void*`, `const u8*`, `const f32*`, `const void* /* struct */`) when no memory store operations target the base register.
    - Added Unit Test 25 in `tools/test_c_stubber.js` (25/25 tests passing).
 2. **Float & Double Pointer Parameter Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
