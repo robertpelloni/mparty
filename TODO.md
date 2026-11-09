@@ -424,3 +424,8 @@
 - [x] Add function-level try-catch error recovery in `tools/c_stubber.js`.
 - [x] Track detailed warnings (`stats.warnings`) and preserve `#pragma GLOBAL_ASM` generation.
 - [x] Add Unit Test 23 in `tools/test_c_stubber.js` (23/23 unit tests passing).
+
+## Float & Double Pointer Parameter Inferencing (v0.87.0)
+
+- [x] Infer `f32*` and `f64*` pointer argument types in `tools/c_stubber.js` based on `lwc1`/`swc1` and `ldc1`/`sdc1` memory operations.
+- [x] Add Unit Test 24 in `tools/test_c_stubber.js` (24/24 unit tests passing).

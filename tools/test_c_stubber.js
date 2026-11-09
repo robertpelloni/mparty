@@ -423,4 +423,21 @@ glabel func_edge_case
     fs.rmSync(tempErrSrcDir, { recursive: true, force: true });
 }
 
+// Test 24: Float and double pointer parameter inferencing (f32* and f64*)
+const floatPtrAsm = `
+    lwc1 $f0, 0($a0)
+    ldc1 $f2, 0($a1)
+    swc1 $f0, 0($a2)
+    sdc1 $f2, 0($a3)
+    jr $ra
+    nop
+`;
+
+const res24 = analyzeAsmBody(floatPtrAsm);
+assert(res24.params.includes('f32* a0'), 'Expected f32* a0 parameter');
+assert(res24.params.includes('f64* a1'), 'Expected f64* a1 parameter');
+assert(res24.params.includes('f32* a2'), 'Expected f32* a2 parameter');
+assert(res24.params.includes('f64* a3'), 'Expected f64* a3 parameter');
+console.log('[OK] Test 24: Float and double pointer parameter inferencing passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

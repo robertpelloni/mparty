@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.86.0 (tracked in `VERSION.md`)
+- **Version:** v0.87.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **Resilient Non-Matching Error Handling & Diagnostics (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **Float & Double Pointer Parameter Inferencing (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Refined parameter inferencing for single-precision and double-precision floating-point pointers (`f32*`, `f64*`) based on `lwc1`/`swc1` and `ldc1`/`sdc1` memory operations.
+   - Added Unit Test 24 in `tools/test_c_stubber.js` (24/24 tests passing).
+2. **Resilient Non-Matching Error Handling & Diagnostics (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Enhanced `tools/c_stubber.js` with function-level try-catch error recovery for non-matching assembly stubs.
    - Added detailed warning tracking (`stats.warnings`) and comment annotations (`Parse Warnings: ...`), ensuring robust `#pragma GLOBAL_ASM` generation even on malformed inputs.
    - Added Unit Test 23 in `tools/test_c_stubber.js` (23/23 tests passing).

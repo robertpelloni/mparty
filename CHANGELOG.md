@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.87.0]
+### Added
+- Refined float and double pointer parameter inferencing (`f32*`, `f64*`) in `tools/c_stubber.js` based on single- and double-precision floating-point memory operations (`lwc1`/`swc1` and `ldc1`/`sdc1`).
+- Added Unit Test 24 in `tools/test_c_stubber.js` validating `f32*` and `f64*` parameter type inference (24/24 tests passing).
+
 ## [0.86.0]
 ### Added
 - Enhanced `tools/c_stubber.js` with resilient function-level try-catch error recovery for non-matching assembly stubs.

@@ -126,6 +126,7 @@ function analyzeAsmBody(body) {
     const unsignedArgs = new Set();
     const pointerOffsets = new Map(); // reg -> Set of offsets accessed
     const pointerSubwordTypes = new Map(); // reg -> 'u8' | 's8' | 'u16' | 's16'
+    const pointerFloatTypes = new Map(); // reg -> 'f32' | 'f64'
     const volatileMmioArgs = new Set(); // reg accessed with hardware MMIO base
     const cop0Registers = new Set();
     const savedRegisters = new Set();
@@ -335,6 +336,13 @@ function analyzeAsmBody(body) {
                 } else if (opcode === 'lh') {
                     if (!pointerSubwordTypes.has(baseReg)) pointerSubwordTypes.set(baseReg, 's16');
                 }
+
+                // Track floating-point load/store pointer type granularity
+                if (opcode === 'ldc1' || opcode === 'sdc1') {
+                    pointerFloatTypes.set(baseReg, 'f64');
+                } else if (opcode === 'lwc1' || opcode === 'swc1') {
+                    if (!pointerFloatTypes.has(baseReg)) pointerFloatTypes.set(baseReg, 'f32');
+                }
             }
 
             // Detect stack argument loading (N64 standard ABI: arguments beyond 4th passed at caller $sp offsets: 0x10, 0x14, etc.)
@@ -427,12 +435,15 @@ function analyzeAsmBody(body) {
                 } else if (pointerOffsets.has(reg)) {
                     const offsets = pointerOffsets.get(reg);
                     const subType = pointerSubwordTypes.get(reg);
+                    const floatType = pointerFloatTypes.get(reg);
                     if (volatileMmioArgs.has(reg)) {
                         params.push(`volatile u32* ${name}`);
                     } else if (offsets.size > 1) {
                         params.push(`void* ${name} /* struct */`);
                     } else if (subType) {
                         params.push(`${subType}* ${name}`);
+                    } else if (floatType) {
+                        params.push(`${floatType}* ${name}`);
                     } else if (unsignedArgs.has(reg)) {
                         params.push(`u8* ${name}`);
                     } else {
