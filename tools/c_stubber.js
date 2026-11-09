@@ -138,6 +138,7 @@ function analyzeAsmBody(body) {
     const mmioAccesses = new Set();
     const rodataSymbols = new Set();
     const rodataFloats = new Set();
+    const tlsSymbols = new Set();
     const calledFunctions = new Set();
     const globalDataReads = new Set();
     const globalDataWrites = new Set();
@@ -239,6 +240,18 @@ function analyzeAsmBody(body) {
             if (opcode === 'lwc1' || opcode === 'ldc1') {
                 rodataFloats.add(sym);
             }
+            if (STORE_OPCODES.has(opcode)) {
+                globalDataWrites.add(sym);
+            } else if (LOAD_OPCODES.has(opcode)) {
+                globalDataReads.add(sym);
+            }
+        }
+
+        // Detect TLS thread-local storage relocations (%dtprel_hi, %dtprel_lo, %tprel_hi, %tprel_lo)
+        const tlsMatch = line.match(/%(?:dtprel_hi|dtprel_lo|tprel_hi|tprel_lo)\(([a-zA-Z0-9_]+)\)/);
+        if (tlsMatch) {
+            const sym = tlsMatch[1];
+            tlsSymbols.add(sym);
             if (STORE_OPCODES.has(opcode)) {
                 globalDataWrites.add(sym);
             } else if (LOAD_OPCODES.has(opcode)) {
@@ -514,6 +527,7 @@ function analyzeAsmBody(body) {
         cop0Registers: Array.from(cop0Registers).sort(),
         rodataSymbols: Array.from(rodataSymbols).filter(sym => !globalDataWrites.has(sym)).sort(),
         rodataFloats: Array.from(rodataFloats).sort(),
+        tlsSymbols: Array.from(tlsSymbols).sort(),
         calledFunctions: Array.from(calledFunctions).sort(),
         globalDataReads: Array.from(globalDataReads).sort(),
         globalDataWrites: Array.from(globalDataWrites).sort(),
@@ -582,6 +596,9 @@ function generateCStub(funcName, analysis, moduleName = 'common', useGlobalAsm =
     }
     if (analysis.rodataFloats && analysis.rodataFloats.length > 0) {
         out += ` * Rodata Floats: ${analysis.rodataFloats.join(', ')}\n`;
+    }
+    if (analysis.tlsSymbols && analysis.tlsSymbols.length > 0) {
+        out += ` * Thread-Local Symbols: ${analysis.tlsSymbols.join(', ')}\n`;
     }
     if (analysis.calledFunctions && analysis.calledFunctions.length > 0) {
         out += ` * External Calls: ${analysis.calledFunctions.join(', ')}\n`;

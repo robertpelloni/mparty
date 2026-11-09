@@ -456,3 +456,9 @@
 
 - [x] Parse `asm_path` and `non_matchings_path` directly from splat YAML in `tools/disassemble.py`.
 - [x] Add unit tests in `tools/test_disassemble.py` (5/5 tests passing).
+
+## TLS Relocation Recognition in C Stubber (v0.93.0)
+
+- [x] Support `%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo` in `tools/c_stubber.js`.
+- [x] Track `tlsSymbols` and emit comment annotations.
+- [x] Add Unit Test 29 in `tools/test_c_stubber.js` (29/29 unit tests passing).

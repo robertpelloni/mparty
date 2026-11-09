@@ -45,8 +45,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Payload Too Large', message: 'Data array exceeds maximum allowed length.' }, { status: 413 });
     }
 
-    // Step 2: Rate limit verification (with x-test-bypass support for test suites)
-    const testBypass = request.headers.get('x-test-bypass');
+    // Step 2: Rate limit verification (with x-test-bypass support for test suites in non-production environments)
+    const testBypass = process.env.NODE_ENV !== 'production' && request.headers.get('x-test-bypass') === 'true';
     if (!testBypass) {
         const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
         const now = Date.now();

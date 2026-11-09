@@ -523,4 +523,24 @@ const stub28Const = generateCStub('get_constant_val', res28Const, 'core', true);
 assert(stub28Const.includes('return 42;'), 'Expected direct return 42; body in generated stub');
 console.log('[OK] Test 28: Trivial leaf function detection and direct return synthesis passed.');
 
+// Test 29: TLS thread-local relocations (%dtprel_hi, %dtprel_lo, %tprel_hi, %tprel_lo)
+const tlsAsm = `
+    lui $t0, %tprel_hi(g_CurrentThreadId)
+    lw $v0, %tprel_lo(g_CurrentThreadId)($t0)
+    lui $t1, %dtprel_hi(g_ThreadErrno)
+    sw $v0, %dtprel_lo(g_ThreadErrno)($t1)
+    jr $ra
+    nop
+`;
+
+const res29 = analyzeAsmBody(tlsAsm);
+assert(res29.tlsSymbols.includes('g_CurrentThreadId'), 'Expected g_CurrentThreadId in tlsSymbols');
+assert(res29.tlsSymbols.includes('g_ThreadErrno'), 'Expected g_ThreadErrno in tlsSymbols');
+assert(res29.globalDataReads.includes('g_CurrentThreadId'), 'Expected g_CurrentThreadId in globalDataReads');
+assert(res29.globalDataWrites.includes('g_ThreadErrno'), 'Expected g_ThreadErrno in globalDataWrites');
+
+const stub29 = generateCStub('sync_thread_context', res29, 'os', false);
+assert(stub29.includes('Thread-Local Symbols: g_CurrentThreadId, g_ThreadErrno'), 'Expected Thread-Local Symbols in comment');
+console.log('[OK] Test 29: TLS thread-local relocations and annotations passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

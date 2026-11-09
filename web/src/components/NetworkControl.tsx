@@ -13,9 +13,11 @@ export default function NetworkControl() {
   const [netplay, setNetplay] = useState<NetplayManager | null>(null);
 
   useEffect(() => {
-    setNetplay(new NetplayManager());
-    return () => netplay?.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const instance = new NetplayManager();
+    setNetplay(instance);
+    return () => {
+      instance.disconnect();
+    };
   }, []);
 
   const mockInviteCode = "MPARTY-8F2A-99B1";

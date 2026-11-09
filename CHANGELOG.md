@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [0.93.0]
+### Added
+- Added TLS thread-local relocation recognition (`%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo`) in `tools/c_stubber.js`.
+- Implemented `tlsSymbols` tracking and `Thread-Local Symbols: ...` comment annotation in generated C stubs with global read/write classification.
+- Added Unit Test 29 in `tools/test_c_stubber.js` (29/29 tests passing).
+
 ## [0.92.0]
 ### Added
 - Automated `asm_path` and `non_matchings_path` option parsing directly from splat YAML configs in `tools/disassemble.py`, removing manual path overrides across multi-title profiles.
