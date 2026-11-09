@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.98.0]
+### Added
+- Expanded RDRAM Interface (RI) and Display Processor Command (DPC) hardware register mappings in `tools/c_stubber.js` (`RI_CONFIG_REG`, `RI_CURRENT_LOAD_REG`, `RI_SELECT_REG`, `RI_REFRESH_REG`, `RI_LATENCY_REG`, `RI_RERROR_REG`, `RI_WERROR_REG`, `DPC_END_REG`, `DPC_CURRENT_REG`, `DPC_STATUS_REG`, `DPC_CLOCK_REG`, `DPC_BUFBUSY_REG`, `DPC_PIPEBUSY_REG`, `DPC_TMEM_REG`).
+- Added Unit Test 34 in `tools/test_c_stubber.js` (34/34 tests passing).
+
 ## [0.97.0]
 ### Added
 - Expanded Peripheral Interface (PI) and MIPS Interface (MI) hardware registers in `tools/c_stubber.js` (`PI_CART_ADDR_REG`, `PI_RD_LEN_REG`, `PI_WR_LEN_REG`, `PI_STATUS_REG`, `PI_BSD_DOM1_LAT_REG`, `PI_BSD_DOM1_PWD_REG`, `PI_BSD_DOM1_PGS_REG`, `PI_BSD_DOM1_RLS_REG`, `MI_VERSION_REG`, `MI_INTR_MASK_REG`).

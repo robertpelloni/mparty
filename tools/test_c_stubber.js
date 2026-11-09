@@ -637,4 +637,27 @@ assert(stub33.includes('Hardware MMIO: MI_INTR_MASK_REG, PI_CART_ADDR_REG, PI_ST
     'Expected PI and MI registers in stub comments');
 console.log('[OK] Test 33: Peripheral Interface (PI) and MIPS Interface (MI) hardware registers passed.');
 
+// Test 34: RDRAM Interface (RI) and Display Processor Command (DPC) registers
+const riDpcAsm = `
+    lui $t0, 0xA470
+    sw $a0, 0x000C($t0)
+    sw $a1, 0x0010($t0)
+    lui $t1, 0xA410
+    sw $a2, 0x0004($t1)
+    lw $v0, 0x000C($t1)
+    jr $ra
+    nop
+`;
+
+const res34 = analyzeAsmBody(riDpcAsm);
+assert(res34.mmioAccesses.includes('RI_SELECT_REG'), 'Expected RI_SELECT_REG (0xA470000C)');
+assert(res34.mmioAccesses.includes('RI_REFRESH_REG'), 'Expected RI_REFRESH_REG (0xA4700010)');
+assert(res34.mmioAccesses.includes('DPC_END_REG'), 'Expected DPC_END_REG (0xA4100004)');
+assert(res34.mmioAccesses.includes('DPC_STATUS_REG'), 'Expected DPC_STATUS_REG (0xA410000C)');
+
+const stub34 = generateCStub('init_rdram_and_dpc', res34, 'hw', false);
+assert(stub34.includes('Hardware MMIO: DPC_END_REG, DPC_STATUS_REG, RI_REFRESH_REG, RI_SELECT_REG'),
+    'Expected RI and DPC registers in stub comments');
+console.log('[OK] Test 34: RDRAM Interface (RI) and Display Processor Command (DPC) registers passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

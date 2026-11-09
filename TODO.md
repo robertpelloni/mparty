@@ -482,3 +482,8 @@
 
 - [x] Add PI Cartridge DMA and MI Interrupt Mask register mappings in `tools/c_stubber.js`.
 - [x] Add Unit Test 33 in `tools/test_c_stubber.js` (33/33 unit tests passing).
+
+## RI/DPC Hardware MMIO Register Expansion (v0.98.0)
+
+- [x] Add RDRAM Interface and Display Processor Command register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 34 in `tools/test_c_stubber.js` (34/34 unit tests passing).

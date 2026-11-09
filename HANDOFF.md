@@ -6,10 +6,13 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.97.0 (tracked in `VERSION.md`)
+- **Version:** v0.98.0 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
-1. **PI/MI Hardware MMIO Register Expansion (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+1. **RI/DPC Hardware MMIO Register Expansion (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
+   - Expanded RDRAM Interface (RI) and Display Processor Command (DPC) hardware register mappings (`RI_CONFIG_REG`, `RI_SELECT_REG`, `RI_REFRESH_REG`, `DPC_END_REG`, `DPC_STATUS_REG`, etc.) in `tools/c_stubber.js`.
+   - Added Unit Test 34 in `tools/test_c_stubber.js` (34/34 tests passing).
+2. **PI/MI Hardware MMIO Register Expansion (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
    - Expanded Peripheral Interface (PI) and MIPS Interface (MI) hardware register mappings (`PI_CART_ADDR_REG`, `PI_WR_LEN_REG`, `PI_STATUS_REG`, `MI_INTR_MASK_REG`, etc.) in `tools/c_stubber.js`.
    - Added Unit Test 33 in `tools/test_c_stubber.js` (33/33 tests passing).
 2. **Bitwise & Shift Trivial Leaf Return Synthesis (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
