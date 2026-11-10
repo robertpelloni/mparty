@@ -6,7 +6,7 @@
 The `mparty` repository is an automated pipeline and web hypervisor designed to decompile, build, and emulate N64 / GameCube games (specifically Mario Party) directly in the browser via WebAssembly, modern TypeScript, and Three.js.
 
 ### Current Version
-- **Version:** v0.99.0 (tracked in `VERSION.md`)
+- **Version:** v1.0.5 (tracked in `VERSION.md`)
 
 ### Recent Milestones & Changes
 1. **SP Hardware MMIO Register Expansion (`tools/c_stubber.js` & `tools/test_c_stubber.js`):**
@@ -194,6 +194,6 @@ The `mparty` repository is an automated pipeline and web hypervisor designed to 
 - `python3 tools/test_generate_splat.py`: **PASS** (all 4 multi-title test suites pass)
 - `python3 tools/test_disassemble.py`: **PASS** (all 7 disassembly test suites pass)
 - `python3 tools/test_mparty_cli.py`: **PASS** (all 5 CLI test suites pass)
-- `node tools/test_c_stubber.js`: **PASS** (all 38 pattern recognition, recursive non-matching stubbing, gp/TLS/PIC %got/%got_page/%got_ofst relocations, batch statistics, stack args, unsigned types, struct/float pointer inference, const qualifiers, unaligned memory access, branch-likely/COP1 branch detection, leaf synthesis, COP0 registers, and comprehensive MMIO SP/DPC/DPS/MI/VI/AI/PI/RI/SI tests pass)
+- `node tools/test_c_stubber.js`: **PASS** (all 39 pattern recognition, recursive non-matching stubbing, gp/TLS/PIC relocations, batch statistics, stack args, unsigned types, struct/float pointer inference, const qualifiers, volatile MMIO return types, unaligned memory access, branch-likely/COP1 branch detection, leaf synthesis, COP0 registers, and comprehensive MMIO SP/DPC/DPS/MI/VI/AI/PI/RI/SI tests pass)
 - `tools/test_ai_loop.py`: **PASS** (all 7 tests pass)
 - Next.js build & Playwright integration suites: **PASS** (32/32 tests pass)

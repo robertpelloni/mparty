@@ -519,3 +519,8 @@
 
 - [x] Expand PIC relocations in `tools/c_stubber.js` (`%got_hi`, `%got_lo`, `%got_page`, `%got_ofst`).
 - [x] Add Unit Test 38 in `tools/test_c_stubber.js` (38/38 tests passing).
+
+## Volatile MMIO Pointer Return Inference (v1.0.5)
+
+- [x] Add `volatile u32*` pointer return inference in `tools/c_stubber.js`.
+- [x] Add Unit Test 39 in `tools/test_c_stubber.js` (39/39 tests passing).

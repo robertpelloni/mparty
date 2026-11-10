@@ -746,4 +746,19 @@ assert(stub38.includes('Rodata Symbols: D_table'), 'Expected Rodata Symbols in s
 assert(stub38.includes('Global Reads: D_table'), 'Expected Global Reads in stub comments');
 console.log('[OK] Test 38: Large-model PIC relocations (%got_page and %got_ofst) passed.');
 
+// Test 39: Volatile MMIO pointer return inference
+const mmioReturnAsm = `
+    lui $v0, 0xA440
+    addiu $v0, $v0, 0x0004
+    jr $ra
+    nop
+`;
+
+const res39 = analyzeAsmBody(mmioReturnAsm);
+assert.strictEqual(res39.returnType, 'volatile u32*', 'Expected volatile u32* return type');
+const stub39 = generateCStub('get_vi_origin_reg', res39, 'vi', true);
+assert(stub39.includes('volatile u32* get_vi_origin_reg(void)'), 'Expected volatile u32* in stub signature');
+assert(stub39.includes('return NULL;'), 'Expected fallback return NULL; in stub body');
+console.log('[OK] Test 39: Volatile MMIO pointer return inference passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

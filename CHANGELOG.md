@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.5]
+### Added
+- Added `volatile u32*` pointer return inference in `tools/c_stubber.js` when `$v0` holds an MMIO address or is derived from volatile base registers.
+- Added Unit Test 39 in `tools/test_c_stubber.js` (39/39 tests passing).
+
 ## [1.0.4]
 ### Added
 - Expanded PIC relocation parsing in `tools/c_stubber.js` to recognize large-model PIC relocations (`%got_hi`, `%got_lo`, `%got_page`, `%got_ofst`).

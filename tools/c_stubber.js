@@ -385,18 +385,34 @@ function analyzeAsmBody(body) {
                     trivialReturnExpr = `${srcArg} >> ${tokens[3]}`;
                 }
                 // Check if $v0 is loaded/moved from a pointer parameter or symbol offset
-                if (opcode === 'move' && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {
+                if (opcode === 'move' && ['$a0', '$a1', '$a2', '$a3'].includes(tokens[2])) {
                     if (pointerOffsets.has(tokens[2])) {
                         isPointerV0 = true;
                     }
+                    if (volatileMmioArgs.has(tokens[2])) {
+                        isPointerV0 = true;
+                        pointerV0Type = 'volatile u32*';
+                    }
                 }
-                if ((opcode === 'addiu' || opcode === 'addu') && [' $a0', '$a1', '$a2', '$a3'].some(a => tokens[2] === a.trim())) {
+                if ((opcode === 'addiu' || opcode === 'addu') && ['$a0', '$a1', '$a2', '$a3'].includes(tokens[2])) {
                     if (pointerOffsets.has(tokens[2])) {
                         isPointerV0 = true;
+                    }
+                    if (volatileMmioArgs.has(tokens[2])) {
+                        isPointerV0 = true;
+                        pointerV0Type = 'volatile u32*';
                     }
                 }
                 if (opcode === 'la' || (opcode === 'addiu' && line.includes('%lo('))) {
                     isPointerV0 = true;
+                }
+                if (registerUpperConstants.has('$v0')) {
+                    const upper = registerUpperConstants.get('$v0');
+                    if (upper === 0xA400 || upper === 0xA410 || upper === 0xA420 || upper === 0xA430 ||
+                        upper === 0xA440 || upper === 0xA450 || upper === 0xA460 || upper === 0xA470 || upper === 0xA480) {
+                        isPointerV0 = true;
+                        pointerV0Type = 'volatile u32*';
+                    }
                 }
             }
             if (tokens[1] === '$v1') usesV1 = true;
