@@ -813,6 +813,7 @@ function processAsmFile(asmFilePath, srcDir, stats = null, nonmatchingsPrefix = 
             fileHasWarnings = true;
             if (stats) {
                 stats.warningsCount += analysis.parseErrors.length;
+                stats.functionsWithWarnings = (stats.functionsWithWarnings || 0) + 1;
                 if (!stats.warnings) stats.warnings = [];
                 analysis.parseErrors.forEach(msg => {
                     stats.warnings.push(`${path.basename(asmFilePath)}:${fn.name}: ${msg}`);
@@ -839,6 +840,7 @@ function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = fa
         processedFiles: [],
         skippedFiles: [],
         filesWithWarnings: 0,
+        functionsWithWarnings: 0,
         warningsCount: 0,
         warnings: [],
         errors: []
@@ -867,6 +869,7 @@ function processDirectory(asmDir, srcDir, stats = null, processNonmatchings = fa
         console.log(`Total Files Generated: ${currentStats.processedFiles.length}`);
         console.log(`Total Functions Typed: ${currentStats.totalFunctions}`);
         console.log(`Files Skipped: ${currentStats.skippedFiles.length}`);
+        console.log(`Functions With Warnings: ${currentStats.functionsWithWarnings || 0}`);
         console.log(`Warnings Encountered: ${currentStats.warningsCount}`);
         console.log(`Errors Encountered: ${currentStats.errors.length}`);
 

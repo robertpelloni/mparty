@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.6]
+### Added
+- Enhanced batch directory processing in `tools/c_stubber.js` to track `functionsWithWarnings` count in statistics summary and `build/stubber_report.json`.
+- Added Unit Test 40 in `tools/test_c_stubber.js` verifying structured function warning and error metric collection (40/40 tests passing).
+
 ## [1.0.5]
 ### Added
 - Added `volatile u32*` pointer return inference in `tools/c_stubber.js` when `$v0` holds an MMIO address or is derived from volatile base registers.

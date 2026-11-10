@@ -524,3 +524,8 @@
 
 - [x] Add `volatile u32*` pointer return inference in `tools/c_stubber.js`.
 - [x] Add Unit Test 39 in `tools/test_c_stubber.js` (39/39 tests passing).
+
+## Structured Function Warning & Error Metrics (v1.0.6)
+
+- [x] Add `functionsWithWarnings` count to `stats` and `build/stubber_report.json` in `tools/c_stubber.js`.
+- [x] Add Unit Test 40 in `tools/test_c_stubber.js` (40/40 tests passing).

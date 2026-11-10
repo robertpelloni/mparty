@@ -761,4 +761,26 @@ assert(stub39.includes('volatile u32* get_vi_origin_reg(void)'), 'Expected volat
 assert(stub39.includes('return NULL;'), 'Expected fallback return NULL; in stub body');
 console.log('[OK] Test 39: Volatile MMIO pointer return inference passed.');
 
+// Test 40: Structured function error & warning metrics in batch directory processing
+const test40AsmDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_warn_asm_'));
+const test40SrcDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mparty_warn_src_'));
+
+fs.writeFileSync(path.join(test40AsmDir, 'warn_test.s'), `
+glabel func_clean
+    jr $ra
+    nop
+
+glabel func_with_parse_warn
+    jr $ra
+    nop
+`);
+
+const stats40 = processDirectory(test40AsmDir, test40SrcDir);
+assert.strictEqual(stats40.totalFunctions, 2, 'Expected 2 total functions');
+assert.strictEqual(typeof stats40.functionsWithWarnings, 'number', 'Expected functionsWithWarnings to be a number');
+assert.strictEqual(stats40.functionsWithWarnings, 0, 'Expected 0 functions with warnings on clean asm');
+fs.rmSync(test40AsmDir, { recursive: true, force: true });
+fs.rmSync(test40SrcDir, { recursive: true, force: true });
+console.log('[OK] Test 40: Structured function error & warning metrics in batch directory processing passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');
