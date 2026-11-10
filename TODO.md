@@ -514,3 +514,8 @@
 
 - [x] Add `extract-mp1`, `extract-mp2`, and `extract-mp3` targets in `Makefile`.
 - [x] Verify dry-run target recipes and execution paths.
+
+## Large-Model PIC Relocation Recognition (v1.0.4)
+
+- [x] Expand PIC relocations in `tools/c_stubber.js` (`%got_hi`, `%got_lo`, `%got_page`, `%got_ofst`).
+- [x] Add Unit Test 38 in `tools/test_c_stubber.js` (38/38 tests passing).

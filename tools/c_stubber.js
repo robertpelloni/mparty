@@ -298,8 +298,8 @@ function analyzeAsmBody(body) {
             }
         }
 
-        // Detect %got(symbol) references for PIC Global Offset Table entries
-        const gotMatch = line.match(/%got\(([a-zA-Z0-9_]+)\)/);
+        // Detect %got(symbol) and extended PIC relocations (%got_hi, %got_lo, %got_page, %got_ofst)
+        const gotMatch = line.match(/%(?:got|got_hi|got_lo|got_page|got_ofst)\(([a-zA-Z0-9_]+)\)/);
         if (gotMatch) {
             const sym = gotMatch[1];
             rodataSymbols.add(sym);

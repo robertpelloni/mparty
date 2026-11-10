@@ -729,4 +729,21 @@ const stub37 = generateCStub('eval_branch_cond', res37, 'math', false);
 assert(stub37.includes('Control Flow: Loop detected'), 'Expected Loop detected in stub comments');
 console.log('[OK] Test 37: Branch-likely and COP1 floating-point branch detection passed.');
 
+// Test 38: Large-model PIC relocations (%got_page and %got_ofst)
+const picLargeAsm = `
+    lw $t0, %got_page(D_table)($gp)
+    addiu $t0, $t0, %got_ofst(D_table)
+    lw $v0, 0x0000($t0)
+    jr $ra
+    nop
+`;
+
+const res38 = analyzeAsmBody(picLargeAsm);
+assert(res38.rodataSymbols.includes('D_table'), 'Expected D_table in rodataSymbols');
+assert(res38.globalDataReads.includes('D_table'), 'Expected D_table in globalDataReads');
+const stub38 = generateCStub('lookup_pic_table', res38, 'pic', false);
+assert(stub38.includes('Rodata Symbols: D_table'), 'Expected Rodata Symbols in stub comments');
+assert(stub38.includes('Global Reads: D_table'), 'Expected Global Reads in stub comments');
+console.log('[OK] Test 38: Large-model PIC relocations (%got_page and %got_ofst) passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

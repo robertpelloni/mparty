@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.4]
+### Added
+- Expanded PIC relocation parsing in `tools/c_stubber.js` to recognize large-model PIC relocations (`%got_hi`, `%got_lo`, `%got_page`, `%got_ofst`).
+- Added Unit Test 38 in `tools/test_c_stubber.js` verifying `%got_page` and `%got_ofst` symbol resolution and read classification (38/38 tests passing).
+
 ## [1.0.3]
 ### Added
 - Added multi-title extraction targets (`extract-mp1`, `extract-mp2`, `extract-mp3`) in `Makefile` with title-specific non-matching directories and C stub generation.
