@@ -55,7 +55,7 @@ export default function Home() {
             <Tooltip content="Current Mario Party WebEngine Platform Release Version. Build targets N64 MIPS opcodes and GameCube Dolphin WASM.">
               <div className="text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                v0.46.0
+                v1.0.2
               </div>
             </Tooltip>
           </div>

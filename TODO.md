@@ -504,3 +504,8 @@
 - [x] Add extraction count summary metrics to `run_splat` in `tools/disassemble.py`.
 - [x] Add `--extract-file` CLI option to `tools/disassemble.py` for standalone function splitting.
 - [x] Add `test_run_splat_extract_nonmatchings_statistics` in `tools/test_disassemble.py` (7/7 tests passing).
+
+## Branch-Likely & COP1 Conditional Branch Recognition (v1.0.2)
+
+- [x] Expand `BRANCH_OPCODES` in `tools/c_stubber.js` (`beql`, `bnel`, `bgezl`, `bgtzl`, `blezl`, `bltzl`, `bc1t`, `bc1f`, `bc1tl`, `bc1fl`).
+- [x] Add Unit Test 37 in `tools/test_c_stubber.js` (37/37 tests passing).

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.2]
+### Added
+- Expanded `BRANCH_OPCODES` in `tools/c_stubber.js` to recognize branch-likely opcodes (`beql`, `bnel`, `bgezl`, `bgtzl`, `blezl`, `bltzl`) and COP1 floating-point conditional branches (`bc1t`, `bc1f`, `bc1tl`, `bc1fl`).
+- Added Unit Test 37 in `tools/test_c_stubber.js` verifying control-flow and loop detection on branch-likely and COP1 branches (37/37 tests passing).
+
 ## [1.0.1]
 ### Added
 - Added extraction summary metrics to `run_splat` in `tools/disassemble.py` reporting total functions split into `asm/nonmatchings`.

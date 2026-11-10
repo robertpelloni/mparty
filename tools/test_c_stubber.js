@@ -705,4 +705,28 @@ assert(stub36.includes('Hardware MMIO: DPS_BUFTEST_ADDR_REG, DPS_BUFTEST_DATA_RE
     'Expected DPS hardware registers in stub comments');
 console.log('[OK] Test 36: Display Processor Span (DPS) hardware registers passed.');
 
+// Test 37: Branch-likely and COP1 floating-point conditional branch detection
+const branchAsm = `
+    c.lt.s $f12, $f14
+    bc1t .L_float_branch
+    nop
+    beql $a0, $zero, .L_likely_target
+    nop
+.L_float_branch:
+    mov.s $f0, $f12
+    jr $ra
+    nop
+.L_likely_target:
+    move $v0, $zero
+    jr $ra
+    nop
+`;
+
+const res37 = analyzeAsmBody(branchAsm);
+assert.strictEqual(res37.hasLoop, true, 'Expected hasLoop to be true for bc1t and beql');
+assert.strictEqual(res37.isTrivialLeaf, false, 'Expected non-trivial leaf due to branch control flow');
+const stub37 = generateCStub('eval_branch_cond', res37, 'math', false);
+assert(stub37.includes('Control Flow: Loop detected'), 'Expected Loop detected in stub comments');
+console.log('[OK] Test 37: Branch-likely and COP1 floating-point branch detection passed.');
+
 console.log('\nAll c_stubber tests passed successfully!');

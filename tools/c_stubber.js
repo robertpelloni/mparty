@@ -24,7 +24,11 @@ const UNALIGNED_OPCODES = new Set(['lwl', 'lwr', 'ldl', 'ldr', 'swl', 'swr', 'sd
 // Explicit unsigned operations (excluding addu which is GCC MIPS standard for signed add without integer overflow trap)
 const UNSIGNED_OPS = new Set(['lbu', 'lhu', 'sltu', 'sltiu', 'divu', 'multu']);
 const CALLEE_SAVED_REGS = new Set(['$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$s8']);
-const BRANCH_OPCODES = new Set(['bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz']);
+const BRANCH_OPCODES = new Set([
+    'bne', 'beq', 'bgez', 'bgtz', 'blez', 'bltz', 'bnez', 'beqz',
+    'beql', 'bnel', 'bgezl', 'bgtzl', 'blezl', 'bltzl',
+    'bc1t', 'bc1f', 'bc1tl', 'bc1fl'
+]);
 
 // Known N64 hardware MMIO register address ranges and names (0x04000000 physical / 0xA4000000 uncached)
 const MMIO_REGISTER_MAP = {
