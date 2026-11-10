@@ -509,3 +509,8 @@
 
 - [x] Expand `BRANCH_OPCODES` in `tools/c_stubber.js` (`beql`, `bnel`, `bgezl`, `bgtzl`, `blezl`, `bltzl`, `bc1t`, `bc1f`, `bc1tl`, `bc1fl`).
 - [x] Add Unit Test 37 in `tools/test_c_stubber.js` (37/37 tests passing).
+
+## Makefile Multi-Title Extraction Automation (v1.0.3)
+
+- [x] Add `extract-mp1`, `extract-mp2`, and `extract-mp3` targets in `Makefile`.
+- [x] Verify dry-run target recipes and execution paths.

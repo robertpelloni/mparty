@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.0.3]
+### Added
+- Added multi-title extraction targets (`extract-mp1`, `extract-mp2`, `extract-mp3`) in `Makefile` with title-specific non-matching directories and C stub generation.
+
 ## [1.0.2]
 ### Added
 - Expanded `BRANCH_OPCODES` in `tools/c_stubber.js` to recognize branch-likely opcodes (`beql`, `bnel`, `bgezl`, `bgtzl`, `blezl`, `bltzl`) and COP1 floating-point conditional branches (`bc1t`, `bc1f`, `bc1tl`, `bc1fl`).
