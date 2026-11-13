@@ -20,13 +20,32 @@ REQUIRED_FILES = [
     "VERSION.md",
     "HANDOFF.md",
     "Makefile",
+    "splat.yaml",
+    "splat.mp1.yaml",
+    "splat.mp2.yaml",
+    "splat.mp3.yaml",
+    "splat.mp4.yaml",
     "tools/generate_splat.py",
     "tools/disassemble.py",
-    "tools/c_stubber.js"
+    "tools/c_stubber.js",
+    "tools/ai_matcher.py",
+    "tools/ai_loop.py",
+    "tools/mparty_cli.py",
+    "tools/test_c_stubber.js",
+    "tools/test_ai_loop.py",
+    "tools/test_ai_matcher.py",
+    "tools/test_generate_splat.py",
+    "tools/test_disassemble.py",
+    "tools/test_mparty_cli.py",
+    "tools/test_pipeline.py",
+    "tools/test_validation_layer.py"
 ]
 
 REQUIRED_DIRECTORIES = [
-    "tools"
+    "tools",
+    "web",
+    "web/src",
+    "web/tests"
 ]
 
 def verify_architecture():

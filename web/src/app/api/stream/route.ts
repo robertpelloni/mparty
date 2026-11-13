@@ -65,4 +65,57 @@ export async function POST(request: Request) {
         console.error("Stream API Error:", error);
         return NextResponse.json({ error: 'Bad Request', message: 'Malformed JSON.' }, { status: 400 });
     }
+
+    // Step 1: Payload validation prior to rate consumption
+    if (!payload || typeof payload !== 'object') {
+        return NextResponse.json({ error: 'Bad Request', message: 'Invalid JSON payload.' }, { status: 400 });
+    }
+
+    if (!payload.action || typeof payload.action !== 'string') {
+        return NextResponse.json({ error: 'Bad Request', message: 'Missing or invalid "action" field.' }, { status: 400 });
+    }
+
+    const validActions = ['sync_input', 'ping', 'save_state', 'load_state'];
+    if (!validActions.includes(payload.action)) {
+        return NextResponse.json({ error: 'Bad Request', message: 'Unsupported action.' }, { status: 400 });
+    }
+
+    if (!payload.data || !Array.isArray(payload.data)) {
+        return NextResponse.json({ error: 'Bad Request', message: 'Missing or invalid "data" array.' }, { status: 400 });
+    }
+
+    if (payload.data.length > MAX_PAYLOAD_DATA_LENGTH) {
+        return NextResponse.json({ error: 'Payload Too Large', message: 'Data array exceeds maximum allowed length.' }, { status: 413 });
+    }
+
+    // Step 2: Rate limit verification (with x-test-bypass support for test suites in non-production environments)
+    const testBypass = process.env.NODE_ENV !== 'production' && request.headers.get('x-test-bypass') === 'true';
+    if (!testBypass) {
+        const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+        const now = Date.now();
+
+        let rateData = rateLimitStore.get(ip);
+
+        if (!rateData || rateData.resetTime < now) {
+            rateData = { count: 1, resetTime: now + RATE_LIMIT_WINDOW };
+            rateLimitStore.set(ip, rateData);
+        } else {
+            rateData.count++;
+            if (rateData.count > MAX_REQUESTS) {
+                return NextResponse.json(
+                    { error: 'Too Many Requests', message: 'Rate limit exceeded.' },
+                    { status: 429, headers: { 'Retry-After': Math.ceil((rateData.resetTime - now) / 1000).toString() } }
+                );
+            }
+        }
+    }
+
+    // Process stream
+    console.log(`[Stream API] Processing action: ${payload.action}`);
+
+    return NextResponse.json({
+        success: true,
+        message: `Stream processed for action: ${payload.action}`,
+        receivedDataLength: payload.data.length
+    });
 }

@@ -8,7 +8,22 @@ test.describe('Decompilation Status & Stub Viewer', () => {
         // Verify title & initial status metrics
         await expect(page.getByText('Decompilation Pipeline & Stub Generator')).toBeVisible();
         await expect(page.getByText('Non-Matching Units')).toBeVisible();
-        await expect(page.getByText('Mario Party (N64)')).toBeVisible();
+        await expect(page.getByText('Mario Party 1 (N64)')).toBeVisible();
+
+        // Verify game target selector
+        const select = page.locator('select').filter({ hasText: 'MP1 (N64)' });
+        await expect(select).toBeVisible();
+        await select.selectOption('mp2');
+        await expect(page.getByText('Mario Party 2 (N64)')).toBeVisible();
+
+        // Select MP4 GameCube target option
+        await select.selectOption('mp4');
+        await expect(page.getByText('Mario Party 4 (GameCube)')).toBeVisible();
+        await expect(page.getByText('24,500')).toBeVisible();
+
+        // Switch back to MP2 for remaining interaction steps
+        await select.selectOption('mp2');
+        await expect(page.getByText('Mario Party 2 (N64)')).toBeVisible();
 
         // Click Process Nonmatchings
         const processBtn = page.getByRole('button', { name: 'Process Nonmatchings' });

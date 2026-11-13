@@ -1,13 +1,16 @@
-name: mock_mario_party
-# sha1: "" # Add your target SHA1 here (disabled for dummy test)
+name: mario_party_1
+sha1: "" # Add your target SHA1 here
 options:
-  basename: mock_mario_party
-  target_path: tests/roms/mock_mario_party.z64
+  basename: mario_party_1
+  target_path: baserom.z64
   base_path: .
   compiler: GCC
-  platform: n64
   find_file_boundaries: True
   header_encoding: ASCII
+  asm_path: asm/mp1
+  src_path: src/mp1
+  asset_path: assets/mp1
+  non_matchings_path: asm/nonmatchings/mp1
 segments:
   - name: header
     type: header

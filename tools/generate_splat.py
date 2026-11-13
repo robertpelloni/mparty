@@ -43,26 +43,96 @@ void func_80000450(s32 a0, s32 a1);
         f.write(content)
     print(f"Generated function prototypes at {output_header_path}")
 
-def generate_yaml(rom_path, output_path="splat.yaml"):
-    check_rom_header(rom_path)
+GAME_PROFILES = {
+    "mp1": {
+        "name": "mario_party_1",
+        "basename": "mario_party_1",
+        "asm_path": "asm/mp1",
+        "src_path": "src/mp1",
+        "asset_path": "assets/mp1",
+        "non_matchings_path": "asm/nonmatchings/mp1",
+        "vram_main": "0x80000400",
+        "vram_overlay": "0x80100000"
+    },
+    "mp2": {
+        "name": "mario_party_2",
+        "basename": "mario_party_2",
+        "asm_path": "asm/mp2",
+        "src_path": "src/mp2",
+        "asset_path": "assets/mp2",
+        "non_matchings_path": "asm/nonmatchings/mp2",
+        "vram_main": "0x80000400",
+        "vram_overlay": "0x80120000"
+    },
+    "mp3": {
+        "name": "mario_party_3",
+        "basename": "mario_party_3",
+        "asm_path": "asm/mp3",
+        "src_path": "src/mp3",
+        "asset_path": "assets/mp3",
+        "non_matchings_path": "asm/nonmatchings/mp3",
+        "vram_main": "0x80000400",
+        "vram_overlay": "0x80140000"
+    },
+    "mp4": {
+        "name": "mario_party_4",
+        "basename": "mario_party_4",
+        "asm_path": "asm/mp4",
+        "src_path": "src/mp4",
+        "asset_path": "assets/mp4",
+        "non_matchings_path": "asm/nonmatchings/mp4",
+        "vram_main": "0x80003100",
+        "vram_overlay": "0x80200000"
+    }
+}
+
+def detect_game_profile(rom_path, requested_game=None):
+    if requested_game and requested_game.lower() in GAME_PROFILES:
+        return GAME_PROFILES[requested_game.lower()]
+
+    lower_name = os.path.basename(rom_path).lower()
+    if "mp1" in lower_name or "mario_party_1" in lower_name or "marioparty1" in lower_name:
+        return GAME_PROFILES["mp1"]
+    if "mp2" in lower_name or "mario_party_2" in lower_name or "marioparty2" in lower_name:
+        return GAME_PROFILES["mp2"]
+    if "mp3" in lower_name or "mario_party_3" in lower_name or "marioparty3" in lower_name:
+        return GAME_PROFILES["mp3"]
+    if "mp4" in lower_name or "mario_party_4" in lower_name or "marioparty4" in lower_name:
+        return GAME_PROFILES["mp4"]
+
     basename = os.path.basename(rom_path).replace('.z64', '').replace('.v64', '').replace('.n64', '')
     if not basename:
         basename = "target_rom"
 
-    yaml_content = f"""name: {basename}
-# sha1: "" # Add your target SHA1 here (disabled for dummy test)
+    return {
+        "name": basename,
+        "basename": basename,
+        "asm_path": "asm",
+        "src_path": "src",
+        "asset_path": "assets",
+        "non_matchings_path": "asm/nonmatchings",
+        "vram_main": "0x80000400",
+        "vram_overlay": "0x80100000"
+    }
+
+def generate_yaml(rom_path, output_path="splat.yaml", game=None):
+    check_rom_header(rom_path)
+    profile = detect_game_profile(rom_path, game)
+
+    yaml_content = f"""name: {profile['name']}
+sha1: "" # Add your target SHA1 here
 options:
-  basename: {basename}
+  basename: {profile['basename']}
   target_path: {rom_path}
   base_path: .
   compiler: GCC
   platform: n64
   find_file_boundaries: True
   header_encoding: ASCII
-  asm_path: asm
-  src_path: src
-  asset_path: assets
-  non_matchings_path: asm/nonmatchings
+  asm_path: {profile['asm_path']}
+  src_path: {profile['src_path']}
+  asset_path: {profile['asset_path']}
+  non_matchings_path: {profile['non_matchings_path']}
 segments:
   - name: header
     type: header
@@ -75,7 +145,7 @@ segments:
   - name: main
     type: code
     start: 0x1000
-    vram: 0x80000400
+    vram: {profile['vram_main']}
     subsegments:
       - [0x1000, c]
       - [0x100000, data]
@@ -83,7 +153,7 @@ segments:
   - name: overlays
     type: code
     start: 0x100000 # Placeholder start for overlays
-    vram: 0x80100000
+    vram: {profile['vram_overlay']}
     subsegments:
       - [0x100000, c]
 
@@ -93,16 +163,17 @@ segments:
     with open(output_path, 'w') as f:
         f.write(yaml_content)
 
-    print(f"Generated {output_path} for {rom_path}")
+    print(f"Generated {output_path} for {rom_path} (Profile: {profile['name']})")
     generate_function_headers()
 
 def main():
     parser = argparse.ArgumentParser(description="Generate splat.yaml and prototype headers for an N64 ROM.")
     parser.add_argument("rom_path", help="Path to the N64 ROM file.")
     parser.add_argument("--out", "-o", default="splat.yaml", help="Output yaml path.")
+    parser.add_argument("--game", "-g", choices=["mp1", "mp2", "mp3", "mp4"], default=None, help="Target game profile (mp1, mp2, mp3, mp4).")
 
     args = parser.parse_args()
-    generate_yaml(args.rom_path, args.out)
+    generate_yaml(args.rom_path, args.out, args.game)
 
 if __name__ == "__main__":
     main()

@@ -272,3 +272,260 @@
 - [x] Infer unsigned integer types (`u32`) for returns and parameters based on unsigned MIPS instructions (`divu`, `multu`, `sltu`, `lbu`, `lhu`).
 - [x] Implement graceful error handling and reporting for malformed/empty assembly bodies.
 - [x] Add unit tests in `tools/test_c_stubber.js` verifying stack argument detection and unsigned type inference.
+
+## Batch Processing Statistics & Report Generation (v0.61.0)
+
+- [x] Add batch processing statistics tracking (total functions, generated files, skipped files, warnings, errors) to `tools/c_stubber.js`.
+- [x] Implement structured JSON report serialization to `build/stubber_report.json`.
+- [x] Add unit test in `tools/test_c_stubber.js` verifying batch directory processing and statistics metrics.
+
+## Global Pointer Relocations & Symbol Access Tracking (v0.62.0)
+
+- [x] Support `%gp_rel` relocation parsing to recognize small data/BSS symbol access.
+- [x] Distinguish global reads vs. global writes across instructions.
+- [x] Annotate separated `Global Reads:` and `Global Writes:` symbol summaries in generated C comments.
+- [x] Add unit test in `tools/test_c_stubber.js` validating `%gp_rel` tracking and read/write classification.
+
+## Multi-Title Splat Configurations for Mario Party 1-3 (v0.63.0)
+
+- [x] Add multi-title configuration profiles (`GAME_PROFILES`) and automatic detection for Mario Party 1 (`mp1`), Mario Party 2 (`mp2`), and Mario Party 3 (`mp3`) in `tools/generate_splat.py`.
+- [x] Add `--game` / `-g` CLI option to `tools/generate_splat.py`.
+- [x] Create `tools/test_generate_splat.py` unit test suite validating profile resolution and YAML output.
+- [x] Integrate multi-title splat test into `tools/test_pipeline.py`.
+
+## Modular Non-Matching Extraction & Granular Stubbing (v0.64.0)
+
+- [x] Enhance `tools/disassemble.py` to recursively scan subdirectories under `asm/` and extract non-matching functions into `asm/nonmatchings/`.
+- [x] Support `--process-nonmatchings` flag in `tools/c_stubber.js` for modular per-function stub generation.
+- [x] Add unit test in `tools/test_c_stubber.js` validating modular non-matching directory processing.
+
+## AI Loop Non-Matching Target Resolution (v0.65.0)
+
+- [x] Add `locate_target_asm` and `locate_target_bin` in `tools/ai_loop.py` to resolve target assembly and binaries across `asm/nonmatchings/` and `build/expected/`.
+- [x] Add `--nonmatchings-dir` CLI parameter to `tools/ai_loop.py`.
+- [x] Add unit test in `tools/test_ai_loop.py` verifying non-matching directory target resolution.
+
+## Multi-Title Decompilation Dashboard Target Selection (v0.66.0)
+
+- [x] Add game target selector (MP1, MP2, MP3) in `DecompilationStatus.tsx`.
+- [x] Connect target game selection to `/api/ai` and configure `--nonmatchings-dir`.
+- [x] Update Playwright tests in `decompilation_status.spec.ts`.
+
+## Multi-Title Targeting in Centralized CLI (v0.67.0)
+
+- [x] Add `--game` / `-g` argument in `tools/mparty_cli.py`.
+- [x] Render target title in interactive terminal dashboard header.
+- [x] Create `tools/test_mparty_cli.py` and integrate into `tools/test_pipeline.py`.
+
+## AI Matcher Assembly Normalization (v0.68.0)
+
+- [x] Add `normalize_instruction` in `tools/ai_matcher.py` to strip addresses and comments from disassembly.
+- [x] Support normalized diff output in `generate_assembly_diff`.
+- [x] Create `tools/test_ai_matcher.py` unit test suite and integrate into `tools/test_pipeline.py`.
+
+## Architecture Verification Expansion (v0.69.0)
+
+- [x] Add toolchain scripts and test suites to `REQUIRED_FILES` in `tools/verify_architecture.py`.
+- [x] Add `web`, `web/src`, and `web/tests` to `REQUIRED_DIRECTORIES`.
+- [x] Verify validation layer failure modes in `tools/test_validation_layer.py`.
+
+## Baseline Splat Configurations for Mario Party 1-3 (v0.70.0)
+
+- [x] Generate baseline `splat.yaml`, `splat.mp1.yaml`, `splat.mp2.yaml`, and `splat.mp3.yaml` configurations.
+- [x] Add `splat-configs` target in `Makefile`.
+- [x] Assert presence in `tools/verify_architecture.py`.
+- [x] Add structure tests in `tools/test_generate_splat.py`.
+
+## COP0 Register Recognition & Subword MMIO Typing (v0.71.0)
+
+- [x] Add COP0 coprocessor register detection (`Status`, `Cause`, `Count`, etc.) in `tools/c_stubber.js`.
+- [x] Infer subword pointer types (`u8*`, `s8*`, `u16*`, `s16*`) and volatile MMIO qualifiers (`volatile u32*`).
+- [x] Expand unit tests in `tools/test_c_stubber.js` (17 tests total).
+
+## Toolchain Resolution & Pipeline Normalization (v0.72.0)
+
+- [x] Refactor toolchain lookup (`compiler`, `objcopy`, `objdump`) in `tools/ai_matcher.py` with `shutil.which`.
+- [x] Normalize sequential step comments in `tools/test_pipeline.py`.
+
+## CLI Dashboard Dynamic Cycling & Status Overrides (v0.73.0)
+
+- [x] Implement `cycle_target_game` and status parameter overrides in `tools/mparty_cli.py`.
+- [x] Add unit tests in `tools/test_mparty_cli.py`.
+
+## Mario Party 4 GameCube Decompilation Scaffolding (v0.74.0)
+
+- [x] Add `mp4` profile to `tools/generate_splat.py`.
+- [x] Generate baseline `splat.mp4.yaml`.
+- [x] Register in `Makefile` and `tools/verify_architecture.py`.
+- [x] Add unit tests in `tools/test_generate_splat.py`.
+
+## Documentation Governance & README Consolidation (v0.75.0)
+
+- [x] Consolidate `README.md` into production-ready architectural guide.
+- [x] Verify architecture requirements against all core documentation.
+
+## Frontend UI Refinements & Formatting (v0.76.0)
+
+- [x] Clean up JSX formatting and handler indentation in `web/src/components/NetworkControl.tsx`.
+- [x] Validate Next.js production build and Playwright test suites.
+
+## Multi-Title Non-Matching Prefixes in C Stubber (v0.77.0)
+
+- [x] Support configurable `nonmatchingsPrefix` and `--nonmatchings-prefix` in `tools/c_stubber.js`.
+- [x] Add Unit Test 18 in `tools/test_c_stubber.js`.
+
+## Validation Layer Splat Config Failure Testing (v0.78.0)
+
+- [x] Add missing splat configuration failure tests in `tools/test_validation_layer.py`.
+- [x] Assert 6/6 failure mode coverage in `tools/test_pipeline.py`.
+
+## Granular MMIO Sub-Register Mapping (v0.79.0)
+
+- [x] Add Audio, Video, and Serial Interface sub-registers to `tools/c_stubber.js`.
+- [x] Implement immediate memory offset addition for base pointer MMIO detection.
+- [x] Add Unit Test 19 in `tools/test_c_stubber.js`.
+
+## Decompilation Studio Mario Party 4 Target Selection (v0.80.0)
+
+- [x] Add `mp4` to `DecompilationStatus.tsx` target selector and `/api/ai`.
+- [x] Add Playwright test in `web/tests/decompilation_status.spec.ts`.
+
+## Centralized CLI Mario Party 4 Integration (v0.81.0)
+
+- [x] Add `mp4` to `tools/mparty_cli.py` title parser, cycle sequence, and status formatting.
+- [x] Expand unit tests in `tools/test_mparty_cli.py`.
+
+## Rodata Relocation Refinement & Float Constant Recognition (v0.82.0)
+
+- [x] Differentiate read-only rodata from mutable global data in `tools/c_stubber.js`.
+- [x] Add `rodataFloats` recognition and annotation.
+- [x] Add Unit Test 20 in `tools/test_c_stubber.js`.
+
+## Disassembly Directory Customization & Unit Testing (v0.83.0)
+
+- [x] Add `--asm-dir` and `--nonmatchings-dir` to `tools/disassemble.py`.
+- [x] Create `tools/test_disassemble.py` unit test suite.
+- [x] Integrate into `tools/test_pipeline.py` and `tools/verify_architecture.py`.
+
+## Position-Independent Code (PIC) Relocations in C Stubber (v0.84.0)
+
+- [x] Add `%got` and `%call16` pattern parsing in `tools/c_stubber.js`.
+- [x] Annotate `External Calls` in generated C stub comments.
+- [x] Add Unit Test 21 in `tools/test_c_stubber.js`.
+
+## Unaligned Memory Access Handling in C Stubber (v0.85.0)
+
+- [x] Detect unaligned load/store instructions (`lwl`, `lwr`, `ldl`, `ldr`, `swl`, `swr`, `sdl`, `sdr`) in `tools/c_stubber.js`.
+- [x] Add `hasUnalignedAccess` tracking and comment annotations (`Features: Unaligned Memory Access (lwl/lwr/swl/swr)`).
+- [x] Add Unit Test 22 in `tools/test_c_stubber.js` (22/22 unit tests passing).
+
+## Resilient Non-Matching Error Handling & Diagnostics (v0.86.0)
+
+- [x] Add function-level try-catch error recovery in `tools/c_stubber.js`.
+- [x] Track detailed warnings (`stats.warnings`) and preserve `#pragma GLOBAL_ASM` generation.
+- [x] Add Unit Test 23 in `tools/test_c_stubber.js` (23/23 unit tests passing).
+
+## Float & Double Pointer Parameter Inferencing (v0.87.0)
+
+- [x] Infer `f32*` and `f64*` pointer argument types in `tools/c_stubber.js` based on `lwc1`/`swc1` and `ldc1`/`sdc1` memory operations.
+- [x] Add Unit Test 24 in `tools/test_c_stubber.js` (24/24 unit tests passing).
+
+## Const Qualifier Inferencing on Read-Only Pointers (v0.88.0)
+
+- [x] Infer `const` qualifiers for pointer parameters without memory store instructions in `tools/c_stubber.js`.
+- [x] Add Unit Test 25 in `tools/test_c_stubber.js` (25/25 unit tests passing).
+
+## Function Symbol Directive Recognition (v0.89.0)
+
+- [x] Support `.globl` and `.ent` symbol directives in `tools/c_stubber.js` and `tools/disassemble.py`.
+- [x] Add Unit Test 26 in `tools/test_c_stubber.js` and update `tools/test_disassemble.py`.
+
+## Pointer Return Type Inferencing (v0.90.0)
+
+- [x] Infer `void*` return types in `tools/c_stubber.js` when `$v0` holds pointer addresses.
+- [x] Emit `return NULL;` fallback stubs in non-matching C files.
+- [x] Add Unit Test 27 in `tools/test_c_stubber.js` (27/27 unit tests passing).
+
+## Trivial Leaf Function Synthesis (v0.91.0)
+
+- [x] Detect trivial return expressions in `tools/c_stubber.js` (`isTrivialLeaf`, `trivialReturnExpr`).
+- [x] Synthesize direct `return <expr>;` statements in C stubs.
+- [x] Add Unit Test 28 in `tools/test_c_stubber.js` (28/28 unit tests passing).
+
+## Automated Splat Option Parsing in Disassembler (v0.92.0)
+
+- [x] Parse `asm_path` and `non_matchings_path` directly from splat YAML in `tools/disassemble.py`.
+- [x] Add unit tests in `tools/test_disassemble.py` (5/5 tests passing).
+
+## TLS Relocation Recognition in C Stubber (v0.93.0)
+
+- [x] Support `%dtprel_hi`, `%dtprel_lo`, `%tprel_hi`, `%tprel_lo` in `tools/c_stubber.js`.
+- [x] Track `tlsSymbols` and emit comment annotations.
+- [x] Add Unit Test 29 in `tools/test_c_stubber.js` (29/29 unit tests passing).
+
+## Function Closing Directive Recognition (v0.94.0)
+
+- [x] Support `.end` and `glabel_end` directives in `tools/disassemble.py` and `tools/c_stubber.js`.
+- [x] Add Unit Test 30 in `tools/test_c_stubber.js` and test in `tools/test_disassemble.py`.
+
+## Floating-Point Trivial Leaf Return Synthesis (v0.95.0)
+
+- [x] Synthesize floating-point trivial returns in `tools/c_stubber.js` (`return f12;`, `return 0.0f;`).
+- [x] Add Unit Test 31 in `tools/test_c_stubber.js` (31/31 unit tests passing).
+
+## Bitwise & Shift Trivial Leaf Return Synthesis (v0.96.0)
+
+- [x] Synthesize bitwise/shift trivial returns in `tools/c_stubber.js` (`return a0 & 0xFF;`, `return a0 << 2;`).
+- [x] Add Unit Test 32 in `tools/test_c_stubber.js` (32/32 unit tests passing).
+
+## PI/MI Hardware MMIO Register Expansion (v0.97.0)
+
+- [x] Add PI Cartridge DMA and MI Interrupt Mask register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 33 in `tools/test_c_stubber.js` (33/33 unit tests passing).
+
+## RI/DPC Hardware MMIO Register Expansion (v0.98.0)
+
+- [x] Add RDRAM Interface and Display Processor Command register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 34 in `tools/test_c_stubber.js` (34/34 unit tests passing).
+
+## SP Hardware MMIO Register Expansion (v0.99.0)
+
+- [x] Add Signal Processor (SP) DMA and status register mappings in `tools/c_stubber.js`.
+- [x] Add Unit Test 35 in `tools/test_c_stubber.js` (35/35 unit tests passing).
+
+## DPS Hardware MMIO Register Expansion (v1.0.0)
+
+- [x] Add Display Processor Span (DPS) register mappings in `tools/c_stubber.js` (`DPS_TEST_MODE_REG`, `DPS_BUFTEST_ADDR_REG`, `DPS_BUFTEST_DATA_REG`).
+- [x] Add Unit Test 36 in `tools/test_c_stubber.js` (36/36 unit tests passing).
+- [x] Milestone v1.0.0 completion: comprehensive hardware register mapping, full test coverage across Python/Node/Playwright, complete multi-title profiles, and single-page web dashboard.
+
+## Disassembly Non-matching Extraction Metrics & CLI (v1.0.1)
+
+- [x] Add extraction count summary metrics to `run_splat` in `tools/disassemble.py`.
+- [x] Add `--extract-file` CLI option to `tools/disassemble.py` for standalone function splitting.
+- [x] Add `test_run_splat_extract_nonmatchings_statistics` in `tools/test_disassemble.py` (7/7 tests passing).
+
+## Branch-Likely & COP1 Conditional Branch Recognition (v1.0.2)
+
+- [x] Expand `BRANCH_OPCODES` in `tools/c_stubber.js` (`beql`, `bnel`, `bgezl`, `bgtzl`, `blezl`, `bltzl`, `bc1t`, `bc1f`, `bc1tl`, `bc1fl`).
+- [x] Add Unit Test 37 in `tools/test_c_stubber.js` (37/37 tests passing).
+
+## Makefile Multi-Title Extraction Automation (v1.0.3)
+
+- [x] Add `extract-mp1`, `extract-mp2`, and `extract-mp3` targets in `Makefile`.
+- [x] Verify dry-run target recipes and execution paths.
+
+## Large-Model PIC Relocation Recognition (v1.0.4)
+
+- [x] Expand PIC relocations in `tools/c_stubber.js` (`%got_hi`, `%got_lo`, `%got_page`, `%got_ofst`).
+- [x] Add Unit Test 38 in `tools/test_c_stubber.js` (38/38 tests passing).
+
+## Volatile MMIO Pointer Return Inference (v1.0.5)
+
+- [x] Add `volatile u32*` pointer return inference in `tools/c_stubber.js`.
+- [x] Add Unit Test 39 in `tools/test_c_stubber.js` (39/39 tests passing).
+
+## Structured Function Warning & Error Metrics (v1.0.6)
+
+- [x] Add `functionsWithWarnings` count to `stats` and `build/stubber_report.json` in `tools/c_stubber.js`.
+- [x] Add Unit Test 40 in `tools/test_c_stubber.js` (40/40 tests passing).

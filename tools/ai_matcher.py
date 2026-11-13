@@ -15,6 +15,8 @@ import subprocess
 import hashlib
 import argparse
 import difflib
+import re
+import shutil
 
 def get_file_hash(filepath):
     """Calculates the SHA256 hash of a file."""
@@ -30,7 +32,7 @@ def compile_c_file(c_file, obj_file, compiler="mips-linux-gnu-gcc", opt_flag="-O
     print(f"Compiling: {' '.join(cmd)}")
 
     # Mock compilation if mips-linux-gnu-gcc is not present for test environments
-    if not os.system(f"which {compiler} > /dev/null 2>&1") == 0:
+    if not shutil.which(compiler):
         print(f"Compiler '{compiler}' not found. Mocking compilation.")
         with open(obj_file, 'w') as f:
             f.write("mock obj file")
@@ -51,7 +53,7 @@ def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
     cmd = [objcopy, "-O", "binary", "-j", ".text", obj_file, text_bin]
 
     # Mock objcopy if mips-linux-gnu-objcopy is not present
-    if not os.system(f"which {objcopy} > /dev/null 2>&1") == 0:
+    if not shutil.which(objcopy):
         print(f"Objcopy '{objcopy}' not found. Mocking objcopy.")
         # Check source content if present in obj_file mock or inspect environment
         with open(obj_file, 'r') as f:
@@ -73,10 +75,31 @@ def extract_text_section(obj_file, text_bin, objcopy="mips-linux-gnu-objcopy"):
         print(f"Objcopy '{objcopy}' not found.")
         return False
 
+def normalize_instruction(line):
+    """
+    Normalizes a MIPS assembly or disassembly instruction line by:
+    - Stripping address offsets (e.g., '  80000400: 27bdffe8 ' -> 'addiu $sp, $sp, -24')
+    - Stripping comments and excessive whitespace
+    - Removing branch target address labels while preserving relative intent
+    """
+    cleaned = line.split('#')[0].split(';')[0].strip()
+    if not cleaned:
+        return ""
+
+    # Check for objdump formatting: <address>: <hex opcode> <instruction>
+    objdump_match = re.match(r'^[0-9a-fA-F]+:\s+(?:[0-9a-fA-F]{8}\s+)?(.*)$', cleaned)
+    if objdump_match:
+        cleaned = objdump_match.group(1).strip()
+
+    # Normalize whitespace between operands
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    cleaned = re.sub(r'\s*,\s*', ', ', cleaned)
+    return cleaned
+
 def disassemble_obj(obj_file, objdump="mips-linux-gnu-objdump"):
     """Disassembles the .text section of an object file to MIPS assembly lines."""
     cmd = [objdump, "-d", "-j", ".text", obj_file]
-    if not os.system(f"which {objdump} > /dev/null 2>&1") == 0:
+    if not shutil.which(objdump):
         return ["mock_instruction_compiled $v0, 0\n"]
 
     try:
@@ -85,20 +108,27 @@ def disassemble_obj(obj_file, objdump="mips-linux-gnu-objdump"):
     except Exception:
         return []
 
-def generate_assembly_diff(obj_file, target_asm_file):
+def generate_assembly_diff(obj_file, target_asm_file, normalize=True):
     """Generates a unified diff between compiled disassembly and target assembly."""
     if not os.path.exists(target_asm_file):
         return ""
 
-    compiled_lines = disassemble_obj(obj_file)
+    compiled_raw = disassemble_obj(obj_file)
     with open(target_asm_file, 'r') as f:
-        target_lines = f.readlines()
+        target_raw = f.readlines()
+
+    if normalize:
+        compiled_lines = [normalize_instruction(l) + '\n' for l in compiled_raw if normalize_instruction(l)]
+        target_lines = [normalize_instruction(l) + '\n' for l in target_raw if normalize_instruction(l)]
+    else:
+        compiled_lines = compiled_raw
+        target_lines = target_raw
 
     diff = difflib.unified_diff(
         compiled_lines,
         target_lines,
-        fromfile="compiled_assembly",
-        tofile="target_assembly",
+        fromfile="compiled_assembly (normalized)" if normalize else "compiled_assembly",
+        tofile="target_assembly (normalized)" if normalize else "target_assembly",
         n=3
     )
     return "".join(diff)
@@ -129,6 +159,7 @@ def main():
     parser.add_argument("--opt", default="-O2", help="Optimization flag.")
     parser.add_argument("--target-asm", default=None, help="Target assembly file for diff output generation.")
     parser.add_argument("--diff", action="store_true", help="Print structured assembly diff on mismatch.")
+    parser.add_argument("--no-normalize", action="store_true", help="Disable instruction normalization in assembly diff output.")
 
     args = parser.parse_args()
 
@@ -148,7 +179,7 @@ def main():
 
             if not match and (args.diff or args.target_asm):
                 asm_path = args.target_asm or os.path.join("asm", f"{base_name}.s")
-                diff_output = generate_assembly_diff(temp_obj, asm_path)
+                diff_output = generate_assembly_diff(temp_obj, asm_path, normalize=not args.no_normalize)
                 if diff_output:
                     print("\n--- [ASSEMBLY DIFF] ---")
                     print(diff_output)

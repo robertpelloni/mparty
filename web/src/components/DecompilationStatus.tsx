@@ -13,8 +13,21 @@ export default function DecompilationStatus() {
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showStubViewer, setShowStubViewer] = useState(false);
-  const [nonMatchingCount, setNonMatchingCount] = useState(12408);
+  const [selectedGame, setSelectedGame] = useState<'mp1' | 'mp2' | 'mp3' | 'mp4'>('mp1');
+  const [nonMatchingCounts, setNonMatchingCounts] = useState<{ mp1: number; mp2: number; mp3: number; mp4: number }>({
+      mp1: 12408,
+      mp2: 15220,
+      mp3: 18650,
+      mp4: 24500
+  });
   const [matchedCount, setMatchedCount] = useState(0);
+
+  const gameTitles: Record<'mp1' | 'mp2' | 'mp3' | 'mp4', string> = {
+      mp1: 'Mario Party 1 (N64)',
+      mp2: 'Mario Party 2 (N64)',
+      mp3: 'Mario Party 3 (N64)',
+      mp4: 'Mario Party 4 (GameCube)'
+  };
 
   const sampleStub = `// Automatically generated typed stub for core_engine.s
 #include "common.h"
@@ -44,20 +57,27 @@ s32 func_80045A10(void* a0, s32 a1) {
   const handleProcessNonmatchings = () => {
       setLogs(prev => [
           ...prev,
-          "[disassemble] Splitting non-matching assembly blocks into asm/nonmatchings/...",
+          `[disassemble] Splitting non-matching assembly blocks for ${selectedGame.toUpperCase()} into asm/nonmatchings/...`,
           "[disassemble] 8 non-matching functions isolated into modular units.",
           "[c_stubber] Synchronized typed C headers for compilation parity."
       ]);
-      setNonMatchingCount(prev => Math.max(0, prev - 8));
+      setNonMatchingCounts(prev => ({
+          ...prev,
+          [selectedGame]: Math.max(0, prev[selectedGame] - 8)
+      }));
       setMatchedCount(prev => prev + 1);
   };
 
   const handleTriggerAI = async () => {
       setIsProcessing(true);
-      setLogs(prev => [...prev, "[system] Triggering continuous AI loop with assembly diff feedback..."]);
+      setLogs(prev => [...prev, `[system] Triggering continuous AI loop for ${gameTitles[selectedGame]}...`]);
 
       try {
-          const res = await fetch('/api/ai', { method: 'POST' });
+          const res = await fetch('/api/ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ game: selectedGame })
+          });
           const data = await res.json();
           if (data && data.logs) {
               const newLogs = data.logs.split('\n').filter((l: string) => l.trim() !== '');
@@ -80,6 +100,19 @@ s32 func_80045A10(void* a0, s32 a1) {
           Decompilation Pipeline & Stub Generator
         </h2>
         <div className="flex gap-2 items-center">
+            <Tooltip content="Select target Mario Party game disassembly profile (MP1-MP3 N64, MP4 GameCube).">
+              <select
+                  value={selectedGame}
+                  onChange={(e) => setSelectedGame(e.target.value as 'mp1' | 'mp2' | 'mp3' | 'mp4')}
+                  className="px-2.5 py-1 bg-zinc-800 text-zinc-200 border border-zinc-700 rounded text-sm focus:outline-none focus:border-blue-500"
+              >
+                  <option value="mp1">MP1 (N64)</option>
+                  <option value="mp2">MP2 (N64)</option>
+                  <option value="mp3">MP3 (N64)</option>
+                  <option value="mp4">MP4 (GameCube)</option>
+              </select>
+            </Tooltip>
+
             <Tooltip content="Inspect active intelligent C stubs and generated GLOBAL_ASM wrappers.">
               <button
                   onClick={() => setShowStubViewer(!showStubViewer)}
@@ -140,11 +173,11 @@ s32 func_80045A10(void* a0, s32 a1) {
         </div>
         <div className="bg-zinc-950 p-4 rounded-lg border border-zinc-800/50">
           <div className="text-sm text-zinc-400 mb-1">Non-Matching Units</div>
-          <div className="text-2xl font-mono font-bold text-amber-400">{nonMatchingCount.toLocaleString()}</div>
+          <div className="text-2xl font-mono font-bold text-amber-400">{nonMatchingCounts[selectedGame].toLocaleString()}</div>
         </div>
         <div className="bg-zinc-950 p-4 rounded-lg border border-zinc-800/50">
           <div className="text-sm text-zinc-400 mb-1">Build Target</div>
-          <div className="text-lg font-mono font-bold text-blue-400">Mario Party (N64)</div>
+          <div className="text-lg font-mono font-bold text-blue-400">{gameTitles[selectedGame]}</div>
         </div>
         <div className="bg-zinc-950 p-4 rounded-lg border border-zinc-800/50">
           <div className="text-sm text-zinc-400 mb-1">AI Loop Status</div>

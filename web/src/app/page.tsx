@@ -10,11 +10,35 @@ export default function Home() {
       {/* Top Navigation Bar */}
       <header className="border-b border-zinc-800 bg-black/50 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-            mparty WebEngine
-          </h1>
-          <div className="text-xs font-mono text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
-            v0.1.0-alpha
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <Gamepad2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                mparty WebEngine
+              </h1>
+              <p className="text-[11px] text-zinc-400 font-mono -mt-0.5">Automated Cross-Console Reverse-Engineering & WebAssembly Platform</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Tooltip content="Launch the interactive terminal to run mparty_cli.py test suites, event loop listeners, and CLI dashboard modes.">
+              <button
+                onClick={() => setIsTerminalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white rounded-lg text-xs font-mono transition-colors"
+              >
+                <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+                CLI Terminal
+              </button>
+            </Tooltip>
+
+            <Tooltip content="Current Mario Party WebEngine Platform Release Version. Build targets N64 MIPS opcodes and GameCube Dolphin WASM.">
+              <div className="text-xs font-mono text-zinc-400 bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                v1.0.6
+              </div>
+            </Tooltip>
           </div>
         </div>
       </header>
